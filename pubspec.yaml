@@ -1,0 +1,43 @@
+name: fonde_ui
+description: Desktop-first Flutter UI component library. Shell layout, precise interaction, and accessibility by default.
+version: 0.1.0
+publish_to: none
+
+repository: https://github.com/szktty/fonde-ui
+
+environment:
+  sdk: ^3.7.0
+  flutter: '>=3.41.2'
+
+dependencies:
+  flutter:
+    sdk: flutter
+  flutter_localizations:
+    sdk: flutter
+  intl: any
+  flutter_riverpod: ^3.0.0
+  riverpod_annotation: ^4.0.0
+  freezed_annotation: ^3.0.0
+  json_annotation: ^4.9.0
+  lucide_icons_flutter: ^3.0.5
+  figma_squircle: ^0.6.3
+  uuid: ^4.5.1
+  multi_split_view: ^3.2.1
+  dots_indicator: ^4.0.1
+  searchfield: ^2.0.0
+  pluto_grid: ^8.0.0
+  textfield_tags: ^3.0.1
+  popover: ^0.3.1
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^5.0.0
+  build_runner: ^2.4.14
+  riverpod_generator: ^4.0.0
+  freezed: ^3.0.0
+  json_serializable: ^6.8.0
+
+flutter:
+  uses-material-design: false
+  generate: true

@@ -1,0 +1,23 @@
+{
+  "@@locale": "ja",
+
+  "menuAppPreferences": "環境設定...",
+  "menuEditUndo": "元に戻す",
+  "menuEditRedo": "やり直す",
+  "menuEditCut": "カット",
+  "menuEditCopy": "コピー",
+  "menuEditPaste": "ペースト",
+  "menuEditSelectAll": "すべてを選択",
+  "menuEditFind": "検索...",
+  "menuEditReplace": "置換...",
+  "menuFileSave": "保存",
+  "menuFileCloseWindow": "ウィンドウを閉じる",
+  "menuFilePageSetup": "ページ設定...",
+  "menuFilePrint": "プリント...",
+  "menuViewZoomIn": "拡大",
+  "menuViewZoomOut": "縮小",
+  "menuViewActualSize": "実際のサイズ",
+  "menuViewFullScreen": "フルスクリーン",
+  "menuLabelApp": "App",
+  "menuLabelWindow": "ウィンドウ"
+}
