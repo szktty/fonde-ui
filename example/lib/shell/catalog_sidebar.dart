@@ -25,6 +25,32 @@ class CatalogItem {
 
 const catalogCategories = [
   CatalogCategory(
+    id: 'layout',
+    label: 'Layout',
+    items: [
+      CatalogItem(id: 'tab_view', label: 'Tab View'),
+      CatalogItem(id: 'fonde_panel', label: 'Panel'),
+    ],
+  ),
+  CatalogCategory(
+    id: 'navigation',
+    label: 'Navigation',
+    items: [
+      CatalogItem(id: 'navigation_overview', label: 'Navigation'),
+      CatalogItem(id: 'launch_bar', label: 'Launch Bar'),
+      CatalogItem(id: 'sidebar_list', label: 'Sidebar List'),
+    ],
+  ),
+  CatalogCategory(
+    id: 'data_view',
+    label: 'Data View',
+    items: [
+      CatalogItem(id: 'table_view', label: 'Table View'),
+      CatalogItem(id: 'outline_view', label: 'Outline View'),
+      CatalogItem(id: 'fonde_list_tile', label: 'List Tile'),
+    ],
+  ),
+  CatalogCategory(
     id: 'buttons',
     label: 'Buttons',
     items: [
@@ -54,31 +80,6 @@ const catalogCategories = [
     ],
   ),
   CatalogCategory(
-    id: 'typography',
-    label: 'Typography',
-    items: [CatalogItem(id: 'fonde_text', label: 'Text')],
-  ),
-  CatalogCategory(
-    id: 'navigation',
-    label: 'Navigation',
-    items: [
-      CatalogItem(id: 'navigation_overview', label: 'Navigation'),
-      CatalogItem(id: 'launch_bar', label: 'Launch Bar'),
-      CatalogItem(id: 'sidebar_list', label: 'Sidebar List'),
-    ],
-  ),
-  CatalogCategory(
-    id: 'layout',
-    label: 'Layout',
-    items: [
-      CatalogItem(id: 'tab_view', label: 'Tab View'),
-      CatalogItem(id: 'outline_view', label: 'Outline View'),
-      CatalogItem(id: 'table_view', label: 'Table View'),
-      CatalogItem(id: 'fonde_panel', label: 'Panel'),
-      CatalogItem(id: 'fonde_list_tile', label: 'List Tile'),
-    ],
-  ),
-  CatalogCategory(
     id: 'feedback',
     label: 'Feedback',
     items: [
@@ -89,11 +90,22 @@ const catalogCategories = [
     ],
   ),
   CatalogCategory(
+    id: 'typography',
+    label: 'Typography',
+    items: [CatalogItem(id: 'fonde_text', label: 'Text')],
+  ),
+  CatalogCategory(
+    id: 'visual',
+    label: 'Visual',
+    items: [
+      CatalogItem(id: 'selection_decorator', label: 'Selection Decorator'),
+    ],
+  ),
+  CatalogCategory(
     id: 'interaction',
     label: 'Interaction',
     items: [
       CatalogItem(id: 'gesture_detector', label: 'Gesture Detector'),
-      CatalogItem(id: 'selection_decorator', label: 'Selection Decorator'),
     ],
   ),
   CatalogCategory(

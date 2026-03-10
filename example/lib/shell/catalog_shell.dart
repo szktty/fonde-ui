@@ -45,7 +45,7 @@ class CatalogShell extends ConsumerStatefulWidget {
 
 class _CatalogShellState extends ConsumerState<CatalogShell> {
   String? _selectedItemId;
-  List<String> _expandedGroupIds = ['buttons'];
+  List<String> _expandedGroupIds = ['layout'];
   int _launchBarIndex = 0;
 
   String get _selectedLabel {
