@@ -106,10 +106,9 @@ class FondeSidebarListItem extends ConsumerWidget {
       FondeSidebarListItemStyle.filled => colorScope.selection,
       FondeSidebarListItemStyle.subtle => colorScope.subtleSelection,
     };
-    final effectiveBackgroundColor =
-        isSelected
-            ? selectedBackgroundColor ?? effectiveSelectedBackground
-            : backgroundColor;
+    final effectiveBackgroundColor = isSelected
+        ? selectedBackgroundColor ?? effectiveSelectedBackground
+        : backgroundColor;
 
     final effectiveContentColor = switch (style) {
       FondeSidebarListItemStyle.filled =>

@@ -43,22 +43,21 @@ class FondeOverflowMenu extends ConsumerWidget {
     final iconTheme = ref.watch(fondeDefaultIconThemeProvider);
     final colorScheme = ref.watch(fondeEffectiveColorSchemeProvider);
 
-    final popupEntries =
-        items.map<FondePopupMenuEntry<String>>((entry) {
-          if (entry is FondeOverflowMenuDivider) {
-            return const FondePopupMenuDividerEntry();
-          }
-          final item = entry as FondeOverflowMenuItem;
-          return FondePopupMenuItemEntry(
-            FondePopupMenuItem<String>(
-              value: item.value,
-              title: item.title,
-              icon: item.icon,
-              enabled: item.enabled,
-              onSelected: item.onSelected,
-            ),
-          );
-        }).toList();
+    final popupEntries = items.map<FondePopupMenuEntry<String>>((entry) {
+      if (entry is FondeOverflowMenuDivider) {
+        return const FondePopupMenuDividerEntry();
+      }
+      final item = entry as FondeOverflowMenuItem;
+      return FondePopupMenuItemEntry(
+        FondePopupMenuItem<String>(
+          value: item.value,
+          title: item.title,
+          icon: item.icon,
+          enabled: item.enabled,
+          onSelected: item.onSelected,
+        ),
+      );
+    }).toList();
 
     return FondePopupMenu<String>(
       items: popupEntries,

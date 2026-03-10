@@ -64,8 +64,9 @@ class FondeRadioButton<T> extends ConsumerWidget {
     // Determine color
     final effectiveActiveColor =
         activeColor ?? appColorScheme.theme.primaryColor;
-    final borderColor =
-        isSelected ? effectiveActiveColor : appColorScheme.base.border;
+    final borderColor = isSelected
+        ? effectiveActiveColor
+        : appColorScheme.base.border;
 
     return GestureDetector(
       onTap: onChanged != null ? () => onChanged!(value) : null,
@@ -83,19 +84,18 @@ class FondeRadioButton<T> extends ConsumerWidget {
               shape: BoxShape.circle,
               border: Border.all(color: borderColor, width: 2.0 * borderScale),
             ),
-            child:
-                isSelected
-                    ? Center(
-                      child: Container(
-                        width: effectiveSize * 0.5,
-                        height: effectiveSize * 0.5,
-                        decoration: BoxDecoration(
-                          color: effectiveActiveColor,
-                          shape: BoxShape.circle,
-                        ),
+            child: isSelected
+                ? Center(
+                    child: Container(
+                      width: effectiveSize * 0.5,
+                      height: effectiveSize * 0.5,
+                      decoration: BoxDecoration(
+                        color: effectiveActiveColor,
+                        shape: BoxShape.circle,
                       ),
-                    )
-                    : null,
+                    ),
+                  )
+                : null,
           ),
         ),
       ),

@@ -148,11 +148,10 @@ class _AppTabViewState extends State<FondeTabView> {
     // If the closed tab was selected, select another tab (executed before updating the parent state).
     if (_selectedTabId == tabId && widget.tabs.length > 1) {
       final closedIndex = widget.tabs.indexWhere((tab) => tab.id == tabId);
-      final nextIndex =
-          closedIndex >= widget.tabs.length - 1
-              ? widget.tabs.length -
-                  2 // If it is the last tab, the previous tab.
-              : closedIndex + 1; // Otherwise, the next tab.
+      final nextIndex = closedIndex >= widget.tabs.length - 1
+          ? widget.tabs.length -
+                2 // If it is the last tab, the previous tab.
+          : closedIndex + 1; // Otherwise, the next tab.
       if (nextIndex >= 0 && nextIndex < widget.tabs.length) {
         final nextTab = widget.tabs[nextIndex];
         if (nextTab.id != tabId) {
@@ -170,10 +169,12 @@ class _AppTabViewState extends State<FondeTabView> {
     return Consumer(
       builder: (context, ref, child) {
         final accessibilityConfig = ref.watch(fondeAccessibilityConfigProvider);
-        final zoomScale =
-            widget.disableZoom ? 1.0 : accessibilityConfig.zoomScale;
-        final borderScale =
-            widget.disableZoom ? 1.0 : accessibilityConfig.borderScale;
+        final zoomScale = widget.disableZoom
+            ? 1.0
+            : accessibilityConfig.zoomScale;
+        final borderScale = widget.disableZoom
+            ? 1.0
+            : accessibilityConfig.borderScale;
 
         // Get the App color scheme using core_themes
         final appColorScheme = ref.watch(fondeEffectiveColorSchemeProvider);
@@ -222,15 +223,14 @@ class _AppTabViewState extends State<FondeTabView> {
         );
 
         // Divider
-        final divider =
-            widget.showDivider
-                ? Container(
-                  height: (widget.dividerThickness * borderScale).toDouble(),
-                  color:
-                      widget.dividerColor ??
-                      appColorScheme.base.divider.withValues(alpha: 0.2),
-                )
-                : null;
+        final divider = widget.showDivider
+            ? Container(
+                height: (widget.dividerThickness * borderScale).toDouble(),
+                color:
+                    widget.dividerColor ??
+                    appColorScheme.base.divider.withValues(alpha: 0.2),
+              )
+            : null;
 
         // Build the layout
         if (widget.tabBarPosition == FondeTabBarPosition.top) {

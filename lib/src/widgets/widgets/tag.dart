@@ -41,18 +41,15 @@ class FondeTagView extends ConsumerWidget {
     final scaledBorderWidth = 1.0 * borderScale;
 
     // Determine color based on selected state
-    final backgroundColor =
-        isSelected
-            ? appColorScheme.theme.primaryColor
-            : appColorScheme.interactive.input.background;
-    final borderColor =
-        isSelected
-            ? appColorScheme.theme.primaryColor
-            : appColorScheme.interactive.input.border;
-    final textColor =
-        isSelected
-            ? (appColorScheme.isDarkMode ? Colors.white : Colors.white)
-            : appColorScheme.base.foreground;
+    final backgroundColor = isSelected
+        ? appColorScheme.theme.primaryColor
+        : appColorScheme.interactive.input.background;
+    final borderColor = isSelected
+        ? appColorScheme.theme.primaryColor
+        : appColorScheme.interactive.input.border;
+    final textColor = isSelected
+        ? (appColorScheme.isDarkMode ? Colors.white : Colors.white)
+        : appColorScheme.base.foreground;
 
     return Container(
       padding: scaledPadding,

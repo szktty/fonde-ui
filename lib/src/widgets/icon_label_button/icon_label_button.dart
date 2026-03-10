@@ -86,10 +86,9 @@ class FondeIconLabelButton extends ConsumerWidget {
     final callback = onPressed;
 
     return MouseRegion(
-      cursor:
-          callback != null
-              ? SystemMouseCursors.click
-              : SystemMouseCursors.basic,
+      cursor: callback != null
+          ? SystemMouseCursors.click
+          : SystemMouseCursors.basic,
       child: GestureDetector(
         onTap: callback,
         child: Container(
@@ -98,20 +97,17 @@ class FondeIconLabelButton extends ConsumerWidget {
             vertical: verticalPadding * zoomScale,
           ),
           decoration: BoxDecoration(
-            color:
-                isSelected
-                    ? (selectedBackgroundColor ??
-                        defaultSelectedBackgroundColor)
-                    : (backgroundColor ?? defaultBackgroundColor),
+            color: isSelected
+                ? (selectedBackgroundColor ?? defaultSelectedBackgroundColor)
+                : (backgroundColor ?? defaultBackgroundColor),
           ),
           child: Row(
             children: [
               IconTheme(
                 data: IconThemeData(
-                  color:
-                      isSelected
-                          ? appColorScheme.theme.primaryColor
-                          : appColorScheme.uiAreas.sideBar.inactiveItemText,
+                  color: isSelected
+                      ? appColorScheme.theme.primaryColor
+                      : appColorScheme.uiAreas.sideBar.inactiveItemText,
                 ),
                 child: icon,
               ),
@@ -119,23 +115,22 @@ class FondeIconLabelButton extends ConsumerWidget {
               Expanded(
                 child: Text(
                   label,
-                  style:
-                      isSelected
-                          ? (selectedLabelStyle ?? defaultSelectedLabelStyle)
-                              ?.copyWith(
-                                fontSize:
-                                    ((selectedLabelStyle ??
-                                                defaultSelectedLabelStyle)
-                                            ?.fontSize ??
-                                        14) *
-                                    zoomScale,
-                              )
-                          : (labelStyle ?? defaultLabelStyle)?.copyWith(
-                            fontSize:
-                                ((labelStyle ?? defaultLabelStyle)?.fontSize ??
-                                    14) *
-                                zoomScale,
-                          ),
+                  style: isSelected
+                      ? (selectedLabelStyle ?? defaultSelectedLabelStyle)
+                            ?.copyWith(
+                              fontSize:
+                                  ((selectedLabelStyle ??
+                                              defaultSelectedLabelStyle)
+                                          ?.fontSize ??
+                                      14) *
+                                  zoomScale,
+                            )
+                      : (labelStyle ?? defaultLabelStyle)?.copyWith(
+                          fontSize:
+                              ((labelStyle ?? defaultLabelStyle)?.fontSize ??
+                                  14) *
+                              zoomScale,
+                        ),
                 ),
               ),
               if (trailing != null) trailing!,

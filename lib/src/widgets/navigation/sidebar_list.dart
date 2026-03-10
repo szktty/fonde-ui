@@ -121,8 +121,9 @@ class FondeSidebarList extends ConsumerWidget {
       backgroundColor: item.backgroundColor,
       selectedBackgroundColor: item.selectedBackgroundColor,
       indent: indent,
-      style:
-          item.style != FondeSidebarListItemStyle.filled ? item.style : style,
+      style: item.style != FondeSidebarListItemStyle.filled
+          ? item.style
+          : style,
       disableZoom: disableZoom,
     );
   }
@@ -155,8 +156,9 @@ class FondeSidebarList extends ConsumerWidget {
       trailing: group.trailing,
       expansionIcon: group.expansionIcon,
       childrenIndent: group.childrenIndent,
-      style:
-          group.style != FondeSidebarListItemStyle.filled ? group.style : style,
+      style: group.style != FondeSidebarListItemStyle.filled
+          ? group.style
+          : style,
       disableZoom: disableZoom,
       children: _processChildren(group.children, zoomScale),
     );

@@ -104,9 +104,7 @@ const catalogCategories = [
   CatalogCategory(
     id: 'interaction',
     label: 'Interaction',
-    items: [
-      CatalogItem(id: 'gesture_detector', label: 'Gesture Detector'),
-    ],
+    items: [CatalogItem(id: 'gesture_detector', label: 'Gesture Detector')],
   ),
   CatalogCategory(
     id: 'platform',

@@ -70,23 +70,20 @@ class FondeSnackBar {
             icon: icon,
           ),
           duration: duration,
-          backgroundColor:
-              Colors
-                  .transparent, // Control background color with custom content
+          backgroundColor: Colors
+              .transparent, // Control background color with custom content
           elevation: 0, // Control shadow with custom content
           behavior: SnackBarBehavior.floating,
           margin: const EdgeInsets.all(16),
           padding: EdgeInsets.zero, // Control padding with custom content
-          action:
-              (actionLabel != null && onActionPressed != null)
-                  ? SnackBarAction(
-                    label: actionLabel,
-                    onPressed: onActionPressed,
-                    textColor:
-                        Colors
-                            .white, // Action button color will be adjusted later
-                  )
-                  : null,
+          action: (actionLabel != null && onActionPressed != null)
+              ? SnackBarAction(
+                  label: actionLabel,
+                  onPressed: onActionPressed,
+                  textColor: Colors
+                      .white, // Action button color will be adjusted later
+                )
+              : null,
           showCloseIcon: showCloseButton,
           closeIconColor:
               Colors.white, // Close icon color will be adjusted later

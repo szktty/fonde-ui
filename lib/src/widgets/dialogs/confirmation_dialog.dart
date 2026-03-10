@@ -62,19 +62,19 @@ class FondeConfirmationDialog extends StatelessWidget {
             const SizedBox(width: 12),
             isDestructive
                 ? FondeButton.destructive(
-                  label: confirmLabel,
-                  onPressed: () {
-                    Navigator.of(context).pop(true);
-                    onConfirm?.call();
-                  },
-                )
+                    label: confirmLabel,
+                    onPressed: () {
+                      Navigator.of(context).pop(true);
+                      onConfirm?.call();
+                    },
+                  )
                 : FondeButton.primary(
-                  label: confirmLabel,
-                  onPressed: () {
-                    Navigator.of(context).pop(true);
-                    onConfirm?.call();
-                  },
-                ),
+                    label: confirmLabel,
+                    onPressed: () {
+                      Navigator.of(context).pop(true);
+                      onConfirm?.call();
+                    },
+                  ),
           ],
         ),
       ),
@@ -132,15 +132,14 @@ Future<bool?> showFondeConfirmationDialog(
   return showDialog<bool>(
     context: context,
     barrierDismissible: false,
-    builder:
-        (context) => FondeConfirmationDialog(
-          message: message,
-          warningItems: warningItems,
-          onConfirm: onConfirm,
-          onCancel: onCancel,
-          confirmLabel: confirmLabel,
-          cancelLabel: cancelLabel,
-          isDestructive: isDestructive,
-        ),
+    builder: (context) => FondeConfirmationDialog(
+      message: message,
+      warningItems: warningItems,
+      onConfirm: onConfirm,
+      onCancel: onCancel,
+      confirmLabel: confirmLabel,
+      cancelLabel: cancelLabel,
+      isDestructive: isDestructive,
+    ),
   );
 }

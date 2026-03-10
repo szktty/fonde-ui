@@ -163,8 +163,9 @@ class _AppExpansionTileState extends ConsumerState<FondeExpansionTile> {
       builder: (context, ref, _) {
         // Get accessibility config for zoom scaling
         final accessibilityConfig = ref.watch(fondeAccessibilityConfigProvider);
-        final zoomScale =
-            widget.disableZoom ? 1.0 : accessibilityConfig.zoomScale;
+        final zoomScale = widget.disableZoom
+            ? 1.0
+            : accessibilityConfig.zoomScale;
         final iconTheme = ref.watch(fondeDefaultIconThemeProvider);
 
         return _buildTile(context, accessibilityConfig, zoomScale, iconTheme);
@@ -227,15 +228,13 @@ class _AppExpansionTileState extends ConsumerState<FondeExpansionTile> {
         widget.collapsedShape != null) {
       header = Container(
         decoration: ShapeDecoration(
-          color:
-              _isExpanded
-                  ? widget.backgroundColor
-                  : widget.collapsedBackgroundColor,
-          shape:
-              _isExpanded
-                  ? (widget.shape ?? ref.watch(fondeRectangleBorderProvider))
-                  : (widget.collapsedShape ??
-                      ref.watch(fondeRectangleBorderProvider)),
+          color: _isExpanded
+              ? widget.backgroundColor
+              : widget.collapsedBackgroundColor,
+          shape: _isExpanded
+              ? (widget.shape ?? ref.watch(fondeRectangleBorderProvider))
+              : (widget.collapsedShape ??
+                    ref.watch(fondeRectangleBorderProvider)),
         ),
         child: header,
       );
