@@ -161,4 +161,4 @@ Apache License 2.0
 
 ## Apps Created with Fonde UI
 
-- [RinneGraph](https://github.com/szktty/rinne-graph) — graph-based knowledge management app
+- [RinneGraph](https://github.com/szktty/rinne-graph) — graph-based database app
