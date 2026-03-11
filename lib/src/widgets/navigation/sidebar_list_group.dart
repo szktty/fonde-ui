@@ -102,13 +102,26 @@ class FondeSidebarListGroup extends ConsumerStatefulWidget {
   ConsumerState<FondeSidebarListGroup> createState() => _NavigationGroupState();
 }
 
-class _NavigationGroupState extends ConsumerState<FondeSidebarListGroup> {
+class _NavigationGroupState extends ConsumerState<FondeSidebarListGroup>
+    with SingleTickerProviderStateMixin {
   late bool _isExpandedState;
+  late AnimationController _animationController;
+  late Animation<double> _sizeAnimation;
 
   @override
   void initState() {
     super.initState();
     _isExpandedState = widget.initiallyExpanded || widget.isExpanded;
+    _animationController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 100),
+      value: _isExpandedState ? 1.0 : 0.0,
+    );
+    _sizeAnimation = CurvedAnimation(
+      parent: _animationController,
+      curve: Curves.easeOut,
+      reverseCurve: Curves.easeIn,
+    );
   }
 
   @override
@@ -116,14 +129,18 @@ class _NavigationGroupState extends ConsumerState<FondeSidebarListGroup> {
     super.didUpdateWidget(oldWidget);
     // If the expansion state is changed from the outside, reflect it.
     if (widget.isExpanded != _isExpandedState) {
-      setState(() {
-        _isExpandedState = widget.isExpanded;
-      });
+      _isExpandedState = widget.isExpanded;
+      if (_isExpandedState) {
+        _animationController.forward();
+      } else {
+        _animationController.reverse();
+      }
     }
   }
 
   @override
   void dispose() {
+    _animationController.dispose();
     super.dispose();
   }
 
@@ -132,9 +149,6 @@ class _NavigationGroupState extends ConsumerState<FondeSidebarListGroup> {
     final accessibilityConfig = ref.watch(fondeAccessibilityConfigProvider);
     final iconTheme = ref.watch(fondeDefaultIconThemeProvider);
     final zoomScale = widget.disableZoom ? 1.0 : accessibilityConfig.zoomScale;
-
-    // Height factor (no animation, direct state change)
-    final heightFactor = _isExpandedState ? 1.0 : 0.0;
 
     final theme = Theme.of(context);
     final colorScope = ref.watch(fondeSideBarColorScopeProvider);
@@ -155,7 +169,7 @@ class _NavigationGroupState extends ConsumerState<FondeSidebarListGroup> {
           color: effectiveContentColor,
         );
 
-    // Custom expansion icon or default chevron icon (no animation)
+    // Custom expansion icon or default chevron icon
     Widget expansionIcon() {
       if (widget.expansionIcon != null) {
         return widget.expansionIcon!;
@@ -169,11 +183,15 @@ class _NavigationGroupState extends ConsumerState<FondeSidebarListGroup> {
     }
 
     void toggleExpansion() {
-      final newExpandedState = !_isExpandedState;
       setState(() {
-        _isExpandedState = newExpandedState;
+        _isExpandedState = !_isExpandedState;
       });
-      widget.onExpansionChanged?.call(newExpandedState);
+      if (_isExpandedState) {
+        _animationController.forward();
+      } else {
+        _animationController.reverse();
+      }
+      widget.onExpansionChanged?.call(_isExpandedState);
     }
 
     // Header part: expansion icon (toggle) + content area (select)
@@ -245,11 +263,14 @@ class _NavigationGroupState extends ConsumerState<FondeSidebarListGroup> {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         header,
-        if (_isExpandedState)
-          Column(
+        SizeTransition(
+          sizeFactor: _sizeAnimation,
+          axisAlignment: -1.0,
+          child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: indentedChildren,
           ),
+        ),
       ],
     );
   }
