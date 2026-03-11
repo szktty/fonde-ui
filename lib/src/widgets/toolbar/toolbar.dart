@@ -65,15 +65,16 @@ class _Toolbar extends ConsumerWidget {
           (padding as EdgeInsets).right * zoomScale,
           (padding as EdgeInsets).bottom * zoomScale,
         ),
-        child: axis == Axis.horizontal
-            ? Row(
-                mainAxisSize: MainAxisSize.min,
-                children: _addSpacing(children, spacing * zoomScale),
-              )
-            : Column(
-                mainAxisSize: MainAxisSize.min,
-                children: _addSpacing(children, spacing * zoomScale),
-              ),
+        child:
+            axis == Axis.horizontal
+                ? Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: _addSpacing(children, spacing * zoomScale),
+                )
+                : Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: _addSpacing(children, spacing * zoomScale),
+                ),
       ),
     );
   }
@@ -114,13 +115,14 @@ class FondeToolbarGroup extends ConsumerWidget {
 
     return Row(
       mainAxisSize: MainAxisSize.min,
-      children: children
-          .expand((child) sync* {
-            yield SizedBox(width: spacing * zoomScale);
-            yield child;
-          })
-          .skip(1)
-          .toList(),
+      children:
+          children
+              .expand((child) sync* {
+                yield SizedBox(width: spacing * zoomScale);
+                yield child;
+              })
+              .skip(1)
+              .toList(),
     );
   }
 }
@@ -192,20 +194,20 @@ class FondeToolbar extends ConsumerWidget {
       decoration: null,
       clipBehavior: Clip.none,
       disableZoom: disableZoom,
-      children: items.map((item) {
-        // Deleted because it is not used
-        final isEnabled = state.enabledTools.contains(item.id);
+      children:
+          items.map((item) {
+            // Deleted because it is not used
+            final isEnabled = state.enabledTools.contains(item.id);
 
-        return FondeToolbarItem(
-          onPressed: isEnabled
-              ? () => toolbarNotifier.selectTool(item.id)
-              : null,
-          tooltip: item.tooltip,
-          enabled: isEnabled,
-          disableZoom: disableZoom,
-          child: item.icon,
-        );
-      }).toList(),
+            return FondeToolbarItem(
+              onPressed:
+                  isEnabled ? () => toolbarNotifier.selectTool(item.id) : null,
+              tooltip: item.tooltip,
+              enabled: isEnabled,
+              disableZoom: disableZoom,
+              child: item.icon,
+            );
+          }).toList(),
     );
   }
 }

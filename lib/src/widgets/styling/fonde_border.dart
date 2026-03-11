@@ -83,34 +83,38 @@ class FondeBorder {
     BorderStyle style = BorderStyle.solid,
   }) {
     return Border(
-      top: top > 0
-          ? BorderSide(
-              width: _getEffectiveWidth(top, borderScale),
-              color: color,
-              style: style,
-            )
-          : BorderSide.none,
-      right: right > 0
-          ? BorderSide(
-              width: _getEffectiveWidth(right, borderScale),
-              color: color,
-              style: style,
-            )
-          : BorderSide.none,
-      bottom: bottom > 0
-          ? BorderSide(
-              width: _getEffectiveWidth(bottom, borderScale),
-              color: color,
-              style: style,
-            )
-          : BorderSide.none,
-      left: left > 0
-          ? BorderSide(
-              width: _getEffectiveWidth(left, borderScale),
-              color: color,
-              style: style,
-            )
-          : BorderSide.none,
+      top:
+          top > 0
+              ? BorderSide(
+                width: _getEffectiveWidth(top, borderScale),
+                color: color,
+                style: style,
+              )
+              : BorderSide.none,
+      right:
+          right > 0
+              ? BorderSide(
+                width: _getEffectiveWidth(right, borderScale),
+                color: color,
+                style: style,
+              )
+              : BorderSide.none,
+      bottom:
+          bottom > 0
+              ? BorderSide(
+                width: _getEffectiveWidth(bottom, borderScale),
+                color: color,
+                style: style,
+              )
+              : BorderSide.none,
+      left:
+          left > 0
+              ? BorderSide(
+                width: _getEffectiveWidth(left, borderScale),
+                color: color,
+                style: style,
+              )
+              : BorderSide.none,
     );
   }
 
@@ -232,16 +236,15 @@ class FondeBorderContainer extends ConsumerWidget {
         border ??
         (borderColor != null
             ? FondeBorder.all(
-                width: borderWidth,
-                color: borderColor!,
-                borderScale: borderScale,
-              )
+              width: borderWidth,
+              color: borderColor!,
+              borderScale: borderScale,
+            )
             : null);
 
     // Adjust the border radius
-    final effectiveBorderRadius = borderRadius != null
-        ? borderRadius! * zoomScale
-        : null;
+    final effectiveBorderRadius =
+        borderRadius != null ? borderRadius! * zoomScale : null;
 
     return Container(
       decoration: BoxDecoration(

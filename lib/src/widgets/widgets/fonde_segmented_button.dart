@@ -32,20 +32,22 @@ class FondeSegmentedButton<T extends Object> extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final appColorScheme = ref.watch(fondeEffectiveColorSchemeProvider);
     // Optimization: Monitor only necessary properties to prevent unnecessary Widget rebuilds
-    final zoomScale = disableZoom
-        ? 1.0
-        : ref.watch(
-            fondeAccessibilityConfigProvider.select(
-              (config) => config.zoomScale,
-            ),
-          );
-    final borderScale = disableZoom
-        ? 1.0
-        : ref.watch(
-            fondeAccessibilityConfigProvider.select(
-              (config) => config.borderScale,
-            ),
-          );
+    final zoomScale =
+        disableZoom
+            ? 1.0
+            : ref.watch(
+              fondeAccessibilityConfigProvider.select(
+                (config) => config.zoomScale,
+              ),
+            );
+    final borderScale =
+        disableZoom
+            ? 1.0
+            : ref.watch(
+              fondeAccessibilityConfigProvider.select(
+                (config) => config.borderScale,
+              ),
+            );
 
     return SegmentedButton<T>(
       segments: segments,

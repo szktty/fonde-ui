@@ -127,9 +127,10 @@ class FondeContainer extends ConsumerWidget {
     }
 
     // Width of the leading widget (zoom scale applied)
-    final effectiveLeadingWidth = leadingWidth != null
-        ? leadingWidth! * zoomScale
-        : defaultHorizontalPadding * zoomScale;
+    final effectiveLeadingWidth =
+        leadingWidth != null
+            ? leadingWidth! * zoomScale
+            : defaultHorizontalPadding * zoomScale;
 
     // Build layout
     Widget content;
@@ -160,13 +161,14 @@ class FondeContainer extends ConsumerWidget {
     } else {
       // If there is no leading widget, apply normal padding
       // If there is a title, adjust the top padding
-      final contentPadding = title != null
-          ? EdgeInsets.only(
-              left: effectivePadding.horizontal,
-              right: effectivePadding.horizontal,
-              bottom: effectivePadding.vertical,
-            )
-          : effectivePadding;
+      final contentPadding =
+          title != null
+              ? EdgeInsets.only(
+                left: effectivePadding.horizontal,
+                right: effectivePadding.horizontal,
+                bottom: effectivePadding.vertical,
+              )
+              : effectivePadding;
       content = Padding(padding: contentPadding, child: child);
     }
 
@@ -176,15 +178,13 @@ class FondeContainer extends ConsumerWidget {
         color ?? (decoration == null ? Colors.transparent : null);
 
     // Container decoration
-    final containerChild = title != null
-        ? Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              titleWidget!,
-              Expanded(child: content),
-            ],
-          )
-        : content;
+    final containerChild =
+        title != null
+            ? Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [titleWidget!, Expanded(child: content)],
+            )
+            : content;
 
     return Container(
       width: width,

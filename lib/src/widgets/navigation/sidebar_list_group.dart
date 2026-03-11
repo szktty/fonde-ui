@@ -142,12 +142,12 @@ class _NavigationGroupState extends ConsumerState<FondeSidebarListGroup> {
       FondeSidebarListItemStyle.filled => colorScope.selection,
       FondeSidebarListItemStyle.subtle => colorScope.subtleSelection,
     };
-    final effectiveBackgroundColor = widget.isSelected
-        ? widget.selectedBackgroundColor ?? effectiveSelectedBackground
-        : widget.backgroundColor;
-    final effectiveContentColor = widget.isSelected
-        ? colorScope.accent
-        : colorScope.text;
+    final effectiveBackgroundColor =
+        widget.isSelected
+            ? widget.selectedBackgroundColor ?? effectiveSelectedBackground
+            : widget.backgroundColor;
+    final effectiveContentColor =
+        widget.isSelected ? colorScope.accent : colorScope.text;
     final effectiveTitleStyle =
         widget.titleStyle ??
         (theme.textTheme.titleSmall ?? const TextStyle(fontSize: 14)).copyWith(
@@ -232,12 +232,13 @@ class _NavigationGroupState extends ConsumerState<FondeSidebarListGroup> {
     );
 
     // Indented child widgets
-    final indentedChildren = widget.children.map((child) {
-      return Padding(
-        padding: EdgeInsets.only(left: widget.childrenIndent * zoomScale),
-        child: child,
-      );
-    }).toList();
+    final indentedChildren =
+        widget.children.map((child) {
+          return Padding(
+            padding: EdgeInsets.only(left: widget.childrenIndent * zoomScale),
+            child: child,
+          );
+        }).toList();
 
     // The part containing the child elements
     return Column(

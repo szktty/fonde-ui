@@ -80,9 +80,8 @@ class _FondeScaffoldState extends ConsumerState<FondeScaffold> {
   Widget build(BuildContext context) {
     final accessibilityConfig = ref.watch(fondeAccessibilityConfigProvider);
     final zoomScale = widget.disableZoom ? 1.0 : accessibilityConfig.zoomScale;
-    final borderScale = widget.disableZoom
-        ? 1.0
-        : accessibilityConfig.borderScale;
+    final borderScale =
+        widget.disableZoom ? 1.0 : accessibilityConfig.borderScale;
     final appColorScheme = ref.watch(fondeEffectiveColorSchemeProvider);
 
     // Watch the visibility state of the sidebars
@@ -191,9 +190,10 @@ class _FondeScaffoldState extends ConsumerState<FondeScaffold> {
               case 'primary_sidebar':
                 return FondePrimarySide(
                   launchBar: widget.launchBar,
-                  sidebar: widget.primarySidebar != null
-                      ? FondeSidebarPane(child: widget.primarySidebar!)
-                      : null,
+                  sidebar:
+                      widget.primarySidebar != null
+                          ? FondeSidebarPane(child: widget.primarySidebar!)
+                          : null,
                   showLaunchBar: widget.showLaunchBar,
                   showSidebar: widget.showPrimarySidebar,
                   zoomScale: zoomScale,

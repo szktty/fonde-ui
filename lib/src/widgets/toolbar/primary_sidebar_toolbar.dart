@@ -47,9 +47,10 @@ class FondePrimarySidebarToolbar extends ConsumerWidget {
           }
 
           return Padding(
-            padding: Platform.isMacOS
-                ? const EdgeInsets.only(top: 2.0)
-                : EdgeInsets.zero,
+            padding:
+                Platform.isMacOS
+                    ? const EdgeInsets.only(top: 2.0)
+                    : EdgeInsets.zero,
             child: Row(
               children: [
                 // Traffic light safe area (macOS only)

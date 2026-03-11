@@ -137,13 +137,14 @@ class FondeExternalPagination extends ConsumerWidget {
         child: FondeButton(
           label: '', // Label is empty as it's only an icon
           onPressed: canNavigate ? () => onPageChanged(targetPage) : null,
-          leadingIcon: showIcon && canNavigate
-              ? Icon(
-                  icon,
-                  size: effectiveIconSize,
-                  color: appColorScheme.base.foreground,
-                )
-              : null,
+          leadingIcon:
+              showIcon && canNavigate
+                  ? Icon(
+                    icon,
+                    size: effectiveIconSize,
+                    color: appColorScheme.base.foreground,
+                  )
+                  : null,
           width: width,
           height: height,
           enabled: canNavigate,

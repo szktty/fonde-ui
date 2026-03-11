@@ -105,9 +105,10 @@ class FondePlatformMenus {
   /// for this instance only. When `null` (the default), the global setting is
   /// used.
   FondePlatformMenus({required BuildContext context, bool? enableLocalization})
-    : _l = (enableLocalization ?? FondeLocalizationConfig.enableLocalization)
-          ? FondeUILocalizations.of(context)
-          : FondeUILocalizationsEn();
+    : _l =
+          (enableLocalization ?? FondeLocalizationConfig.enableLocalization)
+              ? FondeUILocalizations.of(context)
+              : FondeUILocalizationsEn();
 
   final FondeUILocalizations _l;
 
@@ -467,13 +468,14 @@ class FondePlatformMenus {
   PlatformMenuItem fullScreenItem({VoidCallback? onSelected}) =>
       PlatformMenuItem(
         label: _l.menuViewFullScreen,
-        shortcut: Platform.isMacOS
-            ? const SingleActivator(
-                LogicalKeyboardKey.keyF,
-                meta: true,
-                control: true,
-              )
-            : null,
+        shortcut:
+            Platform.isMacOS
+                ? const SingleActivator(
+                  LogicalKeyboardKey.keyF,
+                  meta: true,
+                  control: true,
+                )
+                : null,
         onSelected: onSelected,
       );
 

@@ -202,15 +202,15 @@ class FondeMasterDetailLayout extends ConsumerWidget {
         // Mobile layout: stack with navigation
         return isDetailVisible
             ? Padding(
-                padding: detailPadding,
-                child: detailBuilder(
-                  context,
-                  selectedId,
-                  () => ref
-                      .read(detailVisibilityProvider.notifier)
-                      .setVisible(false),
-                ),
-              )
+              padding: detailPadding,
+              child: detailBuilder(
+                context,
+                selectedId,
+                () => ref
+                    .read(detailVisibilityProvider.notifier)
+                    .setVisible(false),
+              ),
+            )
             : buildMasterView(false);
       },
     );

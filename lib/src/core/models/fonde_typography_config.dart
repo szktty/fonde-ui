@@ -38,9 +38,8 @@ class FondeTypographyConfig {
     return FondeTypographyConfig(
       uiFont: clearUiFont ? null : (uiFont ?? this.uiFont),
       textFont: clearTextFont ? null : (textFont ?? this.textFont),
-      codeBlockFont: clearCodeBlockFont
-          ? null
-          : (codeBlockFont ?? this.codeBlockFont),
+      codeBlockFont:
+          clearCodeBlockFont ? null : (codeBlockFont ?? this.codeBlockFont),
       tableFont: clearTableFont ? null : (tableFont ?? this.tableFont),
       labelFont: clearLabelFont ? null : (labelFont ?? this.labelFont),
     );
@@ -49,23 +48,36 @@ class FondeTypographyConfig {
   /// Creates an instance from JSON.
   factory FondeTypographyConfig.fromJson(Map<String, dynamic> json) {
     return FondeTypographyConfig(
-      uiFont: json['uiFont'] == null
-          ? null
-          : FondeFontConfig.fromJson(json['uiFont'] as Map<String, dynamic>),
-      textFont: json['textFont'] == null
-          ? null
-          : FondeFontConfig.fromJson(json['textFont'] as Map<String, dynamic>),
-      codeBlockFont: json['codeBlockFont'] == null
-          ? null
-          : FondeFontConfig.fromJson(
-              json['codeBlockFont'] as Map<String, dynamic>,
-            ),
-      tableFont: json['tableFont'] == null
-          ? null
-          : FondeFontConfig.fromJson(json['tableFont'] as Map<String, dynamic>),
-      labelFont: json['labelFont'] == null
-          ? null
-          : FondeFontConfig.fromJson(json['labelFont'] as Map<String, dynamic>),
+      uiFont:
+          json['uiFont'] == null
+              ? null
+              : FondeFontConfig.fromJson(
+                json['uiFont'] as Map<String, dynamic>,
+              ),
+      textFont:
+          json['textFont'] == null
+              ? null
+              : FondeFontConfig.fromJson(
+                json['textFont'] as Map<String, dynamic>,
+              ),
+      codeBlockFont:
+          json['codeBlockFont'] == null
+              ? null
+              : FondeFontConfig.fromJson(
+                json['codeBlockFont'] as Map<String, dynamic>,
+              ),
+      tableFont:
+          json['tableFont'] == null
+              ? null
+              : FondeFontConfig.fromJson(
+                json['tableFont'] as Map<String, dynamic>,
+              ),
+      labelFont:
+          json['labelFont'] == null
+              ? null
+              : FondeFontConfig.fromJson(
+                json['labelFont'] as Map<String, dynamic>,
+              ),
     );
   }
 

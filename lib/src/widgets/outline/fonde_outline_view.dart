@@ -147,13 +147,13 @@ class FondeOutlineView<T> extends ConsumerWidget {
           hasChildren: hasChildren,
           depth: depth,
           onTap: () => onItemTap?.call(item),
-          onExpansionChanged: hasChildren
-              ? (expanded) => onExpansionChanged?.call(item)
-              : null,
+          onExpansionChanged:
+              hasChildren ? (expanded) => onExpansionChanged?.call(item) : null,
           disableZoom: disableZoom,
-          children: isExpanded && hasChildren
-              ? _buildOutlineItems(children, depth + 1, newVisitedItems)
-              : [],
+          children:
+              isExpanded && hasChildren
+                  ? _buildOutlineItems(children, depth + 1, newVisitedItems)
+                  : [],
         ),
       );
     }

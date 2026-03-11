@@ -31,17 +31,18 @@ class FondeSegmentedButton<T> extends ConsumerWidget {
     double segmentWidth = 120.0 * zoomScale; // Apply zoom scaling
 
     return SegmentedButton<T>(
-      segments: items
-          .map(
-            (item) => ButtonSegment<T>(
-              value: item.$1,
-              label: SizedBox(
-                width: segmentWidth,
-                child: Center(child: Text(item.$2)),
-              ),
-            ),
-          )
-          .toList(),
+      segments:
+          items
+              .map(
+                (item) => ButtonSegment<T>(
+                  value: item.$1,
+                  label: SizedBox(
+                    width: segmentWidth,
+                    child: Center(child: Text(item.$2)),
+                  ),
+                ),
+              )
+              .toList(),
       selected: {selectedValue},
       onSelectionChanged: (Set<T> selected) => onChanged(selected.first),
       style: ButtonStyle(

@@ -246,13 +246,14 @@ class FondeColorScopeHelper {
         final baseScope = ref.watch(fondeSideBarColorScopeProvider);
         final colors = ref.watch(fondeColorSchemeProvider);
 
-        final scope = isActive
-            ? baseScope.copyWith(
-                text: colors.uiAreas.sideBar.activeItemText,
-                background: colors.uiAreas.sideBar.activeItemBackground,
-                subtleSelection: baseScope.subtleSelection,
-              )
-            : baseScope;
+        final scope =
+            isActive
+                ? baseScope.copyWith(
+                  text: colors.uiAreas.sideBar.activeItemText,
+                  background: colors.uiAreas.sideBar.activeItemBackground,
+                  subtleSelection: baseScope.subtleSelection,
+                )
+                : baseScope;
 
         return ProviderScope(
           overrides: [fondeColorScopeProvider.overrideWithValue(scope)],
