@@ -15,9 +15,13 @@ Developed for [RinneGraph](https://github.com/szktty/rinne-graph). Currently pro
 
 - flutter_riverpod: ^3.0.0 (state management, required for most widgets)
 - riverpod_annotation: ^4.0.0
+- freezed_annotation: ^3.0.0
 - figma_squircle: ^0.6.3 (smooth rounded corners)
 - lucide_icons_flutter: ^3.0.5 (default icon set)
 - multi_split_view: ^3.2.1 (resizable panes in FondeScaffold)
+- pluto_grid: ^8.0.0 (FondeTableView)
+- textfield_tags: ^3.0.1 (FondeTagsField)
+- dots_indicator: ^4.0.1 (FondePageIndicator)
 
 ## Imports
 
@@ -159,7 +163,7 @@ FondeColorScheme
       .inactiveItemText
       .hoverBackground
       .divider
-    .toolbar                   // FondeToolbarColors (was: titleBar)
+    .toolbar                   // FondeToolbarColors
       .background
       .border
       .foreground
@@ -221,6 +225,21 @@ Use `FondeColorScopeHelper` to wrap widgets:
 - `FondeColorScopeHelper.withDialogScope(child:)`
 - `FondeColorScopeHelper.withCustomScope(child:, scope:)`
 
+### FondeThemeColorType
+
+Accent color variants for the theme.
+
+```dart
+enum FondeThemeColorType {
+  red, orange, yellow, green, blue, indigo, violet, pink, graphite
+}
+```
+
+Change accent color at runtime:
+```dart
+ref.read(fondeThemeColorProvider.notifier).setThemeColor(FondeThemeColorType.indigo);
+```
+
 ---
 
 ## Riverpod providers (fonde_ui_riverpod.dart)
@@ -231,10 +250,20 @@ Use `FondeColorScopeHelper` to wrap widgets:
 fondeActiveThemeProvider          // StateNotifier<FondeThemeData>
   .notifier.setTheme(FondeThemeData)
 
-fondeEffectiveColorSchemeProvider // Provider<FondeColorScheme> (resolved for current brightness)
+fondeEffectiveColorSchemeProvider // Provider<FondeColorScheme> (resolved for current brightness + theme color)
 fondeEffectiveFlutterColorSchemeProvider // Provider<ColorScheme>
 fondeEffectiveThemeDataProvider   // Provider<ThemeData>
 fondePlatformBrightnessProvider   // StateNotifier<Brightness>
+```
+
+### Theme color providers
+
+```dart
+fondeThemeColorProvider           // StateNotifier<FondeThemeColorType> (accent color)
+  .notifier.setThemeColor(FondeThemeColorType)
+
+fondeThemeColorSchemeProvider     // Provider<FondeThemeColorScheme>
+effectiveColorSchemeWithThemeProvider  // Provider<FondeColorScheme>
 ```
 
 ### Accessibility
@@ -242,6 +271,19 @@ fondePlatformBrightnessProvider   // StateNotifier<Brightness>
 ```dart
 fondeAccessibilityConfigProvider  // StateNotifier<FondeAccessibilityConfig>
   .notifier.updateConfig(FondeAccessibilityConfig)
+```
+
+Extension on `WidgetRef` (from `fonde_ui_riverpod.dart`):
+```dart
+ref.zoomScale        // double
+ref.fontScale        // double
+ref.borderScale      // double
+ref.scaleValue(double baseValue) -> double
+ref.scaleEdgeInsets(EdgeInsets base) -> EdgeInsets
+ref.scaleBorderRadius(BorderRadius base) -> BorderRadius
+ref.scaleSize(Size base) -> Size
+ref.scaleFontSize(double baseFontSize) -> double
+ref.scaleBorderWidth(double baseWidth) -> double
 ```
 
 ### Color scope providers (internal, but readable)
@@ -272,25 +314,73 @@ FondeNavigationStateData {
 }
 ```
 
+### Search providers
+
+```dart
+fondeSearchQueryProvider          // StateNotifier<String>
+  .notifier.updateQuery(String?)
+  .notifier.clearQuery()
+
+fondeSearchFieldManagerProvider   // Provider<FondeSearchFieldManager>
+  .query -> String
+  .updateQuery(String?)
+  .clearQuery()
+```
+
 ### Sidebar providers
 
 ```dart
-sidebarWidthProvider              // StateNotifier<double>
+fondePrimarySidebarStateProvider  // StateNotifier<bool> (visibility)
+  .notifier.toggle()
+  .notifier.show()
+  .notifier.hide()
+  .notifier.setVisible(bool)
+
+fondeSecondarySidebarStateProvider  // StateNotifier<bool> (visibility)
+  .notifier.toggle()
+  .notifier.show()
+  .notifier.hide()
+  .notifier.setVisible(bool)
+
+fondePerScreenSecondarySidebarStateProvider  // StateNotifier<Map<int, bool>>
+  .notifier.getStateForScreen(int screenIndex) -> bool
+  .notifier.setStateForScreen(int screenIndex, bool visible)
+  .notifier.toggleStateForScreen(int screenIndex)
+
+fondeContextualSecondarySidebarStateProvider  // Provider<bool>
+
+sidebarWidthProvider              // StateNotifier<double> (240–480px, default 320px)
   .notifier.setWidth(double)
-secondarySidebarWidthProvider
-fondeSecondarySidebarStateProvider  // Provider<bool> (visibility)
+  .notifier.adjustWidth(double delta)
+
+secondarySidebarWidthProvider     // StateNotifier<double> (200–400px, default 288px)
+  .notifier.setWidth(double)
+  .notifier.adjustWidth(double delta)
 ```
 
 ### Toolbar providers
 
 ```dart
-toolbarStateProvider              // StateNotifier<ToolbarState>
-  .notifier.selectTool(String id)
-  .notifier.setEnabledTools(List<String>)
+fondeToolbarStateManagerProvider  // StateNotifier<FondeToolbarState>
+  .notifier.selectTool(String toolId)
+  .notifier.enableTool(String toolId)
+  .notifier.disableTool(String toolId)
+  .notifier.updateState(FondeToolbarState)
 
-ToolbarState {
-  String? selectedToolId
-  List<String> enabledTools
+fondeToolbarActionsProvider       // Provider<FondeToolbarActions>
+  .selectTool(String toolId)
+  .enableTool(String toolId)
+  .disableTool(String toolId)
+
+FondeToolbarState {
+  String? selectedTool
+  Set<String> enabledTools
+}
+
+FondeToolbarItemData {
+  required String id
+  required Widget icon
+  String? tooltip
 }
 ```
 
@@ -321,12 +411,13 @@ FondeScaffold({
   bool showPrimarySidebar = true,
   bool showSecondarySidebar = true,
   bool disableZoom = false,
+  bool useSafeArea = false,
 })
 ```
 
 Layout: [launchBar | primarySidebar | content | secondarySidebar?]
-- Primary sidebar: resizable, 240–480px (before zoom), default ~288px
-- Secondary sidebar: resizable, 200–400px, toggled by `fondeSecondarySidebarStateProvider`
+- Primary sidebar: resizable, 240–480px (before zoom), default 320px
+- Secondary sidebar: resizable, 200–400px, default 288px; toggled by `fondeSecondarySidebarStateProvider`
 - When primary sidebar is hidden (via `fondePrimarySidebarStateProvider`), uses collapsed layout with open button in toolbar
 
 ### FondeSidebar
@@ -419,7 +510,7 @@ Desktop: side-by-side with draggable divider. Mobile (<breakpoint): stack naviga
 
 ### FondeToolbar
 
-Data-driven toolbar backed by toolbarStateProvider.
+Data-driven toolbar backed by fondeToolbarStateManagerProvider.
 
 ```dart
 FondeToolbar({
@@ -486,15 +577,45 @@ FondeSidebarListItem({
   Color? backgroundColor,
   Color? selectedBackgroundColor,
   double indent = 0,
+  FondeSidebarListItemStyle style = FondeSidebarListItemStyle.filled,
   bool disableZoom = false,
 })
+
+enum FondeSidebarListItemStyle { filled, subtle }
 ```
 
 Uses `fondeSideBarColorScopeProvider` for colors automatically.
 
-### FondeSidebarListGroup / FondeSidebarListHeader
+### FondeSidebarListGroup
 
 Group with expand/collapse header. Use with `fondeNavigationStateProvider`.
+
+```dart
+FondeSidebarListGroup({
+  required String id,
+  required String title,
+  required List<Widget> children,
+  Widget? icon,
+  bool initiallyExpanded = false,
+  bool isExpanded = false,
+  ValueChanged<bool>? onExpansionChanged,
+  TextStyle? titleStyle,
+  Color? backgroundColor,
+  Color? selectedBackgroundColor,
+  Widget? trailing,
+  Widget? expansionIcon,
+  double childrenIndent = 24.0,
+  Duration animationDuration = Duration.zero,
+  bool isSelected = false,
+  FondeSidebarListItemStyle style = FondeSidebarListItemStyle.filled,
+  VoidCallback? onTap,
+  bool disableZoom = false,
+})
+```
+
+### FondeSidebarListHeader
+
+Section header for sidebar lists.
 
 ### FondeSidebarListDivider (FondeNavigationDivider)
 
@@ -554,6 +675,7 @@ FondeButton.destructive({required String label, VoidCallback? onPressed, ...})  
 // Common params on full constructor:
 Widget? leadingIcon, trailingIcon
 double? width, height
+TextStyle? textStyle
 bool enabled = true
 Color? backgroundColor, borderColor, textColor
 Color? hoverBackgroundColor, pressedBackgroundColor
@@ -572,13 +694,17 @@ FondeIconButton.minimal(...)   // padding: EdgeInsets.zero
 FondeIconButton.circle(...)    // circular shape
 
 // Params:
-double? iconSize, iconColor
-Color? backgroundColor, hoverColor
+double? iconSize
+Color? iconColor, backgroundColor, hoverColor, pressedColor, disabledColor
 String? tooltip
 bool enabled = true
+EdgeInsetsGeometry? padding
+AlignmentGeometry alignment = Alignment.center
+FocusNode? focusNode
 FondeIconButtonShape shape = rectangle  // or circle
-double? cornerRadius, cornerSmoothing
+double? cornerRadius
 BorderSide? border
+BoxConstraints? constraints
 ```
 
 ### FondeSegmentedButton
@@ -610,7 +736,11 @@ Menu button that shows overflow items.
 ```dart
 FondeTextField({
   TextEditingController? controller,
-  String? placeholder,
+  FocusNode? focusNode,
+  String? hintText,
+  String? errorText,
+  Widget? prefixIcon,
+  Widget? suffixIcon,
   bool enabled = true,
   bool obscureText = false,
   TextInputType? keyboardType,
@@ -676,6 +806,8 @@ FondeDialog({
   double? heightRatio,       // 0.0–1.0, takes precedence over height
   double? maxWidth, maxHeight, minWidth, minHeight,
   EdgeInsetsGeometry? padding,
+  double headerBottomSpacing,
+  double dividerHorizontalPadding,
   double elevation = 8.0,
   double? cornerRadius, cornerSmoothing,
   Color? backgroundColor,
@@ -790,6 +922,31 @@ Small label chip widget.
 
 ---
 
+## List widgets
+
+### FondeListTile
+
+```dart
+FondeListTile({
+  required Widget title,
+  Widget? leading,
+  Widget? subtitle,
+  Widget? trailing,
+  required bool isSelected,
+  VoidCallback? onTap,
+  VoidCallback? onLongPress,
+  bool dense = false,
+  EdgeInsetsGeometry? contentPadding,
+  bool enableHover = true,
+  Color? hoverColor,
+  bool disableZoom = false,
+})
+```
+
+Ripple/splash animations are disabled by design (zero-latency principle).
+
+---
+
 ## Typography
 
 ### FondeText
@@ -857,6 +1014,25 @@ Page titles:
 - `pageTitleLarge` → headlineLarge
 - `pageTitleMedium` → headlineSmall
 - `pageTitleSmall` → bodyLarge
+
+### FondeTextStyleBuilder
+
+Utility for building `TextStyle` from a `FondeTextVariant`.
+
+```dart
+// From fonde_ui_riverpod.dart:
+FondeTextStyleBuilderRef.buildTextStyle({
+  required FondeTextVariant variant,
+  required BuildContext context,
+  required WidgetRef ref,
+  Color? color,
+  FontWeight? fontWeight,
+  String? fontFamily,
+  bool disableZoom = false,
+}) -> TextStyle
+
+FondeTextStyleBuilderRef.buildTextStyleWithColor({...}) -> TextStyle
+```
 
 ---
 
@@ -965,10 +1141,6 @@ Scroll view with theme-aware scrollbar.
 
 Content section container with optional title.
 
-### FondeListTile
-
-List tile with leading/trailing/title, theme-aware.
-
 ### FondePageIndicator
 
 Dot page indicator for carousels (uses dots_indicator).
@@ -1072,6 +1244,12 @@ FondeApp(
 ref.read(fondeActiveThemeProvider.notifier).setTheme(FondeThemePresets.dark);
 ref.read(fondeActiveThemeProvider.notifier).setTheme(FondeThemePresets.light);
 ref.read(fondeActiveThemeProvider.notifier).setTheme(FondeThemePresets.system);
+```
+
+### Accent color switching
+
+```dart
+ref.read(fondeThemeColorProvider.notifier).setThemeColor(FondeThemeColorType.indigo);
 ```
 
 ### Dialog
