@@ -202,7 +202,7 @@ class _NavigationGroupState extends ConsumerState<FondeSidebarListGroup>
           // Expansion icon: tapping toggles expand/collapse
           FondeGestureDetector(
             onTapUp: (_) => toggleExpansion(),
-            cursor: SystemMouseCursors.click,
+            cursor: SystemMouseCursors.basic,
             behavior: HitTestBehavior.opaque,
             child: Padding(
               padding: EdgeInsets.only(
@@ -218,7 +218,7 @@ class _NavigationGroupState extends ConsumerState<FondeSidebarListGroup>
           Expanded(
             child: FondeGestureDetector(
               onTapUp: (_) => widget.onTap?.call(),
-              cursor: SystemMouseCursors.click,
+              cursor: SystemMouseCursors.basic,
               behavior: HitTestBehavior.opaque,
               child: Padding(
                 padding: EdgeInsets.only(

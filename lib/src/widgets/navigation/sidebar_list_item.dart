@@ -158,7 +158,7 @@ class FondeSidebarListItem extends ConsumerWidget {
       onTap: onTap,
       onTapDown: onTapDown,
       onTapUp: onTapUp,
-      cursor: SystemMouseCursors.click,
+      cursor: SystemMouseCursors.basic,
       behavior: HitTestBehavior.opaque,
       child: Container(color: effectiveBackgroundColor, child: content),
     );
