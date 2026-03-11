@@ -95,26 +95,37 @@ class _FondeScaffoldState extends ConsumerState<FondeScaffold> {
     // If the sidebar is hidden, use CollapsedSidebarLayout
     if (!sidebarVisible) {
       final iconTheme = ref.watch(fondeDefaultIconThemeProvider);
-      final openButton = FondeIconButton(
-        icon: iconTheme.panelLeft,
-        iconSize: 20,
-        onPressed: () {
-          ref.read(fondePrimarySidebarStateProvider.notifier).show();
-        },
-        tooltip: 'Open Sidebar',
-        padding: EdgeInsets.zero,
-        hoverColor: Colors.transparent,
+      // Width of the open-sidebar button area (left padding 8px + icon 20px)
+      const double openButtonWidth = 28.0;
+      final openButtonArea = Container(
+        width: openButtonWidth,
+        color: appColorScheme.uiAreas.toolbar.background,
+        padding: const EdgeInsets.only(left: 8.0),
+        alignment: Alignment.centerLeft,
+        child: FondeIconButton(
+          icon: iconTheme.panelLeft,
+          iconSize: 20,
+          onPressed: () {
+            ref.read(fondePrimarySidebarStateProvider.notifier).show();
+          },
+          tooltip: 'Open Sidebar',
+          padding: EdgeInsets.zero,
+          hoverColor: Colors.transparent,
+        ),
       );
       return _wrapSafeArea(
         FondeCollapsedSidebarLayout(
           toolbar: Stack(
             children: [
-              widget.toolbar,
+              Padding(
+                padding: const EdgeInsets.only(left: openButtonWidth),
+                child: widget.toolbar,
+              ),
               Positioned(
                 left: 0,
                 top: 0,
                 bottom: 0,
-                child: Center(child: openButton),
+                child: openButtonArea,
               ),
             ],
           ),

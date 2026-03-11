@@ -15,6 +15,7 @@ class FondeMainToolbar extends ConsumerWidget {
     this.center,
     this.trailing,
     this.height = 50.0,
+    this.leadingOffset = 0.0,
   });
 
   final Widget? leading;
@@ -23,6 +24,11 @@ class FondeMainToolbar extends ConsumerWidget {
 
   /// Height of the title bar. Defaults to 50.
   final double height;
+
+  /// Extra left offset applied before [leading] (or before [center] when
+  /// [leading] is null). Use this to avoid overlapping a button that is
+  /// overlaid on top of the toolbar via a [Stack].
+  final double leadingOffset;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -41,6 +47,7 @@ class FondeMainToolbar extends ConsumerWidget {
       ),
       child: Row(
         children: [
+          if (leadingOffset > 0) SizedBox(width: leadingOffset),
           if (leading != null) leading!,
           if (center != null) Expanded(child: center!),
           if (trailing != null) trailing!,
