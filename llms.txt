@@ -10,7 +10,6 @@ Developed for [RinneGraph](https://github.com/szktty/rinne-graph). Currently pro
 - version: 0.1.0
 - Dart SDK: ^3.7.0
 - Flutter: >=3.41.2
-- publish_to: none (private)
 
 ## Key dependencies
 
@@ -1103,34 +1102,3 @@ class MyWidget extends ConsumerWidget {
   }
 }
 ```
-
----
-
-## Naming history (renamed components)
-
-| Old name | Current name |
-|---|---|
-| FondeActivityBar | FondeLaunchBar |
-| FondeActivityBarItem | FondeLaunchBarItem |
-| FondeActivityBarWrapper | FondeLaunchBarWrapper |
-| FondeMainShellLayout | FondeWorkspaceLayout |
-| FondeWarningDialog | FondeConfirmationDialog |
-| FondeSelectable | FondeSelectionDecorator |
-| FondeCard | FondePanel |
-| FondeTappable / FondeTappableMixin | FondeGestureDetector |
-| FondeNavigationContainer | FondeSidebarList |
-| FondeNavigationItem | FondeSidebarListItem |
-| FondeNavigationGroup | FondeSidebarListGroup |
-| FondeNavigationGroupHeader | FondeSidebarListHeader |
-| FondeNavigationItemStyle | FondeSidebarListItemStyle |
-| FondeMainAreaTitlebar | FondeMainToolbar |
-| FondePrimarySidebarTitlebar | FondePrimarySidebarToolbar |
-| FondeSecondarySidebarTitlebar | FondeSecondarySidebarToolbar |
-| FondeTitleBarColors | FondeToolbarColors |
-| FondeUiAreaColors.titleBar | FondeUiAreaColors.toolbar |
-| FondeResizableSidebarArea | FondePrimarySide + FondeSidebarPane |
-
-## Removed components
-
-The following no longer exist: FondeErrorDialog, FondeArrowLine, FondeColorPicker, FondeNavigationSearchField, FondeSelectableCard.
-
