@@ -145,9 +145,7 @@ class FondeContextMenuButton extends ConsumerWidget {
           splashColor: Colors.transparent,
           highlightColor: Colors.transparent,
           hoverColor: Colors.transparent,
-          style: const ButtonStyle(
-            splashFactory: NoSplash.splashFactory,
-          ),
+          style: const ButtonStyle(splashFactory: NoSplash.splashFactory),
           onPressed: () {
             if (controller.isOpen) {
               controller.close();

@@ -59,22 +59,22 @@ class FondeListTile extends ConsumerWidget {
     return Theme(
       data: Theme.of(context).copyWith(splashFactory: NoSplash.splashFactory),
       child: ListTile(
-      leading: leading,
-      trailing: trailing,
-      title: title,
-      subtitle: subtitle,
-      selected: isSelected,
-      selectedTileColor: appColorScheme.interactive.list.selectedBackground,
-      selectedColor: appColorScheme.interactive.list.selectedText,
-      hoverColor: effectiveHoverColor,
-      splashColor: Colors.transparent,
-      enabled: onTap != null,
-      onTap: onTap,
-      onLongPress: onLongPress,
-      dense: dense,
-      contentPadding:
-          contentPadding != null ? contentPadding! * zoomScale : null,
-    ),
+        leading: leading,
+        trailing: trailing,
+        title: title,
+        subtitle: subtitle,
+        selected: isSelected,
+        selectedTileColor: appColorScheme.interactive.list.selectedBackground,
+        selectedColor: appColorScheme.interactive.list.selectedText,
+        hoverColor: effectiveHoverColor,
+        splashColor: Colors.transparent,
+        enabled: onTap != null,
+        onTap: onTap,
+        onLongPress: onLongPress,
+        dense: dense,
+        contentPadding:
+            contentPadding != null ? contentPadding! * zoomScale : null,
+      ),
     );
   }
 }
