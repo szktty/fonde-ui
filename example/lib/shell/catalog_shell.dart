@@ -48,15 +48,6 @@ class _CatalogShellState extends ConsumerState<CatalogShell> {
   List<String> _expandedGroupIds = ['layout'];
   int _launchBarIndex = 0;
 
-  String get _selectedLabel {
-    for (final category in catalogCategories) {
-      for (final item in category.items) {
-        if (item.id == _selectedItemId) return item.label;
-      }
-    }
-    return 'fonde_ui Catalog';
-  }
-
   Widget _buildContent() {
     return switch (_selectedItemId) {
       // Buttons
@@ -119,21 +110,18 @@ class _CatalogShellState extends ConsumerState<CatalogShell> {
   Widget build(BuildContext context) {
     final body = FondeScaffold(
       toolbar: FondeMainToolbar(
-        center: Consumer(
-          builder: (context, ref, _) {
-            final colorScheme = ref.watch(fondeEffectiveColorSchemeProvider);
-            return kIsWeb
-                ? FondeText(
+        center: kIsWeb
+            ? Consumer(
+              builder: (context, ref, _) {
+                final colorScheme = ref.watch(fondeEffectiveColorSchemeProvider);
+                return FondeText(
                   'Web preview — some interactions may differ from the native app',
                   variant: FondeTextVariant.captionText,
                   color: colorScheme.base.foreground.withValues(alpha: 0.55),
-                )
-                : FondeText(
-                  _selectedLabel,
-                  variant: FondeTextVariant.sectionTitleSecondary,
                 );
-          },
-        ),
+              },
+            )
+            : null,
         trailing: _ToolbarControls(),
       ),
       launchBar: FondeLaunchBar(
@@ -364,40 +352,9 @@ class _ToolbarControlsState extends ConsumerState<_ToolbarControls> {
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          // Zoom controls
-          FondeIconButton(
-            icon: LucideIcons.zoomOut,
-            tooltip: 'Zoom Out',
-            enabled: currentZoom > _zoomLevels.first,
-            onPressed: () {
-              if (zoomIdx > 0) {
-                _setZoom(_zoomLevels[zoomIdx - 1]);
-              } else if (zoomIdx < 0) {
-                final lower =
-                    _zoomLevels.where((z) => z < currentZoom).toList();
-                if (lower.isNotEmpty) _setZoom(lower.last);
-              }
-            },
-          ),
-          _ZoomLabel(zoom: currentZoom, onTap: () => _setZoom(1.0)),
-          FondeIconButton(
-            icon: LucideIcons.zoomIn,
-            tooltip: 'Zoom In',
-            enabled: currentZoom < _zoomLevels.last,
-            onPressed: () {
-              if (zoomIdx >= 0 && zoomIdx < _zoomLevels.length - 1) {
-                _setZoom(_zoomLevels[zoomIdx + 1]);
-              } else if (zoomIdx < 0) {
-                final higher =
-                    _zoomLevels.where((z) => z > currentZoom).toList();
-                if (higher.isNotEmpty) _setZoom(higher.first);
-              }
-            },
-          ),
-          const SizedBox(width: 4),
-          _ToolbarDivider(),
-          const SizedBox(width: 4),
           // Font family selector
+          _ToolbarLabel(label: 'Font:'),
+          const SizedBox(width: 2),
           FondePopupMenu<String>(
             enabled: !_fontLoading,
             items: [
@@ -436,6 +393,39 @@ class _ToolbarControlsState extends ConsumerState<_ToolbarControls> {
           const SizedBox(width: 4),
           _ToolbarDivider(),
           const SizedBox(width: 4),
+          // Zoom controls
+          FondeIconButton(
+            icon: LucideIcons.zoomOut,
+            tooltip: 'Zoom Out',
+            enabled: currentZoom > _zoomLevels.first,
+            onPressed: () {
+              if (zoomIdx > 0) {
+                _setZoom(_zoomLevels[zoomIdx - 1]);
+              } else if (zoomIdx < 0) {
+                final lower =
+                    _zoomLevels.where((z) => z < currentZoom).toList();
+                if (lower.isNotEmpty) _setZoom(lower.last);
+              }
+            },
+          ),
+          _ZoomLabel(zoom: currentZoom, onTap: () => _setZoom(1.0)),
+          FondeIconButton(
+            icon: LucideIcons.zoomIn,
+            tooltip: 'Zoom In',
+            enabled: currentZoom < _zoomLevels.last,
+            onPressed: () {
+              if (zoomIdx >= 0 && zoomIdx < _zoomLevels.length - 1) {
+                _setZoom(_zoomLevels[zoomIdx + 1]);
+              } else if (zoomIdx < 0) {
+                final higher =
+                    _zoomLevels.where((z) => z > currentZoom).toList();
+                if (higher.isNotEmpty) _setZoom(higher.first);
+              }
+            },
+          ),
+          const SizedBox(width: 4),
+          _ToolbarDivider(),
+          const SizedBox(width: 4),
           // Theme toggle
           FondeIconButton(
             icon: LucideIcons.monitor,
@@ -466,6 +456,21 @@ class _ToolbarControlsState extends ConsumerState<_ToolbarControls> {
           ),
         ],
       ),
+    );
+  }
+}
+
+class _ToolbarLabel extends ConsumerWidget {
+  const _ToolbarLabel({required this.label});
+  final String label;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final colorScheme = ref.watch(fondeEffectiveColorSchemeProvider);
+    return FondeText(
+      label,
+      variant: FondeTextVariant.captionText,
+      color: colorScheme.base.foreground.withValues(alpha: 0.55),
     );
   }
 }
