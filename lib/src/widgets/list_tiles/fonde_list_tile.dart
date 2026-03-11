@@ -56,7 +56,9 @@ class FondeListTile extends ConsumerWidget {
     final effectiveHoverColor =
         enableHover ? (hoverColor ?? theme.hoverColor) : Colors.transparent;
 
-    return ListTile(
+    return Theme(
+      data: Theme.of(context).copyWith(splashFactory: NoSplash.splashFactory),
+      child: ListTile(
       leading: leading,
       trailing: trailing,
       title: title,
@@ -66,13 +68,13 @@ class FondeListTile extends ConsumerWidget {
       selectedColor: appColorScheme.interactive.list.selectedText,
       hoverColor: effectiveHoverColor,
       splashColor: Colors.transparent,
-      //highlightColor: Colors.transparent,
       enabled: onTap != null,
       onTap: onTap,
       onLongPress: onLongPress,
       dense: dense,
       contentPadding:
           contentPadding != null ? contentPadding! * zoomScale : null,
+    ),
     );
   }
 }
