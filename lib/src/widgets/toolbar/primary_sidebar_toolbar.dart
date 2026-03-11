@@ -1,16 +1,9 @@
-import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../internal.dart';
 import '../../riverpod/widgets/sidebar_state_providers.dart';
 import '../widgets/fonde_icon_button.dart';
 import '../icons/icon_theme_providers.dart';
-
-// Width occupied by macOS traffic light buttons (red, yellow, green).
-const double _macOSTrafficLightButtonsWidth = 90.0;
-// Safe area on the left side, considering the traffic light buttons.
-const double _macOSLeftSafeArea = _macOSTrafficLightButtonsWidth + 8.0;
 
 /// Title bar for the primary sidebar.
 ///
@@ -35,34 +28,14 @@ class FondePrimarySidebarToolbar extends ConsumerWidget {
           ),
         ),
       ),
-      child: LayoutBuilder(
-        builder: (context, constraints) {
-          // If available width is not sufficient, display only the collapse button
-          final availableWidth = constraints.maxWidth;
-          final minRequiredWidth =
-              _macOSTrafficLightButtonsWidth + 40; // Considering button width
-
-          if (availableWidth < minRequiredWidth) {
-            return const SizedBox.shrink(); // Display nothing if width is insufficient
-          }
-
-          return Padding(
-            padding:
-                Platform.isMacOS
-                    ? const EdgeInsets.only(top: 2.0)
-                    : EdgeInsets.zero,
-            child: Row(
-              children: [
-                // Traffic light safe area (macOS only)
-                if (Platform.isMacOS) const SizedBox(width: _macOSLeftSafeArea),
-                // Sidebar collapse button at the left edge of the sidebar area
-                Center(child: _buildPrimarySidebarToggle(ref, iconTheme)),
-                // Remaining space
-                const Expanded(child: SizedBox()),
-              ],
-            ),
-          );
-        },
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0),
+        child: Row(
+          children: [
+            _buildPrimarySidebarToggle(ref, iconTheme),
+            const Expanded(child: SizedBox()),
+          ],
+        ),
       ),
     );
   }
