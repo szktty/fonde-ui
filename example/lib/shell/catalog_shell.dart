@@ -110,18 +110,23 @@ class _CatalogShellState extends ConsumerState<CatalogShell> {
   Widget build(BuildContext context) {
     final body = FondeScaffold(
       toolbar: FondeMainToolbar(
-        center: kIsWeb
-            ? Consumer(
-              builder: (context, ref, _) {
-                final colorScheme = ref.watch(fondeEffectiveColorSchemeProvider);
-                return FondeText(
-                  'Web preview — some interactions may differ from the native app',
-                  variant: FondeTextVariant.captionText,
-                  color: colorScheme.base.foreground.withValues(alpha: 0.55),
-                );
-              },
-            )
-            : null,
+        center:
+            kIsWeb
+                ? Consumer(
+                  builder: (context, ref, _) {
+                    final colorScheme = ref.watch(
+                      fondeEffectiveColorSchemeProvider,
+                    );
+                    return FondeText(
+                      'Web preview — some interactions may differ from the native app',
+                      variant: FondeTextVariant.captionText,
+                      color: colorScheme.base.foreground.withValues(
+                        alpha: 0.55,
+                      ),
+                    );
+                  },
+                )
+                : null,
         trailing: _ToolbarControls(),
       ),
       launchBar: FondeLaunchBar(

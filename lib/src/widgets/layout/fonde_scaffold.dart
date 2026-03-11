@@ -121,12 +121,7 @@ class _FondeScaffoldState extends ConsumerState<FondeScaffold> {
                 padding: const EdgeInsets.only(left: openButtonWidth),
                 child: widget.toolbar,
               ),
-              Positioned(
-                left: 0,
-                top: 0,
-                bottom: 0,
-                child: openButtonArea,
-              ),
+              Positioned(left: 0, top: 0, bottom: 0, child: openButtonArea),
             ],
           ),
           mainContent: _buildMainContent(context, zoomScale, 288.0 * zoomScale),
