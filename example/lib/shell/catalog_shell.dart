@@ -151,7 +151,7 @@ class _CatalogShellState extends ConsumerState<CatalogShell> {
             onTap: () => setState(() => _launchBarIndex = 2),
           ),
           FondeLaunchBarItem(
-            icon: LucideIcons.bug,
+            icon: LucideIcons.zap,
             label: 'Debug',
             logicalIndex: 3,
             onTap: () => setState(() => _launchBarIndex = 3),
