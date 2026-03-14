@@ -766,7 +766,7 @@ class _CatalogCard extends ConsumerWidget {
               width: width,
               height: _kCardSampleHeight,
               child: ColoredBox(
-                color: colorScheme.base.background,
+                color: colorScheme.base.divider,
                 child: Padding(
                   padding: const EdgeInsets.all(FondeSpacingValues.md),
                   child: sample,
@@ -784,6 +784,7 @@ class _CatalogCard extends ConsumerWidget {
                 FondeText(
                   category,
                   variant: FondeTextVariant.sectionTitleSecondary,
+                  color: colorScheme.theme.primaryColor,
                 ),
                 const FondeSpacing.xs(),
                 FondeText(
