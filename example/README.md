@@ -1,4 +1,4 @@
-# fonde_ui Catalog App
+# Fonde UI Catalog App
 
 An interactive catalog app for exploring and testing `fonde_ui` components.
 

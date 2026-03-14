@@ -191,7 +191,7 @@ class _CatalogShellState extends ConsumerState<CatalogShell> {
     final menus = FondePlatformMenus(context: context);
     return PlatformMenuBar(
       menus: [
-        menus.appMenu(appName: 'fonde_ui Catalog'),
+        menus.appMenu(appName: 'Fonde UI Catalog'),
         PlatformMenu(
           label: 'File',
           menus: [
