@@ -37,9 +37,10 @@ class FondeFontConfig {
   factory FondeFontConfig.fromJson(Map<String, dynamic> json) {
     return FondeFontConfig(
       fontFamily: json['fontFamily'] as String,
-      weight: json['weight'] == null
-          ? FontWeight.w400
-          : FontWeight.values[(json['weight'] as int) ~/ 100 - 1],
+      weight:
+          json['weight'] == null
+              ? FontWeight.w400
+              : FontWeight.values[(json['weight'] as int) ~/ 100 - 1],
       size: (json['size'] as num?)?.toDouble() ?? 14.0,
       lineHeight: (json['lineHeight'] as num?)?.toDouble() ?? 1.2,
       letterSpacing: (json['letterSpacing'] as num?)?.toDouble() ?? 0.0,

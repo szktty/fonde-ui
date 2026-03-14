@@ -101,10 +101,11 @@ class FondeTagsField extends ConsumerWidget {
                 cornerSmoothing: 0.6,
               ),
               side: BorderSide(
-                color: inputFieldValues.focusNode.hasFocus
-                    // TODO: Prepare an appropriate theme color here as well
-                    ? appColorScheme.base.background
-                    : const Color(0x00000000),
+                color:
+                    inputFieldValues.focusNode.hasFocus
+                        // TODO: Prepare an appropriate theme color here as well
+                        ? appColorScheme.base.background
+                        : const Color(0x00000000),
                 width: 1.0 * borderScale,
               ),
             ),
@@ -147,9 +148,10 @@ class FondeTagsField extends ConsumerWidget {
                   focusNode: inputFieldValues.focusNode,
                   enabled: enabled,
                   decoration: InputDecoration(
-                    hintText: controller.getTags?.isEmpty ?? true
-                        ? hintText
-                        : '+ Add tag',
+                    hintText:
+                        controller.getTags?.isEmpty ?? true
+                            ? hintText
+                            : '+ Add tag',
                     border: InputBorder.none,
                     enabledBorder: InputBorder.none,
                     focusedBorder: InputBorder.none,

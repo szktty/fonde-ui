@@ -53,9 +53,8 @@ class FondeListTile extends ConsumerWidget {
 
     // Determine hover color (temporary implementation)
     final theme = Theme.of(context);
-    final effectiveHoverColor = enableHover
-        ? (hoverColor ?? theme.hoverColor)
-        : Colors.transparent;
+    final effectiveHoverColor =
+        enableHover ? (hoverColor ?? theme.hoverColor) : Colors.transparent;
 
     return Theme(
       data: Theme.of(context).copyWith(splashFactory: NoSplash.splashFactory),
@@ -73,9 +72,8 @@ class FondeListTile extends ConsumerWidget {
         onTap: onTap,
         onLongPress: onLongPress,
         dense: dense,
-        contentPadding: contentPadding != null
-            ? contentPadding! * zoomScale
-            : null,
+        contentPadding:
+            contentPadding != null ? contentPadding! * zoomScale : null,
       ),
     );
   }

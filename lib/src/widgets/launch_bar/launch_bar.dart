@@ -118,16 +118,18 @@ class _LaunchBarItemWidget extends ConsumerWidget {
           decoration: BoxDecoration(
             border: Border(
               left: BorderSide(
-                color: isSelected
-                    ? appColorScheme.base.selection
-                    : Colors.transparent,
+                color:
+                    isSelected
+                        ? appColorScheme.base.selection
+                        : Colors.transparent,
                 width: (2.0 * borderScale).toDouble(),
               ),
             ),
             // Use color scheme settings: background color is primary color when selected
-            color: isSelected
-                ? appColorScheme.uiAreas.launchBar.activeItemBackground
-                : null,
+            color:
+                isSelected
+                    ? appColorScheme.uiAreas.launchBar.activeItemBackground
+                    : null,
           ),
           child: SizedBox(
             height: (44.0 * zoomScale).toDouble(),
@@ -138,12 +140,13 @@ class _LaunchBarItemWidget extends ConsumerWidget {
                   item.icon,
                   customSize: 22.0,
                   // Use color scheme settings
-                  customColor: !item.enabled
-                      ? appColorScheme.uiAreas.launchBar.inactiveItem
-                            .withValues(alpha: 0.3)
-                      : isSelected
-                      ? appColorScheme.uiAreas.launchBar.activeItem
-                      : appColorScheme.uiAreas.launchBar.inactiveItem,
+                  customColor:
+                      !item.enabled
+                          ? appColorScheme.uiAreas.launchBar.inactiveItem
+                              .withValues(alpha: 0.3)
+                          : isSelected
+                          ? appColorScheme.uiAreas.launchBar.activeItem
+                          : appColorScheme.uiAreas.launchBar.inactiveItem,
                   disableZoom: disableZoom,
                   semanticLabel: item.label,
                 ),

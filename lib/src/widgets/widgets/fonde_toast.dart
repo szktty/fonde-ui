@@ -65,8 +65,9 @@ class FondeToast {
 
       FondePopover.show(
         context: context,
-        bodyBuilder: (context) =>
-            _AppToastContent(message: message, type: type, icon: icon),
+        bodyBuilder:
+            (context) =>
+                _AppToastContent(message: message, type: type, icon: icon),
         duration: duration,
         direction: direction,
         animation: animation,
@@ -113,8 +114,9 @@ class FondeToast {
       arrowWidth: 0,
       barrierColor: Colors.transparent, // Make barrier transparent
       barrierDismissible: true,
-      bodyBuilder: (context) =>
-          _AppToastContent(message: message, type: type, icon: icon),
+      bodyBuilder:
+          (context) =>
+              _AppToastContent(message: message, type: type, icon: icon),
     );
   }
 

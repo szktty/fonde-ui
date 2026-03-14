@@ -109,10 +109,12 @@ class FondePopover extends ConsumerWidget {
 
       case FondePopoverAnimation.slideAndFade:
         final slideOffset = _getSlideOffset(direction);
-        final slideAnimation =
-            Tween<Offset>(begin: slideOffset, end: Offset.zero).animate(
-              CurvedAnimation(parent: animation, curve: Curves.easeOutCubic),
-            );
+        final slideAnimation = Tween<Offset>(
+          begin: slideOffset,
+          end: Offset.zero,
+        ).animate(
+          CurvedAnimation(parent: animation, curve: Curves.easeOutCubic),
+        );
         final fadeAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
           CurvedAnimation(
             parent: animation,
@@ -249,20 +251,21 @@ class FondePopover extends ConsumerWidget {
 
     // Create spotlight overlay
     spotlightEntry = OverlayEntry(
-      builder: (context) => _SpotlightOverlay(
-        targetRect: targetRect,
-        overlayColor: spotlightOverlayColor,
-        spotlightRadius: spotlightRadius,
-        rippleCount: rippleCount,
-        rippleDelay: rippleDelay,
-        onDismiss: () {
-          removeSpotlight();
-          // Close popover only if context is valid
-          if (context.mounted) {
-            Navigator.of(context).pop();
-          }
-        },
-      ),
+      builder:
+          (context) => _SpotlightOverlay(
+            targetRect: targetRect,
+            overlayColor: spotlightOverlayColor,
+            spotlightRadius: spotlightRadius,
+            rippleCount: rippleCount,
+            rippleDelay: rippleDelay,
+            onDismiss: () {
+              removeSpotlight();
+              // Close popover only if context is valid
+              if (context.mounted) {
+                Navigator.of(context).pop();
+              }
+            },
+          ),
     );
 
     overlay.insert(spotlightEntry);
@@ -374,19 +377,21 @@ class FondePopover extends ConsumerWidget {
         },
         barrierColor: effectiveBarrierColor,
         barrierDismissible: barrierDismissible,
-        transitionDuration: animation == FondePopoverAnimation.none
-            ? Duration
-                  .zero // No animation
-            : _getAnimationDuration(animation),
-        popoverTransitionBuilder: animation == FondePopoverAnimation.none
-            ? (animationController, child) =>
-                  child // No animation
-            : (animationController, child) => _buildCustomTransition(
-                animationController,
-                child,
-                animation,
-                direction,
-              ),
+        transitionDuration:
+            animation == FondePopoverAnimation.none
+                ? Duration
+                    .zero // No animation
+                : _getAnimationDuration(animation),
+        popoverTransitionBuilder:
+            animation == FondePopoverAnimation.none
+                ? (animationController, child) =>
+                    child // No animation
+                : (animationController, child) => _buildCustomTransition(
+                  animationController,
+                  child,
+                  animation,
+                  direction,
+                ),
       );
 
       // Set auto-close timer
@@ -459,10 +464,11 @@ class FondePopover extends ConsumerWidget {
 
     show(
       context: context,
-      bodyBuilder: (context) => Container(
-        padding: effectivePadding,
-        child: Text(text, style: effectiveTextStyle),
-      ),
+      bodyBuilder:
+          (context) => Container(
+            padding: effectivePadding,
+            child: Text(text, style: effectiveTextStyle),
+          ),
       direction: direction,
       width: width,
       height: height ?? 60,
@@ -511,32 +517,33 @@ class FondePopover extends ConsumerWidget {
       arrowWidth: 0,
       barrierColor: Colors.transparent, // Make barrier transparent
       barrierDismissible: true,
-      bodyBuilder: (context) => Container(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            if (icon != null) ...[
-              FondeIcon(
-                icon,
-                customSize: 20,
-                customColor: textColor ?? Colors.white,
-                disableZoom: true,
-              ),
-              const SizedBox(width: 8),
-            ],
-            Flexible(
-              child: Text(
-                message,
-                style: TextStyle(
-                  color: textColor ?? Colors.white,
-                  fontSize: 14,
+      bodyBuilder:
+          (context) => Container(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                if (icon != null) ...[
+                  FondeIcon(
+                    icon,
+                    customSize: 20,
+                    customColor: textColor ?? Colors.white,
+                    disableZoom: true,
+                  ),
+                  const SizedBox(width: 8),
+                ],
+                Flexible(
+                  child: Text(
+                    message,
+                    style: TextStyle(
+                      color: textColor ?? Colors.white,
+                      fontSize: 14,
+                    ),
+                  ),
                 ),
-              ),
+              ],
             ),
-          ],
-        ),
-      ),
+          ),
     );
   }
 
@@ -574,41 +581,42 @@ class FondePopover extends ConsumerWidget {
 
     show(
       context: context,
-      bodyBuilder: (context) => Container(
-        padding: const EdgeInsets.symmetric(vertical: 8),
-        child: ListView.builder(
-          itemCount: items.length,
-          itemBuilder: (context, index) {
-            final item = items[index];
-            return GestureDetector(
-              onTap: () {
-                Navigator.of(context).pop();
-                onItemTap(index, item);
-              },
-              child: MouseRegion(
-                cursor: SystemMouseCursors.click,
-                child: Container(
-                  height: 48,
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 16,
-                    vertical: 12,
-                  ),
-                  child: Align(
-                    alignment: Alignment.centerLeft,
-                    child: Text(
-                      item,
-                      style: const TextStyle(
-                        color: Colors.black87,
-                        fontSize: 14,
+      bodyBuilder:
+          (context) => Container(
+            padding: const EdgeInsets.symmetric(vertical: 8),
+            child: ListView.builder(
+              itemCount: items.length,
+              itemBuilder: (context, index) {
+                final item = items[index];
+                return GestureDetector(
+                  onTap: () {
+                    Navigator.of(context).pop();
+                    onItemTap(index, item);
+                  },
+                  child: MouseRegion(
+                    cursor: SystemMouseCursors.click,
+                    child: Container(
+                      height: 48,
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 16,
+                        vertical: 12,
+                      ),
+                      child: Align(
+                        alignment: Alignment.centerLeft,
+                        child: Text(
+                          item,
+                          style: const TextStyle(
+                            color: Colors.black87,
+                            fontSize: 14,
+                          ),
+                        ),
                       ),
                     ),
                   ),
-                ),
-              ),
-            );
-          },
-        ),
-      ),
+                );
+              },
+            ),
+          ),
       direction: direction,
       width: width,
       height: effectiveHeight,
@@ -784,10 +792,11 @@ class _SpotlightPainter extends CustomPainter {
       Radius.circular(spotlightRadius),
     );
 
-    final path = Path()
-      ..addRect(fullScreenRect)
-      ..addRRect(spotlightRect)
-      ..fillType = PathFillType.evenOdd;
+    final path =
+        Path()
+          ..addRect(fullScreenRect)
+          ..addRRect(spotlightRect)
+          ..fillType = PathFillType.evenOdd;
 
     canvas.drawPath(path, paint);
   }

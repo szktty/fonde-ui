@@ -104,9 +104,8 @@ class FondeDivider extends ConsumerWidget {
           // so explicitly specify 0 to disable Divider's top/bottom padding.
           // This allows parent components like FondePage to fully control spacing.
           height: height != null ? height! * zoomScale : 0,
-          thickness: thickness != null
-              ? thickness! * borderScale
-              : 2.0 * borderScale,
+          thickness:
+              thickness != null ? thickness! * borderScale : 2.0 * borderScale,
           indent: indent != null ? indent! * zoomScale : null,
           endIndent: endIndent != null ? endIndent! * zoomScale : null,
           color: dividerColor,
@@ -120,9 +119,8 @@ class FondeDivider extends ConsumerWidget {
       // so explicitly specify 0 to disable Divider's top/bottom padding.
       // This allows parent components like FondePage to fully control spacing.
       height: height != null ? height! * zoomScale : 0,
-      thickness: thickness != null
-          ? thickness! * borderScale
-          : 2.0 * borderScale,
+      thickness:
+          thickness != null ? thickness! * borderScale : 2.0 * borderScale,
       indent: indent != null ? indent! * zoomScale : null,
       endIndent: endIndent != null ? endIndent! * zoomScale : null,
       color: dividerColor,
@@ -187,9 +185,8 @@ class FondeVerticalDivider extends ConsumerWidget {
         color: paddingColor,
         child: VerticalDivider(
           width: width != null ? width! * zoomScale : null,
-          thickness: thickness != null
-              ? thickness! * borderScale
-              : 2.0 * borderScale,
+          thickness:
+              thickness != null ? thickness! * borderScale : 2.0 * borderScale,
           indent: indent != null ? indent! * zoomScale : null,
           endIndent: endIndent != null ? endIndent! * zoomScale : null,
           color: dividerColor,
@@ -200,9 +197,8 @@ class FondeVerticalDivider extends ConsumerWidget {
     // If padding color is not specified, use normal VerticalDivider
     return VerticalDivider(
       width: width != null ? width! * zoomScale : null,
-      thickness: thickness != null
-          ? thickness! * borderScale
-          : 2.0 * borderScale,
+      thickness:
+          thickness != null ? thickness! * borderScale : 2.0 * borderScale,
       indent: indent != null ? indent! * zoomScale : null,
       endIndent: endIndent != null ? endIndent! * zoomScale : null,
       color: dividerColor,

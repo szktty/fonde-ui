@@ -334,9 +334,8 @@ class _AppTextFieldState extends ConsumerState<FondeTextField> {
     final flutterTheme = Theme.of(context);
     final accessibilityConfig = ref.watch(fondeAccessibilityConfigProvider);
     final zoomScale = widget.disableZoom ? 1.0 : accessibilityConfig.zoomScale;
-    final borderScale = widget.disableZoom
-        ? 1.0
-        : accessibilityConfig.borderScale;
+    final borderScale =
+        widget.disableZoom ? 1.0 : accessibilityConfig.borderScale;
 
     // Use the new color scheme provider that responds to theme mode changes
     final appColorScheme = ref.watch(fondeColorSchemeProvider);
@@ -371,22 +370,24 @@ class _AppTextFieldState extends ConsumerState<FondeTextField> {
           hintText: widget.hintText,
           errorText: widget.errorText,
           prefixIcon: widget.prefixIcon,
-          suffixIcon: widget.suffixIcon != null
-              // Center align with Align widget.
-              // This allows adjusting visual position without unnecessarily
-              // expanding the clickable area of IconButton.
-              ? Align(alignment: Alignment.center, child: widget.suffixIcon)
-              : null,
-          suffixIconConstraints: widget.suffixIcon != null
-              ? BoxConstraints(
-                  // Match height to TextField height so Align centers correctly.
-                  minHeight: 32.0 * zoomScale,
-                  maxHeight: 32.0 * zoomScale,
-                  // Width reserves space for icon and left/right padding.
-                  minWidth: 32.0 * zoomScale,
-                  maxWidth: 32.0 * zoomScale,
-                )
-              : null,
+          suffixIcon:
+              widget.suffixIcon != null
+                  // Center align with Align widget.
+                  // This allows adjusting visual position without unnecessarily
+                  // expanding the clickable area of IconButton.
+                  ? Align(alignment: Alignment.center, child: widget.suffixIcon)
+                  : null,
+          suffixIconConstraints:
+              widget.suffixIcon != null
+                  ? BoxConstraints(
+                    // Match height to TextField height so Align centers correctly.
+                    minHeight: 32.0 * zoomScale,
+                    maxHeight: 32.0 * zoomScale,
+                    // Width reserves space for icon and left/right padding.
+                    minWidth: 32.0 * zoomScale,
+                    maxWidth: 32.0 * zoomScale,
+                  )
+                  : null,
           border: InputBorder.none,
           enabledBorder: InputBorder.none,
           focusedBorder: InputBorder.none,
@@ -432,12 +433,14 @@ class _AppTextFieldState extends ConsumerState<FondeTextField> {
         inputFormatters: widget.inputFormatters,
         enabled: widget.enabled,
         cursorWidth: widget.cursorWidth * zoomScale,
-        cursorHeight: widget.cursorHeight != null
-            ? widget.cursorHeight! * zoomScale
-            : null,
-        cursorRadius: widget.cursorRadius != null
-            ? Radius.circular(widget.cursorRadius!.x * zoomScale)
-            : null,
+        cursorHeight:
+            widget.cursorHeight != null
+                ? widget.cursorHeight! * zoomScale
+                : null,
+        cursorRadius:
+            widget.cursorRadius != null
+                ? Radius.circular(widget.cursorRadius!.x * zoomScale)
+                : null,
         cursorColor: widget.cursorColor,
         // selectionHeightStyle and selectionWidthStyle don't allow null, so specify directly
         selectionHeightStyle: ui.BoxHeightStyle.tight,

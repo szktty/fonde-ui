@@ -57,12 +57,7 @@ class FondeCollapsedSidebarLayout extends StatelessWidget {
 
         // Main area: toolbar + content
         Expanded(
-          child: Column(
-            children: [
-              toolbar,
-              Expanded(child: mainContent),
-            ],
-          ),
+          child: Column(children: [toolbar, Expanded(child: mainContent)]),
         ),
       ],
     );

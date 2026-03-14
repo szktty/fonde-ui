@@ -56,14 +56,16 @@ class FondeSection extends ConsumerWidget {
       ],
     );
 
-    final childrenWithDividers = showDividers
-        ? _insertDividers(children, theme.dividerColor, scaledSpacing)
-        : children;
+    final childrenWithDividers =
+        showDividers
+            ? _insertDividers(children, theme.dividerColor, scaledSpacing)
+            : children;
 
     // Scale the padding if it's the default value
-    final scaledPadding = padding == const EdgeInsets.all(16)
-        ? EdgeInsets.all(16 * zoomScale)
-        : padding;
+    final scaledPadding =
+        padding == const EdgeInsets.all(16)
+            ? EdgeInsets.all(16 * zoomScale)
+            : padding;
 
     return Container(
       color: backgroundColor,

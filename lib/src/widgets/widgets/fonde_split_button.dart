@@ -236,47 +236,48 @@ class _AppSplitButtonWidgetState extends State<_AppSplitButtonWidget> {
     final size = renderBox.size;
 
     return OverlayEntry(
-      builder: (context) => GestureDetector(
-        // Close the menu when tapping outside the overlay menu area
-        onTap: _removeOverlay,
-        behavior: HitTestBehavior.translucent,
-        child: Stack(
-          children: [
-            // Transparent area covering the entire screen
-            Positioned.fill(child: Container(color: Colors.transparent)),
-            // Overlay menu body
-            Positioned(
-              child: CompositedTransformFollower(
-                link: _layerLink,
-                showWhenUnlinked: false,
-                offset: Offset(0, size.height),
-                child: GestureDetector(
-                  // Do not propagate taps inside the menu to the parent GestureDetector
-                  onTap: () {},
-                  child: Material(
-                    color: Colors.transparent,
-                    child: _AppSplitButtonMenu(
-                      actions: widget.actions,
-                      borderRadius: widget.borderRadius,
-                      backgroundColor: widget.menuBackgroundColor,
-                      borderColor: widget.menuBorderColor,
-                      textColor: widget.textColor,
-                      textStyle: widget.textStyle,
-                      hoverBackgroundColor: widget.hoverBackgroundColor,
-                      zoomScale: widget.zoomScale,
-                      borderScale: widget.borderScale,
-                      onActionSelected: (action) {
-                        action.onPressed();
-                        _removeOverlay();
-                      },
+      builder:
+          (context) => GestureDetector(
+            // Close the menu when tapping outside the overlay menu area
+            onTap: _removeOverlay,
+            behavior: HitTestBehavior.translucent,
+            child: Stack(
+              children: [
+                // Transparent area covering the entire screen
+                Positioned.fill(child: Container(color: Colors.transparent)),
+                // Overlay menu body
+                Positioned(
+                  child: CompositedTransformFollower(
+                    link: _layerLink,
+                    showWhenUnlinked: false,
+                    offset: Offset(0, size.height),
+                    child: GestureDetector(
+                      // Do not propagate taps inside the menu to the parent GestureDetector
+                      onTap: () {},
+                      child: Material(
+                        color: Colors.transparent,
+                        child: _AppSplitButtonMenu(
+                          actions: widget.actions,
+                          borderRadius: widget.borderRadius,
+                          backgroundColor: widget.menuBackgroundColor,
+                          borderColor: widget.menuBorderColor,
+                          textColor: widget.textColor,
+                          textStyle: widget.textStyle,
+                          hoverBackgroundColor: widget.hoverBackgroundColor,
+                          zoomScale: widget.zoomScale,
+                          borderScale: widget.borderScale,
+                          onActionSelected: (action) {
+                            action.onPressed();
+                            _removeOverlay();
+                          },
+                        ),
+                      ),
                     ),
                   ),
                 ),
-              ),
+              ],
             ),
-          ],
-        ),
-      ),
+          ),
     );
   }
 
@@ -301,9 +302,8 @@ class _AppSplitButtonWidgetState extends State<_AppSplitButtonWidget> {
         width: widget.width,
         height: effectiveHeight,
         child: Row(
-          mainAxisSize: widget.width != null
-              ? MainAxisSize.max
-              : MainAxisSize.min,
+          mainAxisSize:
+              widget.width != null ? MainAxisSize.max : MainAxisSize.min,
           children: [
             // Primary button section
             if (widget.width != null)
@@ -347,9 +347,10 @@ class _AppSplitButtonWidgetState extends State<_AppSplitButtonWidget> {
                           child: Text(
                             widget.primaryLabel,
                             style: widget.textStyle?.copyWith(
-                              color: widget.enabled
-                                  ? widget.textColor
-                                  : widget.textColor.withValues(alpha: 0.6),
+                              color:
+                                  widget.enabled
+                                      ? widget.textColor
+                                      : widget.textColor.withValues(alpha: 0.6),
                             ),
                             overflow: TextOverflow.ellipsis,
                           ),
@@ -398,9 +399,10 @@ class _AppSplitButtonWidgetState extends State<_AppSplitButtonWidget> {
                       Text(
                         widget.primaryLabel,
                         style: widget.textStyle?.copyWith(
-                          color: widget.enabled
-                              ? widget.textColor
-                              : widget.textColor.withValues(alpha: 0.6),
+                          color:
+                              widget.enabled
+                                  ? widget.textColor
+                                  : widget.textColor.withValues(alpha: 0.6),
                         ),
                         overflow: TextOverflow.ellipsis,
                       ),
@@ -433,9 +435,10 @@ class _AppSplitButtonWidgetState extends State<_AppSplitButtonWidget> {
                 child: Center(
                   child: Icon(
                     iconTheme.chevronDown,
-                    color: widget.enabled
-                        ? widget.textColor
-                        : widget.textColor.withValues(alpha: 0.6),
+                    color:
+                        widget.enabled
+                            ? widget.textColor
+                            : widget.textColor.withValues(alpha: 0.6),
                     size:
                         _AppSplitButtonConstants.chevronIconSize *
                         widget.zoomScale,
@@ -493,18 +496,19 @@ class _AppSplitButtonMenu extends StatelessWidget {
       ),
       child: Column(
         mainAxisSize: MainAxisSize.min,
-        children: actions
-            .map(
-              (action) => _AppSplitButtonMenuItem(
-                action: action,
-                textColor: textColor,
-                textStyle: textStyle,
-                hoverBackgroundColor: hoverBackgroundColor,
-                zoomScale: zoomScale,
-                onPressed: () => onActionSelected(action),
-              ),
-            )
-            .toList(),
+        children:
+            actions
+                .map(
+                  (action) => _AppSplitButtonMenuItem(
+                    action: action,
+                    textColor: textColor,
+                    textStyle: textStyle,
+                    hoverBackgroundColor: hoverBackgroundColor,
+                    zoomScale: zoomScale,
+                    onPressed: () => onActionSelected(action),
+                  ),
+                )
+                .toList(),
       ),
     );
   }
@@ -545,9 +549,10 @@ class _AppSplitButtonMenuItemState extends State<_AppSplitButtonMenuItem> {
         onTap: widget.action.enabled ? widget.onPressed : null,
         behavior: HitTestBehavior.opaque,
         child: Container(
-          color: _isHovered && widget.action.enabled
-              ? widget.hoverBackgroundColor
-              : Colors.transparent,
+          color:
+              _isHovered && widget.action.enabled
+                  ? widget.hoverBackgroundColor
+                  : Colors.transparent,
           padding: EdgeInsets.symmetric(
             horizontal:
                 _AppSplitButtonConstants.horizontalPadding * widget.zoomScale,
@@ -568,9 +573,10 @@ class _AppSplitButtonMenuItemState extends State<_AppSplitButtonMenuItem> {
                 child: Text(
                   widget.action.label,
                   style: widget.textStyle?.copyWith(
-                    color: widget.action.enabled
-                        ? widget.textColor
-                        : widget.textColor.withValues(alpha: 0.6),
+                    color:
+                        widget.action.enabled
+                            ? widget.textColor
+                            : widget.textColor.withValues(alpha: 0.6),
                   ),
                   overflow: TextOverflow.ellipsis,
                 ),

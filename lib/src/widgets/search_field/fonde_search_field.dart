@@ -79,9 +79,10 @@ class FondeSearchField extends ConsumerWidget {
         ),
         borderRadius: BorderRadius.circular(8.0 * borderScale),
       ),
-      onSuggestionTap: onSuggestionTap == null
-          ? null
-          : (item) => onSuggestionTap?.call(item.searchKey),
+      onSuggestionTap:
+          onSuggestionTap == null
+              ? null
+              : (item) => onSuggestionTap?.call(item.searchKey),
       onSubmit: onSubmit,
       onSaved: onSaved,
       // Added
@@ -117,23 +118,24 @@ class FondeSearchField extends ConsumerWidget {
           horizontal: 12.0 * zoomScale,
           vertical: 8.0 * zoomScale,
         ),
-        suffixIcon: hasText && onClear != null
-            ? FondeIconButton.circle(
-                icon: iconTheme.x,
-                iconSize: 16.0 * zoomScale,
-                iconColor: appColorScheme.base.foreground,
-                backgroundColor: appColorScheme.base.border,
-                constraints: BoxConstraints.tightFor(
-                  width: 24.0 * zoomScale,
-                  height: 24.0 * zoomScale,
-                ),
-                onPressed: () {
-                  controller.clear();
-                  onClear?.call();
-                },
-                tooltip: 'Clear',
-              )
-            : null,
+        suffixIcon:
+            hasText && onClear != null
+                ? FondeIconButton.circle(
+                  icon: iconTheme.x,
+                  iconSize: 16.0 * zoomScale,
+                  iconColor: appColorScheme.base.foreground,
+                  backgroundColor: appColorScheme.base.border,
+                  constraints: BoxConstraints.tightFor(
+                    width: 24.0 * zoomScale,
+                    height: 24.0 * zoomScale,
+                  ),
+                  onPressed: () {
+                    controller.clear();
+                    onClear?.call();
+                  },
+                  tooltip: 'Clear',
+                )
+                : null,
       ),
       enabled: enabled,
     );

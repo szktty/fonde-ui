@@ -23,9 +23,8 @@ class FondeNavigationState extends _$FondeNavigationState {
 
     if (isExpanded) {
       state = current.copyWith(
-        expandedGroupIds: current.expandedGroupIds
-            .where((id) => id != groupId)
-            .toList(),
+        expandedGroupIds:
+            current.expandedGroupIds.where((id) => id != groupId).toList(),
       );
     } else {
       state = current.copyWith(

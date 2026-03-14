@@ -269,52 +269,53 @@ class _AppPopupMenuButtonState<T> extends State<_AppPopupMenuButton<T>> {
     final menuWidth = _calculateMenuWidth();
 
     return OverlayEntry(
-      builder: (context) => GestureDetector(
-        onTap: () {
-          // Remove overlay
-          if (mounted) {
-            _removeOverlay();
-          }
-        },
-        behavior: HitTestBehavior.translucent,
-        child: Stack(
-          children: [
-            Positioned.fill(child: Container(color: Colors.transparent)),
-            Positioned(
-              width: menuWidth, // Dynamically calculated menu width
-              height: menuHeight,
-              child: CompositedTransformFollower(
-                link: _layerLink,
-                showWhenUnlinked: false,
-                offset: Offset(
-                  -(menuWidth - size.width), // Align to right edge
-                  size.height +
-                      4.0 * widget.zoomScale, // Display below the button
-                ),
-                child: GestureDetector(
-                  onTap:
-                      () {}, // Do not propagate taps within the menu to the parent
-                  behavior: HitTestBehavior.opaque,
-                  child: Material(
-                    color: Colors.transparent,
-                    child: _AppPopupMenuOverlay<T>(
-                      items: widget.items,
-                      colorScheme: widget.colorScheme,
-                      zoomScale: widget.zoomScale,
-                      onItemSelected: (item) {
-                        item.onSelected?.call();
-                        if (mounted) {
-                          _removeOverlay();
-                        }
-                      },
+      builder:
+          (context) => GestureDetector(
+            onTap: () {
+              // Remove overlay
+              if (mounted) {
+                _removeOverlay();
+              }
+            },
+            behavior: HitTestBehavior.translucent,
+            child: Stack(
+              children: [
+                Positioned.fill(child: Container(color: Colors.transparent)),
+                Positioned(
+                  width: menuWidth, // Dynamically calculated menu width
+                  height: menuHeight,
+                  child: CompositedTransformFollower(
+                    link: _layerLink,
+                    showWhenUnlinked: false,
+                    offset: Offset(
+                      -(menuWidth - size.width), // Align to right edge
+                      size.height +
+                          4.0 * widget.zoomScale, // Display below the button
+                    ),
+                    child: GestureDetector(
+                      onTap:
+                          () {}, // Do not propagate taps within the menu to the parent
+                      behavior: HitTestBehavior.opaque,
+                      child: Material(
+                        color: Colors.transparent,
+                        child: _AppPopupMenuOverlay<T>(
+                          items: widget.items,
+                          colorScheme: widget.colorScheme,
+                          zoomScale: widget.zoomScale,
+                          onItemSelected: (item) {
+                            item.onSelected?.call();
+                            if (mounted) {
+                              _removeOverlay();
+                            }
+                          },
+                        ),
+                      ),
                     ),
                   ),
                 ),
-              ),
+              ],
             ),
-          ],
-        ),
-      ),
+          ),
     );
   }
 
@@ -442,9 +443,10 @@ class _AppPopupMenuItemWidgetState<T>
         behavior: HitTestBehavior.opaque,
         child: Container(
           height: 32.0 * widget.zoomScale,
-          color: _isHovered && widget.item.enabled
-              ? widget.colorScheme.interactive.list.itemBackground.hover
-              : Colors.transparent,
+          color:
+              _isHovered && widget.item.enabled
+                  ? widget.colorScheme.interactive.list.itemBackground.hover
+                  : Colors.transparent,
           padding: EdgeInsets.symmetric(
             horizontal: 12.0 * widget.zoomScale,
             vertical: 8.0 * widget.zoomScale,
@@ -455,11 +457,12 @@ class _AppPopupMenuItemWidgetState<T>
                 Icon(
                   widget.item.icon,
                   size: 16.0 * widget.zoomScale,
-                  color: widget.item.enabled
-                      ? widget.colorScheme.base.foreground
-                      : widget.colorScheme.base.foreground.withValues(
-                          alpha: 0.5,
-                        ),
+                  color:
+                      widget.item.enabled
+                          ? widget.colorScheme.base.foreground
+                          : widget.colorScheme.base.foreground.withValues(
+                            alpha: 0.5,
+                          ),
                 ),
                 SizedBox(width: 8.0 * widget.zoomScale),
               ],
@@ -468,11 +471,12 @@ class _AppPopupMenuItemWidgetState<T>
                   widget.item.title,
                   style: TextStyle(
                     fontSize: 14.0 * widget.zoomScale,
-                    color: widget.item.enabled
-                        ? widget.colorScheme.base.foreground
-                        : widget.colorScheme.base.foreground.withValues(
-                            alpha: 0.5,
-                          ),
+                    color:
+                        widget.item.enabled
+                            ? widget.colorScheme.base.foreground
+                            : widget.colorScheme.base.foreground.withValues(
+                              alpha: 0.5,
+                            ),
                   ),
                 ),
               ),

@@ -73,24 +73,26 @@ class _FondeContextMenuState extends ConsumerState<FondeContextMenu> {
 
     return MenuAnchor(
       builder: widget.builder,
-      menuChildren: widget.items.map((item) {
-        if (item is FondeContextMenuDivider) {
-          return const Divider(height: 1);
-        }
-        return MenuItemButton(
-          onPressed: item.enabled ? item.onPressed : null,
-          child: Text(
-            item.label,
-            style: TextStyle(
-              color: item.isDangerous
-                  ? appColorScheme.status.error
-                  : item.enabled
-                  ? null
-                  : appColorScheme.uiAreas.sideBar.inactiveItemText,
-            ),
-          ),
-        );
-      }).toList(),
+      menuChildren:
+          widget.items.map((item) {
+            if (item is FondeContextMenuDivider) {
+              return const Divider(height: 1);
+            }
+            return MenuItemButton(
+              onPressed: item.enabled ? item.onPressed : null,
+              child: Text(
+                item.label,
+                style: TextStyle(
+                  color:
+                      item.isDangerous
+                          ? appColorScheme.status.error
+                          : item.enabled
+                          ? null
+                          : appColorScheme.uiAreas.sideBar.inactiveItemText,
+                ),
+              ),
+            );
+          }).toList(),
     );
   }
 }

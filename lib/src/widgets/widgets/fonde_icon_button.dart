@@ -168,16 +168,16 @@ class _FondeIconButtonState extends ConsumerState<FondeIconButton> {
     final accessibilityConfig = ref.watch(fondeAccessibilityConfigProvider);
     final zoomScale = accessibilityConfig.zoomScale;
 
-    final effectiveIconSize = widget.iconSize != null
-        ? widget.iconSize! * zoomScale
-        : null;
+    final effectiveIconSize =
+        widget.iconSize != null ? widget.iconSize! * zoomScale : null;
     final effectiveCornerRadius =
         widget.cornerRadius ?? FondeBorderRadiusValues.medium;
 
-    final effectiveIconColor = widget.enabled
-        ? (widget.iconColor ?? appColorScheme.base.foreground)
-        : (widget.disabledColor ??
-              appColorScheme.interactive.button.border.disabled);
+    final effectiveIconColor =
+        widget.enabled
+            ? (widget.iconColor ?? appColorScheme.base.foreground)
+            : (widget.disabledColor ??
+                appColorScheme.interactive.button.border.disabled);
 
     Color effectiveBackgroundColor;
     if (!widget.enabled) {
@@ -226,19 +226,20 @@ class _FondeIconButtonState extends ConsumerState<FondeIconButton> {
     return FondeGestureDetector(
       behavior: HitTestBehavior.opaque,
       cursor: widget.enabled ? SystemMouseCursors.click : MouseCursor.defer,
-      onTapDown: widget.enabled
-          ? (_) => setState(() => _isPressed = true)
-          : null,
-      onTapUp: widget.enabled
-          ? (_) {
-              setState(() => _isPressed = false);
-              widget.onPressed?.call();
-            }
-          : null,
+      onTapDown:
+          widget.enabled ? (_) => setState(() => _isPressed = true) : null,
+      onTapUp:
+          widget.enabled
+              ? (_) {
+                setState(() => _isPressed = false);
+                widget.onPressed?.call();
+              }
+              : null,
       onTap: null,
-      onHover: widget.enabled
-          ? (hovered) => setState(() => _isHovered = hovered)
-          : null,
+      onHover:
+          widget.enabled
+              ? (hovered) => setState(() => _isHovered = hovered)
+              : null,
       child: content,
     );
   }

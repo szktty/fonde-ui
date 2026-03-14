@@ -61,15 +61,16 @@ class FondeButtonGroup extends ConsumerWidget {
           width: 1.0 * borderScale,
         ),
       ),
-      child: direction == Axis.horizontal
-          ? Row(
-              mainAxisSize: MainAxisSize.min,
-              children: _addSpacingBetweenChildren(spacing * zoomScale),
-            )
-          : Column(
-              mainAxisSize: MainAxisSize.min,
-              children: _addSpacingBetweenChildren(spacing * zoomScale),
-            ),
+      child:
+          direction == Axis.horizontal
+              ? Row(
+                mainAxisSize: MainAxisSize.min,
+                children: _addSpacingBetweenChildren(spacing * zoomScale),
+              )
+              : Column(
+                mainAxisSize: MainAxisSize.min,
+                children: _addSpacingBetweenChildren(spacing * zoomScale),
+              ),
     );
   }
 
@@ -142,9 +143,10 @@ class _FondeButtonGroupItemState extends ConsumerState<FondeButtonGroupItem> {
     final appColorScheme = ref.watch(fondeColorSchemeProvider);
     final rectangleBorder = ref.watch(fondeRectangleBorderProvider);
 
-    final contentColor = widget.isSelected
-        ? appColorScheme.theme.primaryColor
-        : appColorScheme.uiAreas.sideBar.inactiveItemText;
+    final contentColor =
+        widget.isSelected
+            ? appColorScheme.theme.primaryColor
+            : appColorScheme.uiAreas.sideBar.inactiveItemText;
 
     Color backgroundColor;
     if (_isPressed) {
