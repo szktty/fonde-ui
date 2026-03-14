@@ -45,7 +45,7 @@ class CatalogShell extends ConsumerStatefulWidget {
 
 class _CatalogShellState extends ConsumerState<CatalogShell> {
   String? _selectedItemId;
-  List<String> _expandedGroupIds = ['layout'];
+  List<String> _expandedGroupIds = catalogCategories.map((c) => c.id).toList();
   int _launchBarIndex = 0;
 
   Widget _buildContent() {
@@ -844,50 +844,114 @@ class _NavigationSample extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final colorScheme = ref.watch(fondeEffectiveColorSchemeProvider);
-    return Container(
-      decoration: BoxDecoration(
-        color: colorScheme.uiAreas.sideBar.background,
-        borderRadius: FondeBorderRadiusValues.smallRadius,
-      ),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
+    return ClipRRect(
+      borderRadius: FondeBorderRadiusValues.smallRadius,
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          for (final (icon, label, selected) in [
-            (LucideIcons.inbox, 'Inbox', true),
-            (LucideIcons.send, 'Sent', false),
-            (LucideIcons.archive, 'Archive', false),
-          ])
-            Container(
-              color:
-                  selected
-                      ? colorScheme.uiAreas.sideBar.activeItemBackground
-                      : null,
-              padding: const EdgeInsets.symmetric(
-                horizontal: FondeSpacingValues.md,
-                vertical: 5,
-              ),
-              child: Row(
-                children: [
-                  Icon(
-                    icon,
+          // Launch Bar
+          Container(
+            width: 28,
+            color: colorScheme.uiAreas.launchBar.background,
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Column(
+                  children: [
+                    for (final (icon, active) in [
+                      (LucideIcons.layoutGrid, true),
+                      (LucideIcons.search, false),
+                      (LucideIcons.gitBranch, false),
+                    ])
+                      Container(
+                        width: 28,
+                        height: 28,
+                        color:
+                            active
+                                ? colorScheme
+                                    .uiAreas
+                                    .launchBar
+                                    .activeItemBackground
+                                : null,
+                        child: Icon(
+                          icon,
+                          size: 13,
+                          color:
+                              active
+                                  ? colorScheme.uiAreas.launchBar.activeItem
+                                  : colorScheme.uiAreas.launchBar.inactiveItem,
+                        ),
+                      ),
+                  ],
+                ),
+                Container(
+                  width: 28,
+                  height: 28,
+                  child: Icon(
+                    LucideIcons.settings2,
                     size: 13,
-                    color:
-                        selected
-                            ? colorScheme.uiAreas.sideBar.activeItemText
-                            : colorScheme.uiAreas.sideBar.inactiveItemText,
+                    color: colorScheme.uiAreas.launchBar.inactiveItem,
                   ),
-                  const SizedBox(width: FondeSpacingValues.sm),
-                  FondeText(
-                    label,
-                    variant: FondeTextVariant.captionText,
-                    color:
-                        selected
-                            ? colorScheme.uiAreas.sideBar.activeItemText
-                            : colorScheme.uiAreas.sideBar.inactiveItemText,
-                  ),
+                ),
+              ],
+            ),
+          ),
+          // Vertical divider
+          Container(width: 1, color: colorScheme.uiAreas.sideBar.divider),
+          // Sidebar list
+          Expanded(
+            child: Container(
+              color: colorScheme.uiAreas.sideBar.background,
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  for (final (icon, label, selected) in [
+                    (LucideIcons.inbox, 'Inbox', true),
+                    (LucideIcons.send, 'Sent', false),
+                    (LucideIcons.archive, 'Archive', false),
+                    (LucideIcons.trash2, 'Trash', false),
+                  ])
+                    Container(
+                      color:
+                          selected
+                              ? colorScheme.uiAreas.sideBar.activeItemBackground
+                              : null,
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: FondeSpacingValues.sm,
+                        vertical: 5,
+                      ),
+                      child: Row(
+                        children: [
+                          Icon(
+                            icon,
+                            size: 12,
+                            color:
+                                selected
+                                    ? colorScheme.uiAreas.sideBar.activeItemText
+                                    : colorScheme
+                                        .uiAreas
+                                        .sideBar
+                                        .inactiveItemText,
+                          ),
+                          const SizedBox(width: FondeSpacingValues.xs),
+                          FondeText(
+                            label,
+                            variant: FondeTextVariant.captionText,
+                            color:
+                                selected
+                                    ? colorScheme.uiAreas.sideBar.activeItemText
+                                    : colorScheme
+                                        .uiAreas
+                                        .sideBar
+                                        .inactiveItemText,
+                          ),
+                        ],
+                      ),
+                    ),
                 ],
               ),
             ),
+          ),
         ],
       ),
     );
