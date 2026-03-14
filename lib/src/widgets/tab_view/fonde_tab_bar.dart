@@ -90,17 +90,15 @@ class FondeTabBar extends ConsumerWidget {
       return Tab(
         height: height * zoomScale,
         child: Container(
-          constraints:
-              tab.label != null
-                  ? BoxConstraints(
-                    minWidth: 120.0 * zoomScale,
-                    maxWidth: double.infinity,
-                  )
-                  : null, // No constraint if only an icon
-          padding:
-              tab.label != null
-                  ? EdgeInsets.symmetric(horizontal: 8.0 * zoomScale)
-                  : null,
+          constraints: tab.label != null
+              ? BoxConstraints(
+                  minWidth: 120.0 * zoomScale,
+                  maxWidth: double.infinity,
+                )
+              : null, // No constraint if only an icon
+          padding: tab.label != null
+              ? EdgeInsets.symmetric(horizontal: 8.0 * zoomScale)
+              : null,
           child: Row(
             mainAxisSize: MainAxisSize.min,
             mainAxisAlignment: MainAxisAlignment.center,
@@ -110,10 +108,9 @@ class FondeTabBar extends ConsumerWidget {
                 Icon(
                   tab.icon!,
                   size: 24.0 * zoomScale,
-                  color:
-                      isSelected
-                          ? appColorScheme.theme.primaryColor
-                          : appColorScheme.base.foreground,
+                  color: isSelected
+                      ? appColorScheme.theme.primaryColor
+                      : appColorScheme.base.foreground,
                 ),
                 if (tab.label != null) SizedBox(width: 6.0 * zoomScale),
               ],

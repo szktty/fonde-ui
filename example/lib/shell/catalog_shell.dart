@@ -623,388 +623,569 @@ class _LaunchBarPlaceholder extends ConsumerWidget {
   }
 }
 
-class _WelcomePage extends StatefulWidget {
+class _WelcomePage extends ConsumerWidget {
   const _WelcomePage();
 
   @override
-  State<_WelcomePage> createState() => _WelcomePageState();
-}
-
-class _WelcomePageState extends State<_WelcomePage> {
-  Set<String> _segmentSelected = {'week'};
-  bool _checkbox1 = true;
-  bool _checkbox2 = false;
-  String? _outlineSelected = 'home';
-  Set<String> _outlineExpanded = {'root', 'lib', 'pages'};
-
-  @override
-  Widget build(BuildContext context) {
-    return Consumer(
-      builder: (context, ref, _) {
-        final colorScheme = ref.watch(fondeEffectiveColorSchemeProvider);
-        return _buildContent(colorScheme);
-      },
-    );
-  }
-
-  Widget _buildContent(FondeColorScheme colorScheme) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final colorScheme = ref.watch(fondeEffectiveColorSchemeProvider);
     return SingleChildScrollView(
       padding: const EdgeInsets.symmetric(
-        horizontal: FondeSpacingValues.xxxl + 16,
-        vertical: FondeSpacingValues.xxxl + 8,
+        horizontal: FondeSpacingValues.xxxl,
+        vertical: FondeSpacingValues.xxxl,
       ),
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           // Header
-          const FondeText(
-            'Welcome to Fonde UI',
-            variant: FondeTextVariant.pageTitle,
-          ),
+          const FondeText('Fonde UI', variant: FondeTextVariant.pageTitle),
           const FondeSpacing.sm(),
           FondeText(
-            'Desktop-first UI components for Flutter',
+            'Desktop-first Flutter UI optimized for native-grade instant feedback, with accessibility built in.',
             variant: FondeTextVariant.bodyText,
             color: colorScheme.base.foreground.withValues(alpha: 0.55),
           ),
           const FondeSpacing(height: FondeSpacingValues.xxxl + 8),
 
-          // Preview grid
-          Wrap(
-            spacing: 20,
-            runSpacing: 20,
-            children: [
-              _PreviewCard(
-                title: 'Buttons',
-                child: Wrap(
-                  spacing: 8,
-                  runSpacing: 8,
-                  children: [
-                    FondeButton.primary(label: 'Primary', onPressed: () {}),
-                    FondeButton.normal(label: 'Normal', onPressed: () {}),
-                    FondeButton.cancel(label: 'Cancel', onPressed: () {}),
-                    FondeButton.destructive(label: 'Delete', onPressed: () {}),
-                    FondeSegmentedButton<String>(
-                      selected: _segmentSelected,
-                      onSelectionChanged:
-                          (v) => setState(() => _segmentSelected = v),
-                      segments: const [
-                        ButtonSegment(value: 'day', label: Text('Day')),
-                        ButtonSegment(value: 'week', label: Text('Week')),
-                        ButtonSegment(value: 'month', label: Text('Month')),
-                      ],
-                    ),
-                    FondeButtonGroup(
-                      children: [
-                        FondeButtonGroupItem(
-                          icon: LucideIcons.bold,
-                          onPressed: () {},
-                          isSelected: true,
-                        ),
-                        FondeButtonGroupItem(
-                          icon: LucideIcons.italic,
-                          onPressed: () {},
-                        ),
-                        FondeButtonGroupItem(
-                          icon: LucideIcons.underline,
-                          onPressed: () {},
-                        ),
-                      ],
-                    ),
-                  ],
+          // Component grid (2 columns)
+          LayoutBuilder(
+            builder: (context, constraints) {
+              const spacing = 16.0;
+              final cardWidth = (constraints.maxWidth - spacing) / 2;
+              final cards = [
+                _CatalogCard(
+                  width: cardWidth,
+                  category: 'Buttons',
+                  description: 'Button, Icon Button, Segmented, Split, Group',
+                  sample: const _ButtonsSample(),
                 ),
-              ),
-              _PreviewCard(
-                title: 'Input',
-                child: SizedBox(
-                  width: 260,
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const FondeTextField(hintText: 'Text field'),
-                      const SizedBox(height: 10),
-                      FondeSearchField(
-                        hint: 'Search...',
-                        suggestions: const ['Apple', 'Banana', 'Cherry'],
+                _CatalogCard(
+                  width: cardWidth,
+                  category: 'Input',
+                  description: 'Text Field, Search, Tags, Checkbox, Dropdown',
+                  sample: const _InputSample(),
+                ),
+                _CatalogCard(
+                  width: cardWidth,
+                  category: 'Menus',
+                  description: 'Context Menu, Overflow Menu, Popup Menu',
+                  sample: const _MenusSample(),
+                ),
+                _CatalogCard(
+                  width: cardWidth,
+                  category: 'Navigation',
+                  description: 'Launch Bar, Sidebar List, Groups',
+                  sample: const _NavigationSample(),
+                ),
+                _CatalogCard(
+                  width: cardWidth,
+                  category: 'Layout',
+                  description: 'Tab View, Panel, Scaffold, Sidebar',
+                  sample: const _LayoutSample(),
+                ),
+                _CatalogCard(
+                  width: cardWidth,
+                  category: 'Data View',
+                  description: 'Table View, Outline View, List Tile',
+                  sample: const _DataViewSample(),
+                ),
+                _CatalogCard(
+                  width: cardWidth,
+                  category: 'Feedback',
+                  description: 'Dialog, Toast, Popover, Progress Indicator',
+                  sample: const _FeedbackSample(),
+                ),
+                _CatalogCard(
+                  width: cardWidth,
+                  category: 'Typography',
+                  description: 'Text variants, font scale, color scope',
+                  sample: const _TypographySample(),
+                ),
+              ];
+              return Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  for (var i = 0; i < cards.length; i += 2)
+                    Padding(
+                      padding: EdgeInsets.only(
+                        bottom: i + 2 < cards.length ? spacing : 0,
                       ),
-                      const SizedBox(height: 10),
-                      FondeTagsField(
-                        initialTags: const ['Flutter', 'Dart'],
-                        hintText: 'Add tag...',
-                        onTagsChanged: (_) {},
-                      ),
-                      const SizedBox(height: 10),
-                      Row(
+                      child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          FondeCheckbox(
-                            value: _checkbox1,
-                            onChanged:
-                                (v) => setState(() => _checkbox1 = v ?? false),
-                          ),
-                          const SizedBox(width: 8),
-                          const Text('Option A'),
-                          const SizedBox(width: 16),
-                          FondeCheckbox(
-                            value: _checkbox2,
-                            onChanged:
-                                (v) => setState(() => _checkbox2 = v ?? false),
-                          ),
-                          const SizedBox(width: 8),
-                          const Text('Option B'),
+                          cards[i],
+                          const SizedBox(width: spacing),
+                          if (i + 1 < cards.length) cards[i + 1],
                         ],
                       ),
-                    ],
-                  ),
-                ),
-              ),
-              _PreviewCard(
-                title: 'Layout',
-                child: SizedBox(
-                  width: 300,
-                  height: 220,
-                  child: FondeTabView(
-                    tabs: const [
-                      FondeTab(
-                        id: 'files',
-                        label: 'Files',
-                        icon: LucideIcons.folder,
-                      ),
-                      FondeTab(
-                        id: 'search',
-                        label: 'Search',
-                        icon: LucideIcons.search,
-                      ),
-                      FondeTab(
-                        id: 'settings',
-                        label: 'Settings',
-                        icon: LucideIcons.settings,
-                      ),
-                    ],
-                    contents: [
-                      FondeTabContent(
-                        id: 'files',
-                        content: FondeOutlineView<_WelcomeNode>(
-                          items: _welcomeNodes,
-                          selectedItem:
-                              _outlineSelected != null
-                                  ? _findWelcomeNode(_outlineSelected!)
-                                  : null,
-                          expandedItems: Set.of(
-                            _allWelcomeNodes.where(
-                              (n) => _outlineExpanded.contains(n.id),
-                            ),
-                          ),
-                          onItemTap:
-                              (n) => setState(() => _outlineSelected = n.id),
-                          onExpansionChanged:
-                              (n) => setState(() {
-                                if (_outlineExpanded.contains(n.id)) {
-                                  _outlineExpanded =
-                                      _outlineExpanded
-                                          .where((id) => id != n.id)
-                                          .toSet();
-                                } else {
-                                  _outlineExpanded = {
-                                    ..._outlineExpanded,
-                                    n.id,
-                                  };
-                                }
-                              }),
-                          itemBuilder:
-                              (n, isSelected, isExpanded, hasChildren, depth) =>
-                                  FondeOutlineItem(
-                                    title: Text(n.label),
-                                    isSelected: isSelected,
-                                    isExpanded: isExpanded,
-                                    hasChildren: hasChildren,
-                                    depth: depth,
-                                    leading: Icon(
-                                      hasChildren
-                                          ? LucideIcons.folder
-                                          : LucideIcons.file,
-                                      size: 14,
-                                    ),
-                                  ),
-                          childrenBuilder: (n) => n.children,
-                        ),
-                      ),
-                      FondeTabContent(
-                        id: 'search',
-                        content: const Center(
-                          child: FondeText(
-                            'Search',
-                            variant: FondeTextVariant.bodyText,
-                          ),
-                        ),
-                      ),
-                      FondeTabContent(
-                        id: 'settings',
-                        content: const Center(
-                          child: FondeText(
-                            'Settings',
-                            variant: FondeTextVariant.bodyText,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-              _PreviewCard(
-                title: 'Decoration',
-                child: SizedBox(
-                  width: 260,
-                  child: Column(
-                    children: [
-                      FondeListTile(
-                        leading: const Icon(LucideIcons.inbox, size: 16),
-                        title: const FondeText(
-                          'Inbox',
-                          variant: FondeTextVariant.bodyText,
-                        ),
-                        isSelected: true,
-                        onTap: () {},
-                      ),
-                      FondeListTile(
-                        leading: const Icon(LucideIcons.send, size: 16),
-                        title: const FondeText(
-                          'Sent',
-                          variant: FondeTextVariant.bodyText,
-                        ),
-                        isSelected: false,
-                        onTap: () {},
-                      ),
-                      FondeListTile(
-                        leading: const Icon(LucideIcons.archive, size: 16),
-                        title: const FondeText(
-                          'Archive',
-                          variant: FondeTextVariant.bodyText,
-                        ),
-                        subtitle: const FondeText(
-                          '42 items',
-                          variant: FondeTextVariant.captionText,
-                        ),
-                        isSelected: false,
-                        onTap: () {},
-                      ),
-                      const FondeSpacing.md(),
-                      FondePanel(
-                        header: FondePadding.symmetric(
-                          horizontal: FondeSpacingValues.md,
-                          vertical: FondeSpacingValues.sm,
-                          child: const FondeText(
-                            'Panel',
-                            variant: FondeTextVariant.sectionTitleSecondary,
-                          ),
-                        ),
-                        content: FondePadding(
-                          padding: const EdgeInsets.fromLTRB(
-                            FondeSpacingValues.md,
-                            FondeSpacingValues.xs,
-                            FondeSpacingValues.md,
-                            FondeSpacingValues.md,
-                          ),
-                          child: const FondeText(
-                            'Header · Content · Footer structure',
-                            variant: FondeTextVariant.bodyText,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            ],
+                    ),
+                ],
+              );
+            },
           ),
         ],
       ),
     );
   }
+}
 
-  _WelcomeNode? _findWelcomeNode(String id) {
-    for (final n in _allWelcomeNodes) {
-      if (n.id == id) return n;
-    }
-    return null;
+const _kCardSampleHeight = 140.0;
+
+class _CatalogCard extends ConsumerWidget {
+  const _CatalogCard({
+    required this.width,
+    required this.category,
+    required this.description,
+    required this.sample,
+  });
+
+  final double width;
+  final String category;
+  final String description;
+  final Widget sample;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final colorScheme = ref.watch(fondeEffectiveColorSchemeProvider);
+    return Container(
+      width: width,
+      decoration: BoxDecoration(
+        border: Border.all(color: colorScheme.base.border),
+        borderRadius: FondeBorderRadiusValues.mediumRadius,
+        color: colorScheme.base.background,
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Sample area
+          ClipRRect(
+            borderRadius: const BorderRadius.vertical(
+              top: Radius.circular(FondeBorderRadiusValues.medium),
+            ),
+            child: SizedBox(
+              width: width,
+              height: _kCardSampleHeight,
+              child: ColoredBox(
+                color: colorScheme.base.background,
+                child: Padding(
+                  padding: const EdgeInsets.all(FondeSpacingValues.md),
+                  child: sample,
+                ),
+              ),
+            ),
+          ),
+          Container(height: 1, color: colorScheme.base.border),
+          // Category name + description
+          Padding(
+            padding: const EdgeInsets.all(FondeSpacingValues.md),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                FondeText(
+                  category,
+                  variant: FondeTextVariant.sectionTitleSecondary,
+                ),
+                const FondeSpacing.xs(),
+                FondeText(
+                  description,
+                  variant: FondeTextVariant.smallText,
+                  color: colorScheme.base.foreground.withValues(alpha: 0.55),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
   }
 }
 
-class _PreviewCard extends ConsumerWidget {
-  const _PreviewCard({required this.title, required this.child});
+// --- Static sample widgets ---
 
-  final String title;
-  final Widget child;
+class _ButtonsSample extends ConsumerWidget {
+  const _ButtonsSample();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    return Wrap(
+      spacing: FondeSpacingValues.sm,
+      runSpacing: FondeSpacingValues.sm,
+      children: [
+        FondeButton.primary(label: 'Primary', onPressed: () {}),
+        FondeButton.normal(label: 'Normal', onPressed: () {}),
+        FondeButton.destructive(label: 'Delete', onPressed: () {}),
+        FondeButtonGroup(
+          children: [
+            FondeButtonGroupItem(
+              icon: LucideIcons.bold,
+              onPressed: () {},
+              isSelected: true,
+            ),
+            FondeButtonGroupItem(icon: LucideIcons.italic, onPressed: () {}),
+            FondeButtonGroupItem(icon: LucideIcons.underline, onPressed: () {}),
+          ],
+        ),
+      ],
+    );
+  }
+}
+
+class _InputSample extends ConsumerWidget {
+  const _InputSample();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        const FondeTextField(hintText: 'Text field'),
+        const FondeSpacing.sm(),
+        const FondeSearchField(hint: 'Search...'),
+        const FondeSpacing.sm(),
+        Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const FondeCheckbox(value: true, onChanged: null),
+            const SizedBox(width: FondeSpacingValues.sm),
+            const FondeText('Option A', variant: FondeTextVariant.captionText),
+            const SizedBox(width: FondeSpacingValues.md),
+            const FondeCheckbox(value: false, onChanged: null),
+            const SizedBox(width: FondeSpacingValues.sm),
+            const FondeText('Option B', variant: FondeTextVariant.captionText),
+          ],
+        ),
+      ],
+    );
+  }
+}
+
+class _MenusSample extends ConsumerWidget {
+  const _MenusSample();
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final colorScheme = ref.watch(fondeEffectiveColorSchemeProvider);
     return Container(
       decoration: BoxDecoration(
-        border: Border.all(color: colorScheme.base.divider),
-        borderRadius: FondeBorderRadiusValues.mediumRadius,
+        border: Border.all(color: colorScheme.base.border),
+        borderRadius: FondeBorderRadiusValues.smallRadius,
+        color: colorScheme.uiAreas.dialog.background,
       ),
-      child: ConstrainedBox(
-        constraints: const BoxConstraints(minWidth: 260),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            FondePadding(
-              padding: const EdgeInsets.fromLTRB(
-                FondeSpacingValues.lg,
-                FondeSpacingValues.md,
-                FondeSpacingValues.lg,
-                FondeSpacingValues.sm,
-              ),
-              child: FondeText(
-                title,
-                variant: FondeTextVariant.sectionTitleSecondary,
-                color: colorScheme.base.foreground.withValues(alpha: 0.55),
-              ),
-            ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          for (final (icon, label, selected) in [
+            (LucideIcons.filePlus, 'New File', false),
+            (LucideIcons.pencil, 'Rename', true),
+            (LucideIcons.trash2, 'Delete', false),
+          ])
             Container(
-              height: 1,
-              width: double.infinity,
-              color: colorScheme.base.divider,
+              color:
+                  selected
+                      ? colorScheme.interactive.list.selectedBackground
+                      : null,
+              padding: const EdgeInsets.symmetric(
+                horizontal: FondeSpacingValues.md,
+                vertical: 6,
+              ),
+              child: Row(
+                children: [
+                  Icon(icon, size: 14),
+                  const SizedBox(width: FondeSpacingValues.sm),
+                  FondeText(label, variant: FondeTextVariant.bodyText),
+                ],
+              ),
             ),
-            FondePadding.all(FondeSpacingValues.lg, child: child),
-          ],
-        ),
+        ],
       ),
     );
   }
 }
 
-class _WelcomeNode {
-  const _WelcomeNode(this.id, this.label, [this.children = const []]);
-  final String id;
-  final String label;
-  final List<_WelcomeNode> children;
+class _NavigationSample extends ConsumerWidget {
+  const _NavigationSample();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final colorScheme = ref.watch(fondeEffectiveColorSchemeProvider);
+    return Container(
+      decoration: BoxDecoration(
+        color: colorScheme.uiAreas.sideBar.background,
+        borderRadius: FondeBorderRadiusValues.smallRadius,
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          for (final (icon, label, selected) in [
+            (LucideIcons.inbox, 'Inbox', true),
+            (LucideIcons.send, 'Sent', false),
+            (LucideIcons.archive, 'Archive', false),
+          ])
+            Container(
+              color:
+                  selected
+                      ? colorScheme.uiAreas.sideBar.activeItemBackground
+                      : null,
+              padding: const EdgeInsets.symmetric(
+                horizontal: FondeSpacingValues.md,
+                vertical: 5,
+              ),
+              child: Row(
+                children: [
+                  Icon(
+                    icon,
+                    size: 13,
+                    color:
+                        selected
+                            ? colorScheme.uiAreas.sideBar.activeItemText
+                            : colorScheme.uiAreas.sideBar.inactiveItemText,
+                  ),
+                  const SizedBox(width: FondeSpacingValues.sm),
+                  FondeText(
+                    label,
+                    variant: FondeTextVariant.captionText,
+                    color:
+                        selected
+                            ? colorScheme.uiAreas.sideBar.activeItemText
+                            : colorScheme.uiAreas.sideBar.inactiveItemText,
+                  ),
+                ],
+              ),
+            ),
+        ],
+      ),
+    );
+  }
 }
 
-const _welcomeNodes = [
-  _WelcomeNode('root', 'my_app', [
-    _WelcomeNode('lib', 'lib', [
-      _WelcomeNode('main', 'main.dart'),
-      _WelcomeNode('pages', 'pages', [
-        _WelcomeNode('home', 'home_page.dart'),
-        _WelcomeNode('settings', 'settings_page.dart'),
-      ]),
-    ]),
-    _WelcomeNode('pubspec', 'pubspec.yaml'),
-  ]),
-];
+class _LayoutSample extends ConsumerWidget {
+  const _LayoutSample();
 
-List<_WelcomeNode> get _allWelcomeNodes {
-  final result = <_WelcomeNode>[];
-  void collect(_WelcomeNode n) {
-    result.add(n);
-    for (final c in n.children) {
-      collect(c);
-    }
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final colorScheme = ref.watch(fondeEffectiveColorSchemeProvider);
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        // Tab bar mockup
+        Container(
+          decoration: BoxDecoration(
+            border: Border(bottom: BorderSide(color: colorScheme.base.border)),
+          ),
+          child: Row(
+            children: [
+              for (final (label, selected) in [
+                ('Files', true),
+                ('Search', false),
+                ('Git', false),
+              ])
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: FondeSpacingValues.sm,
+                    vertical: 6,
+                  ),
+                  decoration: BoxDecoration(
+                    border: Border(
+                      bottom: BorderSide(
+                        color:
+                            selected
+                                ? colorScheme.theme.primaryColor
+                                : Colors.transparent,
+                        width: 2,
+                      ),
+                    ),
+                  ),
+                  child: FondeText(
+                    label,
+                    variant: FondeTextVariant.captionText,
+                    color:
+                        selected
+                            ? colorScheme.base.foreground
+                            : colorScheme.base.foreground.withValues(
+                              alpha: 0.5,
+                            ),
+                  ),
+                ),
+            ],
+          ),
+        ),
+        const FondeSpacing.sm(),
+        // Panel mockup
+        FondePanel(
+          header: FondePadding.symmetric(
+            horizontal: FondeSpacingValues.md,
+            vertical: FondeSpacingValues.xs,
+            child: const FondeText(
+              'Details',
+              variant: FondeTextVariant.sectionTitleSecondary,
+            ),
+          ),
+          content: FondePadding.symmetric(
+            horizontal: FondeSpacingValues.md,
+            vertical: FondeSpacingValues.xs,
+            child: FondeText(
+              'Resizable panels',
+              variant: FondeTextVariant.captionText,
+              color: colorScheme.base.foreground.withValues(alpha: 0.55),
+            ),
+          ),
+        ),
+      ],
+    );
   }
+}
 
-  for (final n in _welcomeNodes) {
-    collect(n);
+class _DataViewSample extends ConsumerWidget {
+  const _DataViewSample();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final colorScheme = ref.watch(fondeEffectiveColorSchemeProvider);
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        // Table header
+        Container(
+          color: colorScheme.base.background,
+          padding: const EdgeInsets.symmetric(
+            horizontal: FondeSpacingValues.sm,
+            vertical: 5,
+          ),
+          child: Row(
+            children: [
+              for (final label in ['Name', 'Type', 'Size'])
+                Expanded(
+                  child: FondeText(
+                    label,
+                    variant: FondeTextVariant.captionText,
+                    color: colorScheme.base.foreground.withValues(alpha: 0.55),
+                  ),
+                ),
+            ],
+          ),
+        ),
+        Container(height: 1, color: colorScheme.base.border),
+        for (final (name, type, size, selected) in [
+          ('main.dart', 'Dart', '4 KB', true),
+          ('pubspec.yaml', 'YAML', '1 KB', false),
+        ])
+          Container(
+            color:
+                selected
+                    ? colorScheme.interactive.list.selectedBackground
+                    : null,
+            padding: const EdgeInsets.symmetric(
+              horizontal: FondeSpacingValues.sm,
+              vertical: 5,
+            ),
+            child: Row(
+              children: [
+                Expanded(
+                  child: FondeText(name, variant: FondeTextVariant.captionText),
+                ),
+                Expanded(
+                  child: FondeText(
+                    type,
+                    variant: FondeTextVariant.captionText,
+                    color: colorScheme.base.foreground.withValues(alpha: 0.6),
+                  ),
+                ),
+                Expanded(
+                  child: FondeText(
+                    size,
+                    variant: FondeTextVariant.captionText,
+                    color: colorScheme.base.foreground.withValues(alpha: 0.6),
+                  ),
+                ),
+              ],
+            ),
+          ),
+      ],
+    );
   }
-  return result;
+}
+
+class _FeedbackSample extends ConsumerWidget {
+  const _FeedbackSample();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final colorScheme = ref.watch(fondeEffectiveColorSchemeProvider);
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        // Dialog mockup
+        Container(
+          decoration: BoxDecoration(
+            color: colorScheme.uiAreas.dialog.background,
+            border: Border.all(color: colorScheme.base.border),
+            borderRadius: FondeBorderRadiusValues.mediumRadius,
+          ),
+          padding: const EdgeInsets.symmetric(
+            horizontal: FondeSpacingValues.md,
+            vertical: FondeSpacingValues.sm,
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const FondeText('Confirm', variant: FondeTextVariant.itemTitle),
+              const FondeSpacing.xs(),
+              FondeText(
+                'Are you sure?',
+                variant: FondeTextVariant.captionText,
+                color: colorScheme.base.foreground.withValues(alpha: 0.6),
+              ),
+              const FondeSpacing.xs(),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  FondeButton.cancel(label: 'Cancel', onPressed: () {}),
+                  const SizedBox(width: FondeSpacingValues.xs),
+                  FondeButton.primary(label: 'OK', onPressed: () {}),
+                ],
+              ),
+            ],
+          ),
+        ),
+        const FondeSpacing.sm(),
+        // Progress bar
+        const FondeLinearProgressIndicator(value: 0.65),
+      ],
+    );
+  }
+}
+
+class _TypographySample extends ConsumerWidget {
+  const _TypographySample();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final colorScheme = ref.watch(fondeEffectiveColorSchemeProvider);
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        const FondeText('Page Title', variant: FondeTextVariant.pageTitle),
+        const FondeText(
+          'Section Title',
+          variant: FondeTextVariant.sectionTitleSecondary,
+        ),
+        const FondeText('Body text', variant: FondeTextVariant.bodyText),
+        FondeText(
+          'Caption text',
+          variant: FondeTextVariant.captionText,
+          color: colorScheme.base.foreground.withValues(alpha: 0.55),
+        ),
+        FondeText(
+          'Small text',
+          variant: FondeTextVariant.smallText,
+          color: colorScheme.base.foreground.withValues(alpha: 0.45),
+        ),
+      ],
+    );
+  }
 }

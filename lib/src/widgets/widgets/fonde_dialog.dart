@@ -154,14 +154,16 @@ class FondeDialog extends ConsumerWidget {
     final screenSize = MediaQuery.of(context).size;
 
     // If heightRatio is specified, calculate height based on it
-    final effectiveHeight =
-        heightRatio != null ? screenSize.height * heightRatio! : height;
+    final effectiveHeight = heightRatio != null
+        ? screenSize.height * heightRatio!
+        : height;
 
     // Apply zoom scaling to dimensional values
     final zoomScale = disableZoom ? 1.0 : accessibilityConfig.zoomScale;
     final scaledWidth = width != null ? width! * zoomScale : null;
-    final scaledHeight =
-        effectiveHeight != null ? effectiveHeight * zoomScale : null;
+    final scaledHeight = effectiveHeight != null
+        ? effectiveHeight * zoomScale
+        : null;
     final scaledMaxWidth = maxWidth != null ? maxWidth! * zoomScale : null;
     final scaledMaxHeight = maxHeight != null ? maxHeight! * zoomScale : null;
     final scaledMinWidth = minWidth != null ? minWidth! * zoomScale : null;
@@ -196,40 +198,38 @@ class FondeDialog extends ConsumerWidget {
           children: [
             // Main content area (scrollable if height is specified)
             Flexible(
-              child:
-                  scaledHeight != null
-                      ? ConstrainedBox(
-                        constraints: BoxConstraints(
-                          maxWidth: scaledMaxWidth ?? double.infinity,
-                          maxHeight:
-                              scaledMaxHeight ??
-                              (screenSize.height *
-                                  0.9), // Limit to 90% of screen
-                          minWidth: scaledMinWidth ?? 0.0,
-                          minHeight: scaledMinHeight ?? 0.0,
-                        ),
-                        child: SingleChildScrollView(
-                          child: SizedBox(
-                            width: scaledWidth,
-                            height: scaledHeight,
-                            child: _buildDialogContent(
-                              scaledPadding,
-                              effectiveHeight,
-                            ),
+              child: scaledHeight != null
+                  ? ConstrainedBox(
+                      constraints: BoxConstraints(
+                        maxWidth: scaledMaxWidth ?? double.infinity,
+                        maxHeight:
+                            scaledMaxHeight ??
+                            (screenSize.height * 0.9), // Limit to 90% of screen
+                        minWidth: scaledMinWidth ?? 0.0,
+                        minHeight: scaledMinHeight ?? 0.0,
+                      ),
+                      child: SingleChildScrollView(
+                        child: SizedBox(
+                          width: scaledWidth,
+                          height: scaledHeight,
+                          child: _buildDialogContent(
+                            scaledPadding,
+                            effectiveHeight,
                           ),
                         ),
-                      )
-                      : Container(
-                        width: scaledWidth,
-                        constraints: BoxConstraints(
-                          maxWidth: scaledMaxWidth ?? double.infinity,
-                          minWidth: scaledMinWidth ?? 0.0,
-                        ),
-                        child: _buildDialogContent(
-                          scaledPadding,
-                          effectiveHeight,
-                        ),
                       ),
+                    )
+                  : Container(
+                      width: scaledWidth,
+                      constraints: BoxConstraints(
+                        maxWidth: scaledMaxWidth ?? double.infinity,
+                        minWidth: scaledMinWidth ?? 0.0,
+                      ),
+                      child: _buildDialogContent(
+                        scaledPadding,
+                        effectiveHeight,
+                      ),
+                    ),
             ),
             // Fixed footer area (outside scrollable area)
             if (hasFooter)
@@ -258,32 +258,29 @@ class FondeDialog extends ConsumerWidget {
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
-      mainAxisSize:
-          effectiveHeight != null ? MainAxisSize.max : MainAxisSize.min,
+      mainAxisSize: effectiveHeight != null
+          ? MainAxisSize.max
+          : MainAxisSize.min,
       children: [
         if (hasHeaderContent) ..._buildHeader(),
         if (hasHeaderContent) ..._buildDividerSection(),
         // If height is specified use Expanded, otherwise place directly
         effectiveHeight != null
             ? Expanded(
-              child:
-                  scaledPadding != null
-                      ? FondePadding(
+                child: scaledPadding != null
+                    ? FondePadding(
                         padding: scaledPadding,
                         disableZoom: disableZoom,
                         child: child,
                       )
-                      : FondePadding.xxxl(
-                        disableZoom: disableZoom,
-                        child: child,
-                      ),
-            )
+                    : FondePadding.xxxl(disableZoom: disableZoom, child: child),
+              )
             : scaledPadding != null
             ? FondePadding(
-              padding: scaledPadding,
-              disableZoom: disableZoom,
-              child: child,
-            )
+                padding: scaledPadding,
+                disableZoom: disableZoom,
+                child: child,
+              )
             : FondePadding.xxxl(disableZoom: disableZoom, child: child),
       ],
     );
@@ -444,8 +441,9 @@ Future<T?> showFondeDialog<T>({
   final theme = Theme.of(context);
 
   // Make background transparent if not darkening
-  final effectiveBarrierColor =
-      noDarkBackground ? Colors.transparent : barrierColor;
+  final effectiveBarrierColor = noDarkBackground
+      ? Colors.transparent
+      : barrierColor;
 
   return showDialog<T>(
     context: context,
@@ -457,82 +455,83 @@ Future<T?> showFondeDialog<T>({
     routeSettings: routeSettings,
     anchorPoint: anchorPoint,
     traversalEdgeBehavior: traversalEdgeBehavior,
-    builder:
-        (dialogContext) => Theme(
-          data: theme, // Explicitly pass parent context theme
-          child: Consumer(
-            builder: (context, ref, _) {
-              final accessibilityConfig = ref.watch(
-                fondeAccessibilityConfigProvider,
-              );
-              final zoomScale = accessibilityConfig.zoomScale;
+    builder: (dialogContext) => Theme(
+      data: theme, // Explicitly pass parent context theme
+      child: Consumer(
+        builder: (context, ref, _) {
+          final accessibilityConfig = ref.watch(
+            fondeAccessibilityConfigProvider,
+          );
+          final zoomScale = accessibilityConfig.zoomScale;
 
-              // Get window size using MediaQuery
-              final screenSize = MediaQuery.of(context).size;
+          // Get window size using MediaQuery
+          final screenSize = MediaQuery.of(context).size;
 
-              // If heightRatio is specified, calculate height based on it
-              final effectiveHeight =
-                  heightRatio != null
-                      ? screenSize.height * heightRatio
-                      : height;
+          // If heightRatio is specified, calculate height based on it
+          final effectiveHeight = heightRatio != null
+              ? screenSize.height * heightRatio
+              : height;
 
-              // Apply zoom scaling to dialog function parameters
-              final scaledWidth = width != null ? width * zoomScale : null;
-              final scaledHeight =
-                  effectiveHeight != null ? effectiveHeight * zoomScale : null;
-              final scaledMaxWidth =
-                  maxWidth != null ? maxWidth * zoomScale : null;
-              final scaledMaxHeight =
-                  maxHeight != null ? maxHeight * zoomScale : null;
-              final scaledMinWidth =
-                  minWidth != null ? minWidth * zoomScale : null;
-              final scaledMinHeight =
-                  minHeight != null ? minHeight * zoomScale : null;
-              final scaledElevation = elevation * zoomScale;
-              final scaledCornerRadius =
-                  cornerRadius != null ? cornerRadius * zoomScale : null;
+          // Apply zoom scaling to dialog function parameters
+          final scaledWidth = width != null ? width * zoomScale : null;
+          final scaledHeight = effectiveHeight != null
+              ? effectiveHeight * zoomScale
+              : null;
+          final scaledMaxWidth = maxWidth != null ? maxWidth * zoomScale : null;
+          final scaledMaxHeight = maxHeight != null
+              ? maxHeight * zoomScale
+              : null;
+          final scaledMinWidth = minWidth != null ? minWidth * zoomScale : null;
+          final scaledMinHeight = minHeight != null
+              ? minHeight * zoomScale
+              : null;
+          final scaledElevation = elevation * zoomScale;
+          final scaledCornerRadius = cornerRadius != null
+              ? cornerRadius * zoomScale
+              : null;
 
-              // Scale padding (desktop optimization: default is xxxl=32px)
-              EdgeInsetsGeometry? scaledPadding;
-              // padding has non-null default value so always processed
-              final resolvedPadding = padding!.resolve(TextDirection.ltr);
-              scaledPadding = EdgeInsets.fromLTRB(
-                resolvedPadding.left * zoomScale,
-                resolvedPadding.top * zoomScale,
-                resolvedPadding.right * zoomScale,
-                resolvedPadding.bottom * zoomScale,
-              );
+          // Scale padding (desktop optimization: default is xxxl=32px)
+          EdgeInsetsGeometry? scaledPadding;
+          // padding has non-null default value so always processed
+          final resolvedPadding = padding!.resolve(TextDirection.ltr);
+          scaledPadding = EdgeInsets.fromLTRB(
+            resolvedPadding.left * zoomScale,
+            resolvedPadding.top * zoomScale,
+            resolvedPadding.right * zoomScale,
+            resolvedPadding.bottom * zoomScale,
+          );
 
-              // Build dynamically if builder is specified, otherwise use child
-              final effectiveChild =
-                  builder != null ? builder(context) : dialogChild!;
+          // Build dynamically if builder is specified, otherwise use child
+          final effectiveChild = builder != null
+              ? builder(context)
+              : dialogChild!;
 
-              return FondeDialog(
-                title: title,
-                subtitle: subtitle,
-                footer: footer,
-                width: scaledWidth,
-                height: scaledHeight,
-                heightRatio: heightRatio,
-                maxWidth: scaledMaxWidth,
-                maxHeight: scaledMaxHeight,
-                minWidth: scaledMinWidth,
-                minHeight: scaledMinHeight,
-                padding: scaledPadding,
-                headerBottomSpacing: headerBottomSpacing,
-                dividerHorizontalPadding: dividerHorizontalPadding,
-                elevation: scaledElevation,
-                cornerRadius: scaledCornerRadius,
-                cornerSmoothing: cornerSmoothing,
-                backgroundColor: backgroundColor,
-                showCloseButton: showCloseButton,
-                onClose: onClose,
-                importance: importance,
-                showDivider: showDivider,
-                child: effectiveChild,
-              );
-            },
-          ),
-        ),
+          return FondeDialog(
+            title: title,
+            subtitle: subtitle,
+            footer: footer,
+            width: scaledWidth,
+            height: scaledHeight,
+            heightRatio: heightRatio,
+            maxWidth: scaledMaxWidth,
+            maxHeight: scaledMaxHeight,
+            minWidth: scaledMinWidth,
+            minHeight: scaledMinHeight,
+            padding: scaledPadding,
+            headerBottomSpacing: headerBottomSpacing,
+            dividerHorizontalPadding: dividerHorizontalPadding,
+            elevation: scaledElevation,
+            cornerRadius: scaledCornerRadius,
+            cornerSmoothing: cornerSmoothing,
+            backgroundColor: backgroundColor,
+            showCloseButton: showCloseButton,
+            onClose: onClose,
+            importance: importance,
+            showDivider: showDivider,
+            child: effectiveChild,
+          );
+        },
+      ),
+    ),
   );
 }

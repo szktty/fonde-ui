@@ -66,31 +66,29 @@ class FondeCheckbox extends ConsumerWidget {
     );
 
     // Determine background and border colors
-    final backgroundColor =
-        value == true
-            ? appColorScheme.theme.primaryColor
-            : const Color(0x00000000);
+    final backgroundColor = value == true
+        ? appColorScheme.theme.primaryColor
+        : const Color(0x00000000);
     final borderColor = appColorScheme.base.border;
 
     return GestureDetector(
-      onTap:
-          onChanged != null
-              ? () {
-                if (tristate) {
-                  // For tristate: false -> true -> null -> false
-                  if (value == false) {
-                    onChanged!(true);
-                  } else if (value == true) {
-                    onChanged!(null);
-                  } else {
-                    onChanged!(false);
-                  }
+      onTap: onChanged != null
+          ? () {
+              if (tristate) {
+                // For tristate: false -> true -> null -> false
+                if (value == false) {
+                  onChanged!(true);
+                } else if (value == true) {
+                  onChanged!(null);
                 } else {
-                  // For dual-state: false -> true -> false
-                  onChanged!(!(value ?? false));
+                  onChanged!(false);
                 }
+              } else {
+                // For dual-state: false -> true -> false
+                onChanged!(!(value ?? false));
               }
-              : null,
+            }
+          : null,
       child: Focus(
         focusNode: focusNode,
         autofocus: autofocus,
@@ -107,25 +105,23 @@ class FondeCheckbox extends ConsumerWidget {
                 side: BorderSide(color: borderColor, width: 1.5 * borderScale),
               ),
             ),
-            child:
-                value == true
-                    ? Icon(
-                      iconTheme.check,
-                      size: effectiveSize * 0.6,
-                      color:
-                          appColorScheme.brightness == Brightness.dark
-                              ? Colors.black
-                              : Colors.white,
-                    )
-                    : value == null && tristate
-                    ? Container(
-                      margin: EdgeInsets.all(effectiveSize * 0.25),
-                      decoration: BoxDecoration(
-                        color: appColorScheme.base.border,
-                        borderRadius: BorderRadius.circular(1.0 * zoomScale),
-                      ),
-                    )
-                    : null,
+            child: value == true
+                ? Icon(
+                    iconTheme.check,
+                    size: effectiveSize * 0.6,
+                    color: appColorScheme.brightness == Brightness.dark
+                        ? Colors.black
+                        : Colors.white,
+                  )
+                : value == null && tristate
+                ? Container(
+                    margin: EdgeInsets.all(effectiveSize * 0.25),
+                    decoration: BoxDecoration(
+                      color: appColorScheme.base.border,
+                      borderRadius: BorderRadius.circular(1.0 * zoomScale),
+                    ),
+                  )
+                : null,
           ),
         ),
       ),

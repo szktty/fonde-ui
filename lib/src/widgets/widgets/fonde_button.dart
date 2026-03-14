@@ -229,7 +229,7 @@ class FondeButton extends ConsumerWidget {
         return enabled
             ? appColorScheme.interactive.button.destructiveBackground
             : appColorScheme.interactive.button.destructiveBackground
-                .withValues(alpha: 0.38);
+                  .withValues(alpha: 0.38);
       case _AppButtonRole.primary:
         return enabled
             ? appColorScheme.theme.primaryColor
@@ -252,7 +252,7 @@ class FondeButton extends ConsumerWidget {
         return enabled
             ? appColorScheme.interactive.button.destructiveBackground
             : appColorScheme.interactive.button.destructiveBackground
-                .withValues(alpha: 0.38);
+                  .withValues(alpha: 0.38);
       case _AppButtonRole.primary:
         return enabled
             ? appColorScheme.theme.primaryColor
@@ -405,11 +405,10 @@ class _AppButtonWidgetState extends State<_AppButtonWidget> {
   @override
   Widget build(BuildContext context) {
     // If expandHeight is true, don't specify height (follow parent constraints)
-    final effectiveHeight =
-        widget.expandHeight
-            ? null
-            : (widget.height ??
-                _AppButtonConstants.defaultHeight * widget.zoomScale);
+    final effectiveHeight = widget.expandHeight
+        ? null
+        : (widget.height ??
+              _AppButtonConstants.defaultHeight * widget.zoomScale);
 
     Widget rectangleBorder = FondeRectangleBorder(
       width: widget.width,
@@ -425,12 +424,12 @@ class _AppButtonWidgetState extends State<_AppButtonWidget> {
       ), // Adjust slightly up to correct text position offset
       padding: _getEffectivePadding(),
       child: Row(
-        mainAxisSize:
-            widget.width != null ? MainAxisSize.max : MainAxisSize.min,
+        mainAxisSize: widget.width != null
+            ? MainAxisSize.max
+            : MainAxisSize.min,
         mainAxisAlignment: MainAxisAlignment.center,
-        crossAxisAlignment:
-            CrossAxisAlignment
-                .center, // Adjust text vertical position to center
+        crossAxisAlignment: CrossAxisAlignment
+            .center, // Adjust text vertical position to center
         children: [
           if (widget.leadingIcon != null) ...[
             widget.enabled
@@ -472,10 +471,9 @@ class _AppButtonWidgetState extends State<_AppButtonWidget> {
     );
 
     // If expandHeight is true, expand to parent constraints with SizedBox.expand
-    Widget content =
-        widget.expandHeight
-            ? SizedBox.expand(child: rectangleBorder)
-            : rectangleBorder;
+    Widget content = widget.expandHeight
+        ? SizedBox.expand(child: rectangleBorder)
+        : rectangleBorder;
 
     // When width is not specified, limit to content size with IntrinsicWidth
     if (widget.width == null) {
@@ -483,12 +481,15 @@ class _AppButtonWidgetState extends State<_AppButtonWidget> {
     }
 
     return GestureDetector(
-      onTapDown:
-          widget.enabled ? (_) => setState(() => _isPressed = true) : null,
-      onTapUp:
-          widget.enabled ? (_) => setState(() => _isPressed = false) : null,
-      onTapCancel:
-          widget.enabled ? () => setState(() => _isPressed = false) : null,
+      onTapDown: widget.enabled
+          ? (_) => setState(() => _isPressed = true)
+          : null,
+      onTapUp: widget.enabled
+          ? (_) => setState(() => _isPressed = false)
+          : null,
+      onTapCancel: widget.enabled
+          ? () => setState(() => _isPressed = false)
+          : null,
       onTap: widget.enabled ? widget.onPressed : null,
       child: content,
     );

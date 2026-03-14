@@ -303,10 +303,9 @@ class _AppDropdownMenuWidget<T> extends ConsumerWidget {
         );
 
     // Get currently selected value
-    final selectedEntry =
-        dropdownMenuEntries
-            .where((entry) => entry.value == initialSelection)
-            .firstOrNull;
+    final selectedEntry = dropdownMenuEntries
+        .where((entry) => entry.value == initialSelection)
+        .firstOrNull;
 
     // If width is not specified, calculate maximum width of all items
     double? effectiveWidth;
@@ -464,8 +463,9 @@ class _AppDropdownButtonState<T> extends State<_AppDropdownButton<T>> {
     switch (widget.position) {
       case FondeDropdownMenuPosition.overlay:
         // Calculate so selected item aligns with dropdown button position
-        verticalOffset =
-            selectedIndex >= 0 ? -selectedIndex * size.height : 0.0;
+        verticalOffset = selectedIndex >= 0
+            ? -selectedIndex * size.height
+            : 0.0;
         break;
       case FondeDropdownMenuPosition.below:
         // Display below dropdown button
@@ -478,18 +478,16 @@ class _AppDropdownButtonState<T> extends State<_AppDropdownButton<T>> {
     }
 
     // Calculate overlay menu width
-    final overlayWidth =
-        widget.showAsActionIcon
-            ? (widget.width ??
-                200.0) // For action icon button, use calculated width
-            : size.width; // For normal case, use button's actual width
+    final overlayWidth = widget.showAsActionIcon
+        ? (widget.width ??
+              200.0) // For action icon button, use calculated width
+        : size.width; // For normal case, use button's actual width
 
     // Calculate horizontal offset based on alignment
     // Adjust offset based on whether checkmark is displayed
-    final checkmarkOffset =
-        widget.showCheckmark
-            ? _AppDropdownMenuConstants.totalOffset * widget.zoomScale
-            : 0.0;
+    final checkmarkOffset = widget.showCheckmark
+        ? _AppDropdownMenuConstants.totalOffset * widget.zoomScale
+        : 0.0;
     double horizontalOffset;
     switch (widget.alignment) {
       case FondeDropdownMenuAlignment.left:
@@ -507,63 +505,61 @@ class _AppDropdownButtonState<T> extends State<_AppDropdownButton<T>> {
     }
 
     return OverlayEntry(
-      builder:
-          (context) => GestureDetector(
-            // Close menu when tapping outside overlay menu
-            onTap: _removeOverlay,
-            behavior: HitTestBehavior.translucent,
-            child: Stack(
-              children: [
-                // Transparent area covering entire screen
-                Positioned.fill(child: Container(color: Colors.transparent)),
-                // Overlay menu body
-                Positioned(
-                  width: overlayWidth,
-                  height:
-                      widget.dropdownMenuEntries.length *
-                          (_AppDropdownMenuConstants.defaultHeight *
-                              widget.zoomScale) +
-                      _AppDropdownMenuConstants.verticalPadding *
-                          widget.zoomScale,
-                  child: CompositedTransformFollower(
-                    link: _layerLink,
-                    showWhenUnlinked: false,
-                    offset: Offset(
-                      horizontalOffset,
-                      verticalOffset - 0.5,
-                    ), // Adjusted from +1.0 → -0.5 (middle value)
-                    child: GestureDetector(
-                      // Don't propagate taps inside menu to parent GestureDetector
-                      onTap: () {},
-                      child: Material(
-                        color: Colors.transparent,
-                        child: _AppDropdownOverlay<T>(
-                          entries: widget.dropdownMenuEntries,
-                          onSelected: (value) {
-                            widget.onSelected?.call(value);
-                            _removeOverlay();
-                          },
-                          borderRadius: widget.borderRadius,
-                          backgroundColor: widget.overlayBackgroundColor,
-                          borderColor: widget.overlayBorderColor,
-                          textColor: widget.textColor,
-                          textStyle: widget.textStyle,
-                          buttonHeight: size.height,
-                          selectedValue: widget.selectedEntry?.value,
-                          overlayWidth: overlayWidth,
-                          alignment: widget.alignment,
-                          showCheckmark: widget.showCheckmark,
-                          hoverBackgroundColor: _getHoverBackgroundColor(),
-                          zoomScale: widget.zoomScale,
-                          borderScale: widget.borderScale,
-                        ),
-                      ),
+      builder: (context) => GestureDetector(
+        // Close menu when tapping outside overlay menu
+        onTap: _removeOverlay,
+        behavior: HitTestBehavior.translucent,
+        child: Stack(
+          children: [
+            // Transparent area covering entire screen
+            Positioned.fill(child: Container(color: Colors.transparent)),
+            // Overlay menu body
+            Positioned(
+              width: overlayWidth,
+              height:
+                  widget.dropdownMenuEntries.length *
+                      (_AppDropdownMenuConstants.defaultHeight *
+                          widget.zoomScale) +
+                  _AppDropdownMenuConstants.verticalPadding * widget.zoomScale,
+              child: CompositedTransformFollower(
+                link: _layerLink,
+                showWhenUnlinked: false,
+                offset: Offset(
+                  horizontalOffset,
+                  verticalOffset - 0.5,
+                ), // Adjusted from +1.0 → -0.5 (middle value)
+                child: GestureDetector(
+                  // Don't propagate taps inside menu to parent GestureDetector
+                  onTap: () {},
+                  child: Material(
+                    color: Colors.transparent,
+                    child: _AppDropdownOverlay<T>(
+                      entries: widget.dropdownMenuEntries,
+                      onSelected: (value) {
+                        widget.onSelected?.call(value);
+                        _removeOverlay();
+                      },
+                      borderRadius: widget.borderRadius,
+                      backgroundColor: widget.overlayBackgroundColor,
+                      borderColor: widget.overlayBorderColor,
+                      textColor: widget.textColor,
+                      textStyle: widget.textStyle,
+                      buttonHeight: size.height,
+                      selectedValue: widget.selectedEntry?.value,
+                      overlayWidth: overlayWidth,
+                      alignment: widget.alignment,
+                      showCheckmark: widget.showCheckmark,
+                      hoverBackgroundColor: _getHoverBackgroundColor(),
+                      zoomScale: widget.zoomScale,
+                      borderScale: widget.borderScale,
                     ),
                   ),
                 ),
-              ],
+              ),
             ),
-          ),
+          ],
+        ),
+      ),
     );
   }
 
@@ -583,10 +579,9 @@ class _AppDropdownButtonState<T> extends State<_AppDropdownButton<T>> {
       child: GestureDetector(
         onTap: widget.enabled ? _showOverlay : null,
         child: Container(
-          width:
-              widget.showAsActionIcon
-                  ? (_AppDropdownMenuConstants.defaultHeight * widget.zoomScale)
-                  : widget.width,
+          width: widget.showAsActionIcon
+              ? (_AppDropdownMenuConstants.defaultHeight * widget.zoomScale)
+              : widget.width,
           height:
               widget.height ??
               _AppDropdownMenuConstants.defaultHeight * widget.zoomScale,
@@ -604,56 +599,22 @@ class _AppDropdownButtonState<T> extends State<_AppDropdownButton<T>> {
             vertical:
                 _AppDropdownMenuConstants.verticalPadding * widget.zoomScale,
           ),
-          child:
-              widget.showAsActionIcon
-                  ? Align(
-                    alignment: Alignment.center,
-                    child: Icon(
-                      widget.actionIcon ?? iconTheme.moreVert,
-                      color: widget.textColor,
-                      size: 20 * widget.zoomScale,
-                    ),
-                  )
-                  : Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    crossAxisAlignment:
-                        CrossAxisAlignment
-                            .start, // Changed from center to start
-                    children: [
-                      // Display leading icon of selected item
-                      if (widget.selectedEntry?.leadingIcon != null) ...[
-                        Padding(
-                          padding: EdgeInsets.only(
-                            top:
-                                2.0 *
-                                widget
-                                    .zoomScale, // Changed from 4.0 → 2.0 (adjust up)
-                          ),
-                          child: widget.selectedEntry!.leadingIcon!,
-                        ),
-                        SizedBox(
-                          width:
-                              _AppDropdownMenuConstants.spacing *
-                              widget.zoomScale,
-                        ),
-                      ],
-                      Expanded(
-                        child: FondeText(
-                          widget.selectedEntry?.label ?? widget.hintText ?? '',
-                          variant: FondeTextVariant.bodyText,
-                          color:
-                              widget.selectedEntry != null
-                                  ? widget.textColor
-                                  : widget.textColor.withValues(alpha: 0.6),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                      ),
-                      SizedBox(
-                        width:
-                            _AppDropdownMenuConstants.spacing *
-                            widget.zoomScale,
-                      ),
+          child: widget.showAsActionIcon
+              ? Align(
+                  alignment: Alignment.center,
+                  child: Icon(
+                    widget.actionIcon ?? iconTheme.moreVert,
+                    color: widget.textColor,
+                    size: 20 * widget.zoomScale,
+                  ),
+                )
+              : Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  crossAxisAlignment:
+                      CrossAxisAlignment.start, // Changed from center to start
+                  children: [
+                    // Display leading icon of selected item
+                    if (widget.selectedEntry?.leadingIcon != null) ...[
                       Padding(
                         padding: EdgeInsets.only(
                           top:
@@ -661,16 +622,46 @@ class _AppDropdownButtonState<T> extends State<_AppDropdownButton<T>> {
                               widget
                                   .zoomScale, // Changed from 4.0 → 2.0 (adjust up)
                         ),
-                        child: Icon(
-                          iconTheme.chevronDown,
-                          color: widget.textColor,
-                          size:
-                              _AppDropdownMenuConstants.chevronIconSize *
-                              widget.zoomScale,
-                        ),
+                        child: widget.selectedEntry!.leadingIcon!,
+                      ),
+                      SizedBox(
+                        width:
+                            _AppDropdownMenuConstants.spacing *
+                            widget.zoomScale,
                       ),
                     ],
-                  ),
+                    Expanded(
+                      child: FondeText(
+                        widget.selectedEntry?.label ?? widget.hintText ?? '',
+                        variant: FondeTextVariant.bodyText,
+                        color: widget.selectedEntry != null
+                            ? widget.textColor
+                            : widget.textColor.withValues(alpha: 0.6),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                    SizedBox(
+                      width:
+                          _AppDropdownMenuConstants.spacing * widget.zoomScale,
+                    ),
+                    Padding(
+                      padding: EdgeInsets.only(
+                        top:
+                            2.0 *
+                            widget
+                                .zoomScale, // Changed from 4.0 → 2.0 (adjust up)
+                      ),
+                      child: Icon(
+                        iconTheme.chevronDown,
+                        color: widget.textColor,
+                        size:
+                            _AppDropdownMenuConstants.chevronIconSize *
+                            widget.zoomScale,
+                      ),
+                    ),
+                  ],
+                ),
         ),
       ),
     );
@@ -732,21 +723,20 @@ class _AppDropdownOverlay<T> extends StatelessWidget {
       ),
       child: Column(
         mainAxisSize: MainAxisSize.min,
-        children:
-            entries.map((entry) {
-              return _AppDropdownMenuItem<T>(
-                entry: entry,
-                onSelected: onSelected,
-                textColor: textColor,
-                textStyle: textStyle,
-                buttonHeight: buttonHeight,
-                isSelected: entry.value == selectedValue,
-                alignment: alignment,
-                showCheckmark: showCheckmark,
-                hoverBackgroundColor: hoverBackgroundColor,
-                zoomScale: zoomScale,
-              );
-            }).toList(),
+        children: entries.map((entry) {
+          return _AppDropdownMenuItem<T>(
+            entry: entry,
+            onSelected: onSelected,
+            textColor: textColor,
+            textStyle: textStyle,
+            buttonHeight: buttonHeight,
+            isSelected: entry.value == selectedValue,
+            alignment: alignment,
+            showCheckmark: showCheckmark,
+            hoverBackgroundColor: hoverBackgroundColor,
+            zoomScale: zoomScale,
+          );
+        }).toList(),
       ),
     );
   }
@@ -825,28 +815,27 @@ class _AppDropdownMenuItemState<T> extends State<_AppDropdownMenuItem<T>> {
                   width:
                       _AppDropdownMenuConstants.checkboxSpaceWidth *
                       widget.zoomScale,
-                  child:
-                      widget.isSelected
-                          ? Align(
-                            alignment:
-                                Alignment.topLeft, // Position checkmark at top
-                            child: Padding(
-                              padding: EdgeInsets.only(
-                                top:
-                                    4.0 *
-                                    widget
-                                        .zoomScale, // Changed from 2.0 → 4.0 (offset further down)
-                              ),
-                              child: Icon(
-                                iconTheme.check,
-                                color: widget.textColor,
-                                size:
-                                    _AppDropdownMenuConstants.checkIconSize *
-                                    widget.zoomScale,
-                              ),
+                  child: widget.isSelected
+                      ? Align(
+                          alignment:
+                              Alignment.topLeft, // Position checkmark at top
+                          child: Padding(
+                            padding: EdgeInsets.only(
+                              top:
+                                  4.0 *
+                                  widget
+                                      .zoomScale, // Changed from 2.0 → 4.0 (offset further down)
                             ),
-                          )
-                          : null,
+                            child: Icon(
+                              iconTheme.check,
+                              color: widget.textColor,
+                              size:
+                                  _AppDropdownMenuConstants.checkIconSize *
+                                  widget.zoomScale,
+                            ),
+                          ),
+                        )
+                      : null,
                 ),
                 SizedBox(
                   width: _AppDropdownMenuConstants.spacing * widget.zoomScale,
@@ -875,9 +864,8 @@ class _AppDropdownMenuItemState<T> extends State<_AppDropdownMenuItem<T>> {
                       widget.entry.label,
                       variant: FondeTextVariant.bodyText,
                       color: widget.textColor,
-                      overflow:
-                          TextOverflow
-                              .ellipsis, // Changed from visible to ellipsis
+                      overflow: TextOverflow
+                          .ellipsis, // Changed from visible to ellipsis
                       maxLines: 1, // Explicitly limit to 1 line
                     ),
               ),

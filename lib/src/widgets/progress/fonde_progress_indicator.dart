@@ -44,8 +44,9 @@ class FondeLinearProgressIndicator extends ConsumerWidget {
     final colorScheme = ref.watch(effectiveColorSchemeWithThemeProvider);
     final accessibility = ref.watch(fondeAccessibilityConfigProvider);
 
-    final effectiveHeight =
-        disableZoom ? height : height * accessibility.zoomScale;
+    final effectiveHeight = disableZoom
+        ? height
+        : height * accessibility.zoomScale;
     final effectiveColor = color ?? colorScheme.theme.primaryColor;
     final effectiveBackgroundColor =
         backgroundColor ?? colorScheme.base.divider;

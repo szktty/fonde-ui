@@ -87,8 +87,9 @@ class _FondeOutlineItemState extends ConsumerState<FondeOutlineItem> {
     final appColorScheme = ref.watch(fondeEffectiveColorSchemeProvider);
     final accessibilityConfig = ref.watch(fondeAccessibilityConfigProvider);
     final zoomScale = widget.disableZoom ? 1.0 : accessibilityConfig.zoomScale;
-    final borderScale =
-        widget.disableZoom ? 1.0 : accessibilityConfig.borderScale;
+    final borderScale = widget.disableZoom
+        ? 1.0
+        : accessibilityConfig.borderScale;
     final theme = Theme.of(context);
 
     // Calculate indent based on depth
@@ -99,18 +100,16 @@ class _FondeOutlineItemState extends ConsumerState<FondeOutlineItem> {
         appColorScheme.interactive.list.selectedBackground;
     final hoverBackground =
         appColorScheme.interactive.list.itemBackground.hover;
-    final backgroundColor =
-        widget.isSelected
-            ? selectedBackground
-            : _isHovered
-            ? hoverBackground
-            : Colors.transparent;
+    final backgroundColor = widget.isSelected
+        ? selectedBackground
+        : _isHovered
+        ? hoverBackground
+        : Colors.transparent;
 
     // Text color
-    final textColor =
-        widget.isSelected
-            ? appColorScheme.uiAreas.sideBar.activeItemText
-            : appColorScheme.uiAreas.sideBar.inactiveItemText;
+    final textColor = widget.isSelected
+        ? appColorScheme.uiAreas.sideBar.activeItemText
+        : appColorScheme.uiAreas.sideBar.inactiveItemText;
 
     // Expansion icon
     Widget? expandIcon;
@@ -138,8 +137,9 @@ class _FondeOutlineItemState extends ConsumerState<FondeOutlineItem> {
 
     // Main content
     Widget content = MouseRegion(
-      cursor:
-          widget.onTap != null ? SystemMouseCursors.click : MouseCursor.defer,
+      cursor: widget.onTap != null
+          ? SystemMouseCursors.click
+          : MouseCursor.defer,
       onEnter: (_) => setState(() => _isHovered = true),
       onExit: (_) => setState(() => _isHovered = false),
       child: GestureDetector(
@@ -248,10 +248,9 @@ class _FondeOutlineItemState extends ConsumerState<FondeOutlineItem> {
             mainAxisSize: MainAxisSize.min,
             children: widget.children,
           ),
-          crossFadeState:
-              widget.isExpanded
-                  ? CrossFadeState.showSecond
-                  : CrossFadeState.showFirst,
+          crossFadeState: widget.isExpanded
+              ? CrossFadeState.showSecond
+              : CrossFadeState.showFirst,
           duration: widget.animationDuration,
         ),
       ],

@@ -117,51 +117,43 @@ class FondeColorScheme {
     // Define 3-level background color system
     // Level 1: Main background (most frequently used)
     // Guideline compliant: Light #F8F9FA, Dark #212529
-    final mainBackground =
-        isDark
-            ? _AppColorConstants.darkBackground
-            : _AppColorConstants.lightBackground;
+    final mainBackground = isDark
+        ? _AppColorConstants.darkBackground
+        : _AppColorConstants.lightBackground;
 
     // Level 2: Navigation background (primary sidebar, secondary sidebar, activity bar)
-    final navigationBackground =
-        isDark
-            ? _AppColorConstants.darkNavigationBackground
-            : _AppColorConstants.lightNavigationBackground;
+    final navigationBackground = isDark
+        ? _AppColorConstants.darkNavigationBackground
+        : _AppColorConstants.lightNavigationBackground;
 
     // Level 3: System background (title bar, status bar)
-    final systemBackground =
-        isDark
-            ? _AppColorConstants.darkSystemBackground
-            : _AppColorConstants.lightSystemBackground;
+    final systemBackground = isDark
+        ? _AppColorConstants.darkSystemBackground
+        : _AppColorConstants.lightSystemBackground;
 
     // Define base colors
     final baseColors = FondeBaseColors(
-      foreground:
-          isDark
-              ? _AppColorConstants.darkForeground
-              : _AppColorConstants.lightForeground,
+      foreground: isDark
+          ? _AppColorConstants.darkForeground
+          : _AppColorConstants.lightForeground,
       background: mainBackground, // Use Level 1
       selection: themeColorScheme.primaryColor,
-      border:
-          isDark
-              ? _AppColorConstants.darkBorder
-              : _AppColorConstants.lightBorder,
-      divider:
-          isDark
-              ? _AppColorConstants.darkBorder
-              : _AppColorConstants.lightBorder,
-      shadow:
-          isDark
-              ? Colors.black.withAlpha(_AppColorConstants.alpha128)
-              : Colors.black.withAlpha(_AppColorConstants.alpha77),
+      border: isDark
+          ? _AppColorConstants.darkBorder
+          : _AppColorConstants.lightBorder,
+      divider: isDark
+          ? _AppColorConstants.darkBorder
+          : _AppColorConstants.lightBorder,
+      shadow: isDark
+          ? Colors.black.withAlpha(_AppColorConstants.alpha128)
+          : Colors.black.withAlpha(_AppColorConstants.alpha77),
     );
 
     // Define activity bar colors (Level 2: Navigation background)
     // When selected, background is slightly brighter, icon is theme color (moderate emphasis)
-    final launchBarActiveBackground =
-        isDark
-            ? _AppColorConstants.darkLaunchBarActiveBackground
-            : _AppColorConstants.lightLaunchBarActiveBackground;
+    final launchBarActiveBackground = isDark
+        ? _AppColorConstants.darkLaunchBarActiveBackground
+        : _AppColorConstants.lightLaunchBarActiveBackground;
 
     final launchBarColors = FondeLaunchBarColors(
       background: navigationBackground, // Use Level 2
@@ -182,22 +174,18 @@ class FondeColorScheme {
       ),
       activeItemText: Colors.white,
       inactiveItemText: baseColors.foreground,
-      hoverBackground:
-          isDark
-              ? _AppColorConstants.darkSidebarHoverBackground
-              : _AppColorConstants.lightSidebarHoverBackground,
+      hoverBackground: isDark
+          ? _AppColorConstants.darkSidebarHoverBackground
+          : _AppColorConstants.lightSidebarHoverBackground,
     );
 
     // Define status bar colors (Level 3: System background)
     final statusBarColors = FondeStatusBarColors(
       background: systemBackground, // Use Level 3
       foreground: baseColors.foreground,
-      itemHoverBackground:
-          isDark
-              ? colorScheme.onSurface.withAlpha(_AppColorConstants.alpha26)
-              : themeColorScheme.primaryColor.withAlpha(
-                _AppColorConstants.alpha13,
-              ),
+      itemHoverBackground: isDark
+          ? colorScheme.onSurface.withAlpha(_AppColorConstants.alpha26)
+          : themeColorScheme.primaryColor.withAlpha(_AppColorConstants.alpha13),
       prominentBackground: colorScheme.error,
       prominentForeground: colorScheme.onError,
     );
@@ -224,14 +212,12 @@ class FondeColorScheme {
       border: baseColors.divider,
       foreground: baseColors.foreground,
       iconColor: baseColors.foreground,
-      buttonHoverBackground:
-          isDark
-              ? baseColors.foreground.withAlpha(_AppColorConstants.alpha26)
-              : baseColors.foreground.withAlpha(_AppColorConstants.alpha13),
-      buttonActiveBackground:
-          isDark
-              ? baseColors.foreground.withAlpha(_AppColorConstants.alpha51)
-              : baseColors.foreground.withAlpha(_AppColorConstants.alpha26),
+      buttonHoverBackground: isDark
+          ? baseColors.foreground.withAlpha(_AppColorConstants.alpha26)
+          : baseColors.foreground.withAlpha(_AppColorConstants.alpha13),
+      buttonActiveBackground: isDark
+          ? baseColors.foreground.withAlpha(_AppColorConstants.alpha51)
+          : baseColors.foreground.withAlpha(_AppColorConstants.alpha26),
     );
 
     // Consolidate UI area colors
@@ -263,14 +249,12 @@ class FondeColorScheme {
     final buttonColors = FondeButtonColors(
       background: createStatefulColors(
         Colors.transparent,
-        hover:
-            isDark
-                ? _AppColorConstants.darkButtonHoverBackground
-                : _AppColorConstants.lightButtonHoverBackground,
-        active:
-            isDark
-                ? _AppColorConstants.darkButtonActiveBackground
-                : _AppColorConstants.lightButtonActiveBackground,
+        hover: isDark
+            ? _AppColorConstants.darkButtonHoverBackground
+            : _AppColorConstants.lightButtonHoverBackground,
+        active: isDark
+            ? _AppColorConstants.darkButtonActiveBackground
+            : _AppColorConstants.lightButtonActiveBackground,
       ),
       text: createStatefulColors(baseColors.foreground),
       border: createStatefulColors(
@@ -280,15 +264,13 @@ class FondeColorScheme {
       ),
       primaryBackground: themeColorScheme.primaryColor,
       primaryText: colorScheme.onPrimary,
-      primaryPressedBackground:
-          isDark
-              ? themeColorScheme.primaryColor.darken(0.15)
-              : themeColorScheme.primaryColor.darken(0.1),
+      primaryPressedBackground: isDark
+          ? themeColorScheme.primaryColor.darken(0.15)
+          : themeColorScheme.primaryColor.darken(0.1),
       // Destructive action button specific colors
-      destructiveBackground:
-          isDark
-              ? _AppColorConstants.darkDestructiveBackground
-              : _AppColorConstants.lightDestructiveBackground,
+      destructiveBackground: isDark
+          ? _AppColorConstants.darkDestructiveBackground
+          : _AppColorConstants.lightDestructiveBackground,
       destructiveText: Colors.white,
       destructivePressedBackground:
           _AppColorConstants.destructivePressedBackground,
@@ -296,14 +278,12 @@ class FondeColorScheme {
 
     // Define input colors
     final inputColors = FondeInputColors(
-      background:
-          isDark
-              ? _AppColorConstants.darkInputBackground
-              : _AppColorConstants.lightInputBackground,
-      border:
-          isDark
-              ? _AppColorConstants.darkInputBorder
-              : _AppColorConstants.lightInputBorder,
+      background: isDark
+          ? _AppColorConstants.darkInputBackground
+          : _AppColorConstants.lightInputBackground,
+      border: isDark
+          ? _AppColorConstants.darkInputBorder
+          : _AppColorConstants.lightInputBorder,
       focusBorder: themeColorScheme.primaryColor,
       placeholder: baseColors.foreground.withAlpha(_AppColorConstants.alpha128),
       text: baseColors.foreground,
@@ -313,12 +293,11 @@ class FondeColorScheme {
     final listColors = FondeListColors(
       itemBackground: createStatefulColors(
         Colors.transparent,
-        hover:
-            isDark
-                ? colorScheme.onSurface.withAlpha(_AppColorConstants.alpha51)
-                : themeColorScheme.primaryColor.withAlpha(
-                  _AppColorConstants.alpha26,
-                ),
+        hover: isDark
+            ? colorScheme.onSurface.withAlpha(_AppColorConstants.alpha51)
+            : themeColorScheme.primaryColor.withAlpha(
+                _AppColorConstants.alpha26,
+              ),
       ),
       itemText: createStatefulColors(baseColors.foreground),
       selectedBackground: sideBarColors.activeItemBackground,
@@ -327,20 +306,17 @@ class FondeColorScheme {
 
     // Define dropdown colors
     final dropdownColors = FondeDropdownColors(
-      background:
-          isDark
-              ? _AppColorConstants.darkDropdownBackground
-              : _AppColorConstants.lightDropdownBackground,
-      border:
-          isDark
-              ? _AppColorConstants.darkInputBorder
-              : _AppColorConstants.lightInputBorder,
+      background: isDark
+          ? _AppColorConstants.darkDropdownBackground
+          : _AppColorConstants.lightDropdownBackground,
+      border: isDark
+          ? _AppColorConstants.darkInputBorder
+          : _AppColorConstants.lightInputBorder,
       itemBackground: createStatefulColors(
         Colors.transparent,
-        hover:
-            isDark
-                ? _AppColorConstants.darkDropdownItemHoverBackground
-                : _AppColorConstants.lightDropdownItemHoverBackground,
+        hover: isDark
+            ? _AppColorConstants.darkDropdownItemHoverBackground
+            : _AppColorConstants.lightDropdownItemHoverBackground,
       ),
       itemText: baseColors.foreground,
     );
@@ -370,10 +346,9 @@ class FondeColorScheme {
       dropdownBorder: baseColors.border,
       selectedItemBackground: colorScheme.primaryContainer,
       selectedItemText: colorScheme.onPrimaryContainer,
-      hoverBackground:
-          isDark
-              ? baseColors.foreground.withAlpha(_AppColorConstants.alpha26)
-              : baseColors.foreground.withAlpha(_AppColorConstants.alpha13),
+      hoverBackground: isDark
+          ? baseColors.foreground.withAlpha(_AppColorConstants.alpha26)
+          : baseColors.foreground.withAlpha(_AppColorConstants.alpha13),
       itemText: baseColors.foreground,
       itemDescriptionText: baseColors.foreground.withAlpha(
         _AppColorConstants.alpha153,
@@ -382,10 +357,9 @@ class FondeColorScheme {
 
     // Define action button colors
     final actionButtonColors = FondeActionButtonColors(
-      background:
-          isDark
-              ? baseColors.foreground.withAlpha(_AppColorConstants.alpha51)
-              : baseColors.foreground.withAlpha(_AppColorConstants.alpha26),
+      background: isDark
+          ? baseColors.foreground.withAlpha(_AppColorConstants.alpha51)
+          : baseColors.foreground.withAlpha(_AppColorConstants.alpha26),
       iconColor: baseColors.foreground,
     );
 

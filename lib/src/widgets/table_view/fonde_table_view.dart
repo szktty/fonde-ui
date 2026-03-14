@@ -101,42 +101,40 @@ class _FondeTableViewState<T> extends State<FondeTableView<T>> {
   }
 
   void _buildPlutoData() {
-    _plutoColumns =
-        widget.columns.map((col) {
-          return PlutoColumn(
-            title: col.title,
-            field: col.id,
-            type: PlutoColumnType.text(),
-            width: col.width,
-            minWidth: col.minWidth ?? 50.0,
-            enableColumnDrag: widget.allowColumnReordering,
-            enableSorting: col.sortable,
-            enableContextMenu: false,
-            enableDropToResize: widget.allowColumnResizing,
-            renderer: (rendererContext) {
-              final rowIndex = rendererContext.rowIdx;
-              if (rowIndex < widget.data.length) {
-                final item = widget.data[rowIndex];
-                final isSelected = _selectedRows.any(
-                  (s) => widget.keyExtractor(s) == widget.keyExtractor(item),
-                );
-                return col.cellBuilder(item, isSelected);
-              }
-              return const SizedBox.shrink();
-            },
-          );
-        }).toList();
-
-    _plutoRows =
-        widget.data.asMap().entries.map((entry) {
-          final item = entry.value;
-          final key = widget.keyExtractor(item);
-          final cells = <String, PlutoCell>{};
-          for (final col in widget.columns) {
-            cells[col.id] = PlutoCell(value: key);
+    _plutoColumns = widget.columns.map((col) {
+      return PlutoColumn(
+        title: col.title,
+        field: col.id,
+        type: PlutoColumnType.text(),
+        width: col.width,
+        minWidth: col.minWidth ?? 50.0,
+        enableColumnDrag: widget.allowColumnReordering,
+        enableSorting: col.sortable,
+        enableContextMenu: false,
+        enableDropToResize: widget.allowColumnResizing,
+        renderer: (rendererContext) {
+          final rowIndex = rendererContext.rowIdx;
+          if (rowIndex < widget.data.length) {
+            final item = widget.data[rowIndex];
+            final isSelected = _selectedRows.any(
+              (s) => widget.keyExtractor(s) == widget.keyExtractor(item),
+            );
+            return col.cellBuilder(item, isSelected);
           }
-          return PlutoRow(key: ValueKey(key), cells: cells);
-        }).toList();
+          return const SizedBox.shrink();
+        },
+      );
+    }).toList();
+
+    _plutoRows = widget.data.asMap().entries.map((entry) {
+      final item = entry.value;
+      final key = widget.keyExtractor(item);
+      final cells = <String, PlutoCell>{};
+      for (final col in widget.columns) {
+        cells[col.id] = PlutoCell(value: key);
+      }
+      return PlutoRow(key: ValueKey(key), cells: cells);
+    }).toList();
   }
 
   void _onSelectionChanged(List<T> items) {
@@ -195,12 +193,11 @@ class _FondeTableViewState<T> extends State<FondeTableView<T>> {
       } else {
         sm.setRowChecked(targetRow, true);
       }
-      final selectedItems =
-          sm.checkedRows
-              .map((row) => _plutoRows.indexOf(row))
-              .where((i) => i >= 0 && i < widget.data.length)
-              .map((i) => widget.data[i])
-              .toList();
+      final selectedItems = sm.checkedRows
+          .map((row) => _plutoRows.indexOf(row))
+          .where((i) => i >= 0 && i < widget.data.length)
+          .map((i) => widget.data[i])
+          .toList();
       _onSelectionChanged(selectedItems);
     } else {
       for (final row in sm.checkedRows.toList()) {
@@ -249,10 +246,9 @@ class _FondeTableViewState<T> extends State<FondeTableView<T>> {
     return PlutoGridConfiguration(
       columnSize: PlutoGridColumnSizeConfig(
         autoSizeMode: PlutoAutoSizeMode.scale,
-        resizeMode:
-            widget.allowColumnResizing
-                ? PlutoResizeMode.pushAndPull
-                : PlutoResizeMode.none,
+        resizeMode: widget.allowColumnResizing
+            ? PlutoResizeMode.pushAndPull
+            : PlutoResizeMode.none,
       ),
       enterKeyAction: PlutoGridEnterKeyAction.none,
       enableMoveDownAfterSelecting: false,
@@ -308,10 +304,9 @@ class _FondeTableViewState<T> extends State<FondeTableView<T>> {
             child: PlutoGrid(
               columns: _plutoColumns,
               rows: _plutoRows,
-              mode:
-                  widget.allowMultiSelect
-                      ? PlutoGridMode.multiSelect
-                      : PlutoGridMode.select,
+              mode: widget.allowMultiSelect
+                  ? PlutoGridMode.multiSelect
+                  : PlutoGridMode.select,
               configuration: _buildConfiguration(cs, zoomScale, context, ref),
               onLoaded: _handleLoaded,
             ),
