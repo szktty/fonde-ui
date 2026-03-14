@@ -1,5 +1,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:url_launcher/url_launcher.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fonde_ui/fonde_ui.dart';
 import 'package:fonde_ui/fonde_ui_riverpod.dart';
@@ -110,23 +111,7 @@ class _CatalogShellState extends ConsumerState<CatalogShell> {
   Widget build(BuildContext context) {
     final body = FondeScaffold(
       toolbar: FondeMainToolbar(
-        center:
-            kIsWeb
-                ? Consumer(
-                  builder: (context, ref, _) {
-                    final colorScheme = ref.watch(
-                      fondeEffectiveColorSchemeProvider,
-                    );
-                    return FondeText(
-                      'Web preview — some interactions may differ from the native app',
-                      variant: FondeTextVariant.captionText,
-                      color: colorScheme.base.foreground.withValues(
-                        alpha: 0.55,
-                      ),
-                    );
-                  },
-                )
-                : null,
+        center: const SizedBox.shrink(),
         trailing: _ToolbarControls(),
       ),
       launchBar: FondeLaunchBar(
@@ -237,6 +222,9 @@ const _fontFamilies = [
 const _zoomLevels = [0.75, 0.9, 1.0, 1.1, 1.25, 1.5];
 
 /// Toolbar trailing area: theme toggle, font settings, and zoom controls
+const _kGitHubUrl = 'https://github.com/szktty/fonde-ui';
+const _kPackageVersion = '0.1.0';
+
 class _ToolbarControls extends ConsumerStatefulWidget {
   @override
   ConsumerState<_ToolbarControls> createState() => _ToolbarControlsState();
@@ -339,6 +327,7 @@ class _ToolbarControlsState extends ConsumerState<_ToolbarControls> {
   Widget build(BuildContext context) {
     final activeTheme = ref.watch(fondeActiveThemeProvider);
     final accessibility = ref.watch(fondeAccessibilityConfigProvider);
+    final colorScheme = ref.watch(fondeEffectiveColorSchemeProvider);
     final isSystem = activeTheme.themeMode == ThemeMode.system;
     final isDark = activeTheme.themeMode == ThemeMode.dark;
     final currentFontSize = activeTheme.typography?.uiFont?.size ?? 14.0;
@@ -346,7 +335,7 @@ class _ToolbarControlsState extends ConsumerState<_ToolbarControls> {
     final zoomIdx = _zoomIndex(currentZoom);
 
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 8),
+      padding: const EdgeInsets.only(left: 8, right: FondeSpacingValues.xxxl),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
@@ -446,6 +435,28 @@ class _ToolbarControlsState extends ConsumerState<_ToolbarControls> {
                     .read(fondeActiveThemeProvider.notifier)
                     .setTheme(FondeThemePresets.dark),
           ),
+          const SizedBox(width: 4),
+          _ToolbarDivider(),
+          const SizedBox(width: 8),
+          // Version
+          FondeText(
+            'v$_kPackageVersion',
+            variant: FondeTextVariant.captionText,
+            color: colorScheme.base.foreground.withValues(alpha: 0.45),
+          ),
+          const SizedBox(width: 6),
+          // GitHub
+          FondeIconButton.circle(
+            icon: LucideIcons.github,
+            tooltip: 'GitHub',
+            iconSize: 16,
+            backgroundColor: colorScheme.base.foreground.withValues(
+              alpha: 0.15,
+            ),
+            constraints: const BoxConstraints.tightFor(width: 28, height: 28),
+            onPressed: () => launchUrl(Uri.parse(_kGitHubUrl)),
+          ),
+          const SizedBox(width: 4),
         ],
       ),
     );
