@@ -246,13 +246,6 @@ class _ToolbarControlsState extends ConsumerState<_ToolbarControls> {
   String _selectedFontFamily = '';
   bool _fontLoading = false;
 
-  String get _fontFamilyLabel {
-    for (final (label, value) in _fontFamilies) {
-      if (value == _selectedFontFamily) return label;
-    }
-    return 'System Default';
-  }
-
   Future<void> _applyFontFamily(String fontFamily) async {
     if (fontFamily.isEmpty) {
       setState(() {
@@ -358,24 +351,18 @@ class _ToolbarControlsState extends ConsumerState<_ToolbarControls> {
         mainAxisSize: MainAxisSize.min,
         children: [
           // Font family selector
-          _ToolbarLabel(label: 'Font:'),
-          const SizedBox(width: 2),
-          FondePopupMenu<String>(
+          FondeDropdownMenu<String>(
             enabled: !_fontLoading,
-            items: [
+            width: 180,
+            initialSelection: _selectedFontFamily,
+            onSelected: (value) {
+              if (value != null) _applyFontFamily(value);
+            },
+            dropdownMenuEntries: [
               for (final (label, value) in _fontFamilies)
-                FondePopupMenuItemEntry(
-                  FondePopupMenuItem(
-                    value: value,
-                    title: label,
-                    onSelected: () => _applyFontFamily(value),
-                  ),
-                ),
+                DropdownMenuEntry(value: value, label: label),
             ],
-            child: _FontFamilyButton(
-              label: _fontFamilyLabel,
-              loading: _fontLoading,
-            ),
+            position: FondeDropdownMenuPosition.below,
           ),
           const SizedBox(width: 4),
           // Font size
@@ -465,21 +452,6 @@ class _ToolbarControlsState extends ConsumerState<_ToolbarControls> {
   }
 }
 
-class _ToolbarLabel extends ConsumerWidget {
-  const _ToolbarLabel({required this.label});
-  final String label;
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final colorScheme = ref.watch(fondeEffectiveColorSchemeProvider);
-    return FondeText(
-      label,
-      variant: FondeTextVariant.captionText,
-      color: colorScheme.base.foreground.withValues(alpha: 0.55),
-    );
-  }
-}
-
 class _ToolbarDivider extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -522,44 +494,6 @@ class _FontSizeLabel extends ConsumerWidget {
       label: '${size.round()}px',
       tooltip: 'Reset Font Size',
       onTap: onTap,
-    );
-  }
-}
-
-class _FontFamilyButton extends ConsumerWidget {
-  const _FontFamilyButton({required this.label, this.loading = false});
-  final String label;
-  final bool loading;
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final colorScheme = ref.watch(fondeEffectiveColorSchemeProvider);
-    final fgColor = colorScheme.base.foreground.withValues(
-      alpha: loading ? 0.4 : 0.75,
-    );
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 2),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          if (loading) ...[
-            SizedBox(
-              width: 10,
-              height: 10,
-              child: CircularProgressIndicator(
-                strokeWidth: 1.5,
-                color: fgColor,
-              ),
-            ),
-            const SizedBox(width: 4),
-          ],
-          FondeText(
-            label,
-            variant: FondeTextVariant.captionText,
-            color: fgColor,
-          ),
-        ],
-      ),
     );
   }
 }
