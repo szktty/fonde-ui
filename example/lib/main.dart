@@ -1,8 +1,0 @@
-import 'package:flutter/widgets.dart';
-import 'package:fonde_ui/fonde_ui.dart';
-
-import 'shell/catalog_shell.dart';
-
-void main() {
-  runApp(const FondeApp(title: 'fonde_ui Catalog', home: CatalogShell()));
-}

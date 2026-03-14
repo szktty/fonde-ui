@@ -1,6 +1,0 @@
-arb-dir: lib/l10n
-template-arb-file: fonde_ui_en.arb
-output-localization-file: fonde_ui_localizations.dart
-output-class: FondeUILocalizations
-output-dir: lib/src/core/l10n
-nullable-getter: false
