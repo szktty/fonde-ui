@@ -144,7 +144,5 @@ app.*.symbols
 **/windows/flutter/generated_plugins.cmake
 **/windows/flutter/ephemeral/
 
-# docs (internal)
-docs/
 .mcp.json
 .serena/

@@ -4,6 +4,8 @@
 
 * **Fonde** (pronounced *fond*) — named after *fond de veau*.
 
+![Screenshot](docs/images/screenshot.png)
+
 ## Overview
 
 `fonde_ui` is a Flutter UI component library for desktop applications, developed for [RinneGraph](https://github.com/szktty/rinne-graph). It provides improved multi-pane layouts, instant feedback interaction, and accessibility support out-of-the-box.
