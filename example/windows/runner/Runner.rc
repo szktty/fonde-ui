@@ -90,12 +90,12 @@ BEGIN
         BLOCK "040904e4"
         BEGIN
             VALUE "CompanyName", "com.example" "\0"
-            VALUE "FileDescription", "fonde_catalog" "\0"
+            VALUE "FileDescription", "Fonde UI Catalog" "\0"
             VALUE "FileVersion", VERSION_AS_STRING "\0"
-            VALUE "InternalName", "fonde_catalog" "\0"
+            VALUE "InternalName", "fonde_ui_catalog" "\0"
             VALUE "LegalCopyright", "Copyright (C) 2026 com.example. All rights reserved." "\0"
-            VALUE "OriginalFilename", "fonde_catalog.exe" "\0"
-            VALUE "ProductName", "fonde_catalog" "\0"
+            VALUE "OriginalFilename", "fonde_ui_catalog.exe" "\0"
+            VALUE "ProductName", "Fonde UI Catalog" "\0"
             VALUE "ProductVersion", VERSION_AS_STRING "\0"
         END
     END

@@ -1,4 +1,4 @@
-package com.example.fonde_catalog
+package com.example.fonde_ui_catalog
 
 import io.flutter.embedding.android.FlutterActivity
 

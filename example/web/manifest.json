@@ -1,6 +1,6 @@
 {
-    "name": "fonde_catalog",
-    "short_name": "fonde_catalog",
+    "name": "Fonde UI Catalog",
+    "short_name": "Fonde UI Catalog",
     "start_url": ".",
     "display": "standalone",
     "background_color": "#0175C2",
