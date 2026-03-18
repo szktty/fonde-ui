@@ -21,20 +21,4 @@ class FondeThemeUtils {
     );
   }
 
-  // Method intended for internal use only.
-  // Do not use from outside the package.
-  // Let the core_themes package handle brightness determination; do not access directly from outside.
-  static Brightness _getEffectiveBrightness(
-    ThemeMode themeMode,
-    Brightness platformBrightness,
-  ) {
-    switch (themeMode) {
-      case ThemeMode.system:
-        return platformBrightness;
-      case ThemeMode.light:
-        return Brightness.light;
-      case ThemeMode.dark:
-        return Brightness.dark;
-    }
-  }
 }

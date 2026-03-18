@@ -7,7 +7,6 @@ import '../../internal.dart';
 import '../../riverpod/widgets/sidebar_width_provider.dart';
 import '../../riverpod/widgets/sidebar_state_providers.dart';
 import '../icons/icon_theme_providers.dart';
-import '../toolbar/primary_sidebar_toolbar.dart';
 import '../toolbar/secondary_sidebar_toolbar.dart';
 import '../widgets/fonde_icon_button.dart';
 import 'collapsed_sidebar_layout.dart';
