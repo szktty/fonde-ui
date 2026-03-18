@@ -99,21 +99,19 @@ class FondeSpacing extends ConsumerWidget {
 
   /// Horizontal-only spacing.
   const FondeSpacing.horizontal(
-    double width, {
+    this.width, {
     super.key,
     this.disableZoom = false,
     this.strictMode = kDebugMode,
-  }) : width = width,
-       height = null;
+  }) : height = null;
 
   /// Vertical-only spacing.
   const FondeSpacing.vertical(
-    double height, {
+    this.height, {
     super.key,
     this.disableZoom = false,
     this.strictMode = kDebugMode,
-  }) : width = null,
-       height = height;
+  }) : width = null;
 
   /// Factory constructors that use predefined spacing values.
 

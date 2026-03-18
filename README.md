@@ -4,7 +4,7 @@
 
 * **Fonde** (pronounced *fond*) — named after *fond de veau*.
 
-![Screenshot](docs/images/screenshot.png)
+![Screenshot](doc/images/screenshot.png)
 
 ## Overview
 

@@ -153,7 +153,6 @@ class _AppSplitButtonConstants {
   static const double horizontalPadding = 12.0;
   static const double verticalPadding = 8.0;
   static const double defaultHeight = 48.0;
-  static const double dividerWidth = 1.0;
   static const double chevronIconSize = 16.0;
   static const double iconSpacing = 4.0;
   static const double dropdownButtonWidth = 32.0;
