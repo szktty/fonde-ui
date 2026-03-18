@@ -25,7 +25,7 @@ Desktop-first Flutter UI optimized for native-grade instant feedback, with acces
 
 ## Before Committing
 
-- Always run `fvm flutter format .` before creating a commit
+- Always run `fvm dart format .` before creating a commit
 
 ## Documentation
 
