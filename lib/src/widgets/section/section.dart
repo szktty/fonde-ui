@@ -69,6 +69,7 @@ class FondeSection extends ConsumerWidget {
 
     return Container(
       color: backgroundColor,
+      padding: scaledPadding,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisSize: MainAxisSize.min,

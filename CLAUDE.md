@@ -11,7 +11,7 @@ Desktop-first Flutter UI optimized for native-grade instant feedback, with acces
   - `lib/src/core`: Core functionality
   - `lib/src/widgets`: Widgets
   - `lib/src/riverpod`: Riverpod-related code
-- `docs`: Documentation
+- `doc`: Documentation
 
 ## Design Policy
 
@@ -25,5 +25,5 @@ Desktop-first Flutter UI optimized for native-grade instant feedback, with acces
 
 ## Documentation
 
-- Design guidelines: @docs/design/
+- Design guidelines: @doc/design/
 - LLM documentation: @llms.txt
