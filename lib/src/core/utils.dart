@@ -20,5 +20,4 @@ class FondeThemeUtils {
       orElse: () => FondeThemePresets.system,
     );
   }
-
 }
