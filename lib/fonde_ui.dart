@@ -93,11 +93,16 @@ export 'src/widgets/context_menu/fonde_context_menu.dart';
 export 'src/widgets/text_field/fonde_text_field.dart';
 export 'src/widgets/search_field/fonde_search_field.dart';
 export 'src/widgets/tags_field/fonde_tags_field.dart';
+export 'src/widgets/number_field/fonde_number_field.dart';
 export 'src/widgets/widgets/fonde_checkbox.dart';
 export 'src/widgets/widgets/fonde_radio_button.dart';
 export 'src/widgets/widgets/fonde_dropdown_menu.dart';
 export 'src/widgets/widgets/fonde_popup_menu.dart';
 export 'src/widgets/widgets/fonde_expansion_tile.dart';
+
+// ─── Date Picker ──────────────────────────────────────────────────────────────
+export 'src/widgets/date_picker/fonde_date_picker.dart';
+export 'package:table_calendar/table_calendar.dart' show StartingDayOfWeek;
 
 // ─── Dialogs & Overlays ───────────────────────────────────────────────────────
 export 'src/widgets/widgets/fonde_dialog.dart';

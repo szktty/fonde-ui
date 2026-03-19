@@ -23,6 +23,10 @@ Desktop-first Flutter UI optimized for native-grade instant feedback, with acces
 - Use `fvm flutter` instead of global `flutter` for all commands
 - Use `flutter build` to verify builds. `flutter analyze` is not a substitute for a build check
 
+## Before Committing
+
+- Always run `fvm dart format .` before creating a commit
+
 ## Documentation
 
 - Design guidelines: @doc/design/

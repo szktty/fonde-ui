@@ -7,7 +7,7 @@ Developed for [RinneGraph](https://github.com/szktty/rinne-graph). Currently pro
 ## Package info
 
 - name: fonde_ui
-- version: 0.1.0
+- version: 0.2.0
 - Dart SDK: ^3.7.0
 - Flutter: >=3.41.2
 
@@ -789,6 +789,62 @@ Popup menu with items list.
 ### FondeExpansionTile
 
 Expandable list tile.
+
+### FondeNumberField
+
+Numeric input with − and + buttons. Supports integer and decimal values, min/max bounds, and step size.
+
+```dart
+FondeNumberField({
+  num? initialValue,
+  num? min,
+  num? max,
+  num step = 1,
+  int decimalPlaces = 0,     // 0 = integer mode
+  String? hintText,
+  String? suffix,            // label suffix e.g. "px", "%"
+  ValueChanged<num?>? onChanged,
+  bool enabled = true,
+  double? width,             // defaults to 120
+  bool disableZoom = false,
+})
+```
+
+Default height: 32px. On focus-lost or Enter, text is parsed and clamped to [min, max].
+
+### FondeDatePicker
+
+Monthly calendar widget for single-day or range selection. Backed by `table_calendar`.
+
+```dart
+FondeDatePicker({
+  required DateTime firstDate,
+  required DateTime lastDate,
+  DateTime? initialDate,              // defaults to today
+  DateTime? selectedDate,             // single-selection pre-selection
+  ValueChanged<DateTime>? onDaySelected,
+  DateTime? rangeStart,
+  DateTime? rangeEnd,
+  void Function(DateTime? start, DateTime? end)? onRangeSelected,
+  bool rangeSelectionMode = false,
+  List<Object?> Function(DateTime day)? eventLoader,
+  bool Function(DateTime day)? enabledDayPredicate,
+  dynamic locale,                     // e.g. 'ja', 'en_US'
+  StartingDayOfWeek startingDayOfWeek = StartingDayOfWeek.monday,
+  bool disableZoom = false,
+})
+```
+
+Helper to show in a dialog:
+
+```dart
+final date = await showFondeDatePickerDialog(
+  context: context,
+  firstDate: DateTime(2020),
+  lastDate: DateTime(2030),
+  selectedDate: currentDate,
+);
+```
 
 ---
 
