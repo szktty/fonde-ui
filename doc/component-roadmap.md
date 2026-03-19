@@ -26,7 +26,7 @@ Currently, button widgets only accept a plain string via the `tooltip` parameter
 Horizontal/vertical split pane for use inside content areas.
 `FondeScaffold` uses `multi_split_view` internally, but it is not easily reusable for splits within content.
 
-### FondeNumberField
+### ~~FondeNumberField~~ ✓ Done (WIP — design polish pending)
 Numeric input with increment/decrement buttons. Common in settings UIs.
 
 ### FondeSlider
@@ -39,7 +39,7 @@ The current `FondeToast` appears to be designed for single-instance use.
 ### FondeColorPicker
 Color picker UI in popup form.
 
-### FondeDatePicker / FondeTimePicker
+### ~~FondeDatePicker~~ ✓ Done (WIP — design polish pending) / FondeTimePicker
 Desktop-style popup date and time pickers.
 
 ---
