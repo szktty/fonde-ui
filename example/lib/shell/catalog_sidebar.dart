@@ -78,6 +78,7 @@ const catalogCategories = [
       CatalogItem(id: 'fonde_tags_field', label: 'Tags Field'),
       CatalogItem(id: 'fonde_number_field', label: 'Number Field'),
       CatalogItem(id: 'fonde_checkbox', label: 'Checkbox'),
+      CatalogItem(id: 'fonde_radio_button', label: 'Radio Button'),
       CatalogItem(id: 'fonde_date_picker', label: 'Date Picker'),
     ],
   ),
