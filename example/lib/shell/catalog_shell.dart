@@ -38,6 +38,14 @@ import '../pages/sidebar_list_page.dart';
 import '../pages/launch_bar_page.dart';
 import '../pages/navigation_page.dart';
 import '../pages/placeholder_page.dart';
+import '../pages/status_bar_page.dart';
+import '../pages/shortcut_scope_page.dart';
+import '../pages/tooltip_page.dart';
+import '../pages/draggable_page.dart';
+import '../pages/split_pane_page.dart';
+import '../pages/slider_page.dart';
+import '../pages/notification_overlay_page.dart';
+import '../pages/color_picker_page.dart';
 import 'catalog_sidebar.dart';
 
 class CatalogShell extends ConsumerStatefulWidget {
@@ -90,6 +98,15 @@ class _CatalogShellState extends ConsumerState<CatalogShell> {
       'selection_decorator' => const SelectionDecoratorPage(),
       'fonde_panel' => const PanelPage(),
       'fonde_list_tile' => const ListTilePage(),
+      // New components
+      'fonde_status_bar' => const StatusBarPage(),
+      'fonde_shortcut_scope' => const ShortcutScopePage(),
+      'fonde_tooltip' => const TooltipPage(),
+      'fonde_draggable' => const DraggablePage(),
+      'fonde_split_pane' => const SplitPanePage(),
+      'fonde_slider' => const SliderPage(),
+      'fonde_notification_overlay' => const NotificationOverlayPage(),
+      'fonde_color_picker' => const ColorPickerPage(),
       // Platform
       'platform_menus' => const PlatformMenusPage(),
       // Other: dummy pages

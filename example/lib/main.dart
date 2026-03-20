@@ -4,5 +4,13 @@ import 'package:fonde_ui/fonde_ui.dart';
 import 'shell/catalog_shell.dart';
 
 void main() {
-  runApp(const FondeApp(title: 'Fonde UI Catalog', home: CatalogShell()));
+  runApp(
+    const FondeApp(
+      title: 'Fonde UI Catalog',
+      home: FondeNotificationOverlay(
+        alignment: Alignment.bottomRight,
+        child: CatalogShell(),
+      ),
+    ),
+  );
 }

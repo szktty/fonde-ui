@@ -30,6 +30,7 @@ class FondeScaffold extends ConsumerStatefulWidget {
     this.launchBar,
     this.primarySidebar,
     this.secondarySidebar,
+    this.statusBar,
     this.showLaunchBar = true,
     this.showPrimarySidebar = true,
     this.showSecondarySidebar = true,
@@ -43,6 +44,10 @@ class FondeScaffold extends ConsumerStatefulWidget {
   final Widget? launchBar;
   final Widget? primarySidebar;
   final Widget? secondarySidebar;
+
+  /// Optional status bar displayed at the bottom of the scaffold.
+  /// Typically a [FondeStatusBar] widget.
+  final Widget? statusBar;
 
   /// Whether to show the launch bar.
   final bool showLaunchBar;
@@ -215,6 +220,9 @@ class _FondeScaffoldState extends ConsumerState<FondeScaffold> {
                     Expanded(
                       child: FondeMainContentArea(child: widget.content),
                     ),
+
+                    // Status bar (optional, fixed at bottom)
+                    if (widget.statusBar != null) widget.statusBar!,
                   ],
                 );
               case 'secondary_sidebar':
@@ -244,22 +252,37 @@ class _FondeScaffoldState extends ConsumerState<FondeScaffold> {
     double zoomScale,
     double secondaryWidth,
   ) {
-    return Row(
+    final mainColumn = Column(
       children: [
-        // Main Content - fill the remaining space
         Expanded(
-          child: FondeMainContentArea(
-            child: ConstrainedBox(
-              constraints: BoxConstraints(minWidth: 480 * zoomScale),
-              child: widget.content,
-            ),
+          child: Row(
+            children: [
+              // Main Content - fill the remaining space
+              Expanded(
+                child: FondeMainContentArea(
+                  child: ConstrainedBox(
+                    constraints: BoxConstraints(minWidth: 480 * zoomScale),
+                    child: widget.content,
+                  ),
+                ),
+              ),
+
+              // Secondary Sidebar - show only if it exists and is visible
+              if (widget.secondarySidebar != null &&
+                  widget.showSecondarySidebar)
+                SizedBox(
+                  width: secondaryWidth,
+                  child: widget.secondarySidebar!,
+                ),
+            ],
           ),
         ),
 
-        // Secondary Sidebar - show only if it exists and is visible
-        if (widget.secondarySidebar != null && widget.showSecondarySidebar)
-          SizedBox(width: secondaryWidth, child: widget.secondarySidebar!),
+        // Status bar (optional, fixed at bottom)
+        if (widget.statusBar != null) widget.statusBar!,
       ],
     );
+
+    return mainColumn;
   }
 }
