@@ -17,6 +17,10 @@ Desktop-first Flutter UI optimized for native-grade instant feedback, with acces
 
 - Use Riverpod for state management
   - APIs that depend on Riverpod must be exported via `fonde_ui_riverpod.dart`
+- Component design decisions follow the priority order defined in `@doc/design/01-foundations.md`:
+  1. Accessibility
+  2. Desktop platform conventions
+  3. Figma-style aesthetics
 
 ## Specific Tooling
 

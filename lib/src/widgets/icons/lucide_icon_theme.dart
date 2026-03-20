@@ -46,7 +46,11 @@ const fondeDefaultIconTheme = FondeIconTheme(
   chevronDown: LucideIcons.chevronDown200,
   chevronRight: LucideIcons.chevronRight200,
   // Check and selection
-  check: LucideIcons.check200,
+  check: LucideIcons.check600,
+  checkIndeterminate: LucideIcons.minus600,
+  checkboxIconSizeRatio: 0.7,
+  // Actions (generic)
+  minus: LucideIcons.minus200,
   // Entity and data
   circle: LucideIcons.circle200,
   link: LucideIcons.link200,

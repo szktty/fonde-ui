@@ -47,6 +47,10 @@ class FondeIconTheme {
     required this.chevronRight,
     // Check and selection
     required this.check,
+    required this.checkIndeterminate,
+    required this.checkboxIconSizeRatio,
+    // Actions (generic)
+    required this.minus,
     // Entity and data
     required this.circle,
     required this.link,
@@ -155,6 +159,15 @@ class FondeIconTheme {
 
   // Check and selection
   final IconData check;
+  final IconData checkIndeterminate;
+
+  /// Size ratio of check/indeterminate icons relative to the checkbox size.
+  /// Adjust per icon set: bolder strokes (e.g. 600-weight) work better at ~0.7,
+  /// thinner strokes (e.g. 200-weight) may need ~0.6.
+  final double checkboxIconSizeRatio;
+
+  // Actions (generic)
+  final IconData minus;
 
   // Entity and data
   final IconData circle;
@@ -259,6 +272,9 @@ class FondeIconTheme {
     IconData? chevronDown,
     IconData? chevronRight,
     IconData? check,
+    IconData? checkIndeterminate,
+    double? checkboxIconSizeRatio,
+    IconData? minus,
     IconData? circle,
     IconData? link,
     IconData? tag,
@@ -345,6 +361,10 @@ class FondeIconTheme {
       chevronDown: chevronDown ?? this.chevronDown,
       chevronRight: chevronRight ?? this.chevronRight,
       check: check ?? this.check,
+      checkIndeterminate: checkIndeterminate ?? this.checkIndeterminate,
+      checkboxIconSizeRatio:
+          checkboxIconSizeRatio ?? this.checkboxIconSizeRatio,
+      minus: minus ?? this.minus,
       circle: circle ?? this.circle,
       link: link ?? this.link,
       tag: tag ?? this.tag,
@@ -436,6 +456,9 @@ class FondeIconTheme {
         chevronDown == other.chevronDown &&
         chevronRight == other.chevronRight &&
         check == other.check &&
+        checkIndeterminate == other.checkIndeterminate &&
+        checkboxIconSizeRatio == other.checkboxIconSizeRatio &&
+        minus == other.minus &&
         circle == other.circle &&
         link == other.link &&
         tag == other.tag &&
@@ -524,6 +547,9 @@ class FondeIconTheme {
     chevronDown,
     chevronRight,
     check,
+    checkIndeterminate,
+    checkboxIconSizeRatio,
+    minus,
     circle,
     link,
     tag,

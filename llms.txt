@@ -7,7 +7,7 @@ Developed for [RinneGraph](https://github.com/szktty/rinne-graph). Currently pro
 ## Package info
 
 - name: fonde_ui
-- version: 0.3.0
+- version: 0.4.0-dev
 - Dart SDK: ^3.7.0
 - Flutter: >=3.41.2
 
@@ -44,8 +44,9 @@ All widgets that use Riverpod internally are ConsumerWidgets. `FondeApp` provide
 
 ## Design principles
 
-- Zero-latency feedback: no animation delays on user input
 - Desktop-first: mouse + keyboard assumed
+- Accessibility first: visibility and perceivability take priority over aesthetics in all component design decisions
+- Animations that delay response to user input (ripple, tab switching, etc.) are disabled; whether to use animation is decided by accessibility (visibility, reduced motion) rather than aesthetics
 - Accessibility: zoom scale, border scale, high contrast via FondeAccessibilityConfig
 - All dimensional values scale with `accessibilityConfig.zoomScale` and `accessibilityConfig.borderScale`
 - `disableZoom: true` parameter available on most widgets to opt out of scaling
@@ -766,13 +767,27 @@ FondeCheckbox({
   required bool? value,
   required ValueChanged<bool?>? onChanged,
   bool tristate = false,
-  double? size,          // default 20px
+  double? size,                                              // default 20px
+  FondeCheckboxShape shape = FondeCheckboxShape.rectangle,  // or .circle
+  FondeCheckboxFillStyle fillStyle = FondeCheckboxFillStyle.filled,  // or .outline / .iconOnly
   String? semanticLabel,
   bool disableZoom = false,
 })
+
+enum FondeCheckboxShape { rectangle, circle }
+
+enum FondeCheckboxFillStyle {
+  filled,    // background filled with primaryColor when checked (default, macOS style)
+  outline,   // no fill; border + icon use primaryColor when checked (Figma style)
+  iconOnly,  // no fill, no border color change; only icon is colored with primaryColor
+}
 ```
 
-Uses smooth rounded corners (cornerRadius: 4px). Tristate: false → true → null → false.
+Uses smooth rounded corners (cornerRadius: 4px) for rectangle shape.
+Check icon: `FondeIconTheme.check` (default: `LucideIcons.check400`).
+Indeterminate icon: `FondeIconTheme.checkIndeterminate` (default: `LucideIcons.minus400`).
+Both are overridable via `fondeActiveIconThemeProvider`.
+Tristate: false → true → null → false.
 
 ### FondeRadioButton
 
@@ -999,7 +1014,7 @@ FondeListTile({
 })
 ```
 
-Ripple/splash animations are disabled by design (zero-latency principle).
+Ripple/splash animations are disabled by design (animations that delay input response are avoided).
 
 ---
 
@@ -1233,25 +1248,87 @@ Custom icon theme. When set via `fondeActiveIconThemeProvider`, widgets use it i
 The default icon set is Lucide Icons. `lucideIconTheme` constant provides the default mapping.
 
 Common icon properties on FondeIconTheme:
-- `.check`, `.x`, `.chevronRight`, `.chevronDown`, `.search`, `.plus`, `.minus`, `.settings`, etc.
+- `.check`, `.checkIndeterminate` — checkbox checked / indeterminate state
+- `.minus` — generic horizontal-bar action (decrease, collapse, etc.)
+- `.x`, `.chevronRight`, `.chevronDown`, `.search`, `.plus`, `.settings`, etc.
 
 ---
 
 ## Styling helpers
 
+### FondeRectangleBorder
+
+Figma-style squircle border container widget. Uses figma_squircle's `SmoothRectangleBorder` internally.
+
+```dart
+FondeRectangleBorder({
+  Widget? child,
+  double? cornerRadius,       // default 12.0
+  double? cornerSmoothing,    // default 0.6 (0.0–1.0; higher = smoother)
+  BorderSide? side,           // default: colorScheme.base.border, width 1.5
+  Color? color,               // background color, default null (transparent)
+  EdgeInsetsGeometry? padding,
+  double? width,
+  double? height,
+  AlignmentGeometry alignment = Alignment.center,
+})
+```
+
+Riverpod providers:
+
+```dart
+fondeRectangleBorderProvider          // Provider<SmoothRectangleBorder> (radius=12, smoothing=0.6, themed border)
+fondeShapeDecorationProvider(         // Provider<ShapeDecoration>
+  color: Color?,
+  cornerRadius: double?,
+  cornerSmoothing: double?,
+  side: BorderSide?,
+)
+```
+
+### FondeBorderRadius
+
+Wrapper around `SmoothBorderRadius` for unified squircle corner values.
+
+```dart
+// Constructors:
+FondeBorderRadius()                        // radius=12.0, smoothing=0.6 (default)
+FondeBorderRadius.radius(double radius)    // custom radius, smoothing=0.6
+FondeBorderRadius.small()                  // radius=8.0,  smoothing=0.6
+FondeBorderRadius.medium()                 // radius=12.0, smoothing=0.6
+FondeBorderRadius.large()                  // radius=16.0, smoothing=0.6
+FondeBorderRadius.circular(double radius)  // smoothing=1.0 (fully circular)
+FondeBorderRadius.create({double? cornerRadius, double? cornerSmoothing})  // factory
+
+// Conversion:
+.toSmoothBorderRadius()    // → SmoothBorderRadius
+.toBorderRadiusGeometry()  // → BorderRadiusGeometry
+```
+
+Provider: `fondeBorderRadiusProvider` → `FondeBorderRadius.medium()`
+
+### FondeBorderSide
+
+`BorderSide` subclass with preset widths.
+
+```dart
+FondeBorderSide.thin()      // width=1.0
+FondeBorderSide.standard()  // width=1.5 (default)
+FondeBorderSide.thick()     // width=2.0
+FondeBorderSide.none()      // width=0, style=none
+```
+
+Provider: `fondeBorderSideProvider` → `FondeBorderSide.standard(color: colorScheme.base.border)`
+
 ### FondeBorderRadiusValues
+
+Standard `BorderRadius` constants (non-squircle, for Flutter-native widgets).
 
 ```dart
 FondeBorderRadiusValues.small  = 4.0
 FondeBorderRadiusValues.medium = 8.0
 FondeBorderRadiusValues.large  = 12.0
 ```
-
-Used with figma_squircle `SmoothBorderRadius(cornerRadius:, cornerSmoothing: 0.6)`.
-
-### FondeBorder
-
-Themed border helper.
 
 ---
 

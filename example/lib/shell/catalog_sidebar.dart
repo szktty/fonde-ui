@@ -111,6 +111,7 @@ const catalogCategories = [
     label: 'Visual',
     items: [
       CatalogItem(id: 'selection_decorator', label: 'Selection Decorator'),
+      CatalogItem(id: 'fonde_rectangle_border', label: 'Rectangle Border'),
     ],
   ),
   CatalogCategory(

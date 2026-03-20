@@ -46,6 +46,7 @@ import '../pages/split_pane_page.dart';
 import '../pages/slider_page.dart';
 import '../pages/notification_overlay_page.dart';
 import '../pages/color_picker_page.dart';
+import '../pages/rectangle_border_page.dart';
 import 'catalog_sidebar.dart';
 
 class CatalogShell extends ConsumerStatefulWidget {
@@ -107,6 +108,8 @@ class _CatalogShellState extends ConsumerState<CatalogShell> {
       'fonde_slider' => const SliderPage(),
       'fonde_notification_overlay' => const NotificationOverlayPage(),
       'fonde_color_picker' => const ColorPickerPage(),
+      // Visual
+      'fonde_rectangle_border' => const RectangleBorderPage(),
       // Platform
       'platform_menus' => const PlatformMenusPage(),
       // Other: dummy pages
