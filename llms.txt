@@ -1239,19 +1239,79 @@ Common icon properties on FondeIconTheme:
 
 ## Styling helpers
 
+### FondeRectangleBorder
+
+Figma-style squircle border container widget. Uses figma_squircle's `SmoothRectangleBorder` internally.
+
+```dart
+FondeRectangleBorder({
+  Widget? child,
+  double? cornerRadius,       // default 12.0
+  double? cornerSmoothing,    // default 0.6 (0.0–1.0; higher = smoother)
+  BorderSide? side,           // default: colorScheme.base.border, width 1.5
+  Color? color,               // background color, default null (transparent)
+  EdgeInsetsGeometry? padding,
+  double? width,
+  double? height,
+  AlignmentGeometry alignment = Alignment.center,
+})
+```
+
+Riverpod providers:
+
+```dart
+fondeRectangleBorderProvider          // Provider<SmoothRectangleBorder> (radius=12, smoothing=0.6, themed border)
+fondeShapeDecorationProvider(         // Provider<ShapeDecoration>
+  color: Color?,
+  cornerRadius: double?,
+  cornerSmoothing: double?,
+  side: BorderSide?,
+)
+```
+
+### FondeBorderRadius
+
+Wrapper around `SmoothBorderRadius` for unified squircle corner values.
+
+```dart
+// Constructors:
+FondeBorderRadius()                        // radius=12.0, smoothing=0.6 (default)
+FondeBorderRadius.radius(double radius)    // custom radius, smoothing=0.6
+FondeBorderRadius.small()                  // radius=8.0,  smoothing=0.6
+FondeBorderRadius.medium()                 // radius=12.0, smoothing=0.6
+FondeBorderRadius.large()                  // radius=16.0, smoothing=0.6
+FondeBorderRadius.circular(double radius)  // smoothing=1.0 (fully circular)
+FondeBorderRadius.create({double? cornerRadius, double? cornerSmoothing})  // factory
+
+// Conversion:
+.toSmoothBorderRadius()    // → SmoothBorderRadius
+.toBorderRadiusGeometry()  // → BorderRadiusGeometry
+```
+
+Provider: `fondeBorderRadiusProvider` → `FondeBorderRadius.medium()`
+
+### FondeBorderSide
+
+`BorderSide` subclass with preset widths.
+
+```dart
+FondeBorderSide.thin()      // width=1.0
+FondeBorderSide.standard()  // width=1.5 (default)
+FondeBorderSide.thick()     // width=2.0
+FondeBorderSide.none()      // width=0, style=none
+```
+
+Provider: `fondeBorderSideProvider` → `FondeBorderSide.standard(color: colorScheme.base.border)`
+
 ### FondeBorderRadiusValues
+
+Standard `BorderRadius` constants (non-squircle, for Flutter-native widgets).
 
 ```dart
 FondeBorderRadiusValues.small  = 4.0
 FondeBorderRadiusValues.medium = 8.0
 FondeBorderRadiusValues.large  = 12.0
 ```
-
-Used with figma_squircle `SmoothBorderRadius(cornerRadius:, cornerSmoothing: 0.6)`.
-
-### FondeBorder
-
-Themed border helper.
 
 ---
 

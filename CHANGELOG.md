@@ -9,6 +9,11 @@
 - FIX
   - Bug fixes
 
+## develop
+
+- [ADD] Add catalog sample page for FondeRectangleBorder / FondeBorderRadius / FondeBorderSide
+- [UPDATE] Update llms.txt documentation for FondeRectangleBorder, FondeBorderRadius, FondeBorderSide, FondeBorderRadiusValues
+
 ## 0.3.0
 
 **Release date**: 2026-03-20
