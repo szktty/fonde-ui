@@ -30,6 +30,8 @@ const catalogCategories = [
     items: [
       CatalogItem(id: 'tab_view', label: 'Tab View'),
       CatalogItem(id: 'fonde_panel', label: 'Panel'),
+      CatalogItem(id: 'fonde_status_bar', label: 'Status Bar'),
+      CatalogItem(id: 'fonde_split_pane', label: 'Split Pane'),
     ],
   ),
   CatalogCategory(
@@ -80,6 +82,8 @@ const catalogCategories = [
       CatalogItem(id: 'fonde_checkbox', label: 'Checkbox'),
       CatalogItem(id: 'fonde_radio_button', label: 'Radio Button'),
       CatalogItem(id: 'fonde_date_picker', label: 'Date Picker'),
+      CatalogItem(id: 'fonde_slider', label: 'Slider'),
+      CatalogItem(id: 'fonde_color_picker', label: 'Color Picker'),
     ],
   ),
   CatalogCategory(
@@ -90,6 +94,11 @@ const catalogCategories = [
       CatalogItem(id: 'fonde_toast', label: 'Toast'),
       CatalogItem(id: 'fonde_popover', label: 'Popover'),
       CatalogItem(id: 'fonde_progress_indicator', label: 'Progress Indicator'),
+      CatalogItem(
+        id: 'fonde_notification_overlay',
+        label: 'Notification Overlay',
+      ),
+      CatalogItem(id: 'fonde_tooltip', label: 'Tooltip'),
     ],
   ),
   CatalogCategory(
@@ -107,7 +116,11 @@ const catalogCategories = [
   CatalogCategory(
     id: 'interaction',
     label: 'Interaction',
-    items: [CatalogItem(id: 'gesture_detector', label: 'Gesture Detector')],
+    items: [
+      CatalogItem(id: 'gesture_detector', label: 'Gesture Detector'),
+      CatalogItem(id: 'fonde_draggable', label: 'Draggable'),
+      CatalogItem(id: 'fonde_shortcut_scope', label: 'Shortcut Scope'),
+    ],
   ),
   CatalogCategory(
     id: 'platform',

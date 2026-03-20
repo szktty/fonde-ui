@@ -2,42 +2,44 @@
 
 ## Priority: High
 
-### FondeStatusBar
-Status bar at the bottom of the screen. Can be implemented by adding a `statusBar` parameter to `FondeScaffold`.
-Required to complete the typical desktop app layout.
+### ~~FondeStatusBar~~ ✓ Done
+Status bar at the bottom of the screen. Added `statusBar` parameter to `FondeScaffold`.
+Also provides `FondeStatusBarItem` and `FondeStatusBarDivider`.
 
-### Keyboard Shortcut Management (FondeShortcutScope)
-Scope-aware keyboard shortcut management. Required to fulfill the desktop-first design principle (mouse + keyboard assumed).
-Useful standalone, and becomes more valuable paired with a command palette.
+### ~~Keyboard Shortcut Management (FondeShortcutScope)~~ ✓ Done
+Scope-aware keyboard shortcut management. `FondeShortcutScope` wraps `Shortcuts`+`Actions`
+with desktop-first defaults and a `FondeShortcutRegistry` for command-palette integration.
 
-### FondeDraggable / FondeDragTarget
-Drag-and-drop for files, list items, and panel reordering.
-Flutter's default `Draggable` has mobile-oriented behavior; a desktop-appropriate wrapper is needed.
+### ~~FondeDraggable / FondeDragTarget~~ ✓ Done
+Desktop-appropriate drag-and-drop. `FondeDraggable<T>` uses left-button drag, grab/grabbing
+cursor, ghost/badge/custom feedback. `FondeDragTarget<T>` exposes `isOver` to builders.
 
-### FondeTooltip (enhanced)
-Rich-content tooltip supporting keybinding display, multi-line content, etc.
-Currently, button widgets only accept a plain string via the `tooltip` parameter.
+### ~~FondeTooltip (enhanced)~~ ✓ Done
+Rich-content tooltip supporting keybinding display (`shortcut` param), multi-line `description`,
+and themed styling via `_FondeTooltipDecoration`.
 
 ---
 
 ## Priority: Medium
 
-### FondeSplitPane
-Horizontal/vertical split pane for use inside content areas.
-`FondeScaffold` uses `multi_split_view` internally, but it is not easily reusable for splits within content.
+### ~~FondeSplitPane~~ ✓ Done
+Horizontal/vertical split pane for use inside content areas, built on `multi_split_view`.
+Accepts `initialSizes`, `minSizes`, `maxSizes`, and `onSizesChanged`.
 
 ### ~~FondeNumberField~~ ✓ Done (WIP — design polish pending)
 Numeric input with increment/decrement buttons. Common in settings UIs.
 
-### FondeSlider
-Theme-aware slider. Flutter's default `Slider` does not match fonde-ui's visual style out of the box.
+### ~~FondeSlider~~ ✓ Done
+Theme-aware slider. `FondeSlider` and `FondeRangeSlider` apply primary color, consistent
+track/thumb sizing, and accessibility zoom scaling.
 
-### Notification Stack (FondeNotificationOverlay)
-Queue and stacking management for multiple simultaneous `FondeToast` notifications.
-The current `FondeToast` appears to be designed for single-instance use.
+### ~~Notification Stack (FondeNotificationOverlay)~~ ✓ Done
+`FondeNotificationOverlay` wraps a widget tree and shows stacked notifications from
+`fondeNotificationProvider`. Supports info/success/warning/error, auto-dismiss, and max-visible cap.
 
-### FondeColorPicker
-Color picker UI in popup form.
+### ~~FondeColorPicker~~ ✓ Done
+HSV color picker with saturation-value canvas, hue slider, optional alpha slider, and hex input.
+`showFondeColorPickerDialog` shows it in a themed popup.
 
 ### ~~FondeDatePicker~~ ✓ Done (WIP — design polish pending) / FondeTimePicker
 Desktop-style popup date and time pickers.
@@ -49,6 +51,9 @@ Desktop-style popup date and time pickers.
 - `FondeTreeView` — may overlap with `FondeOutlineView`; needs clarification
 - `FondeCalendar` — general-purpose but high implementation cost
 - `FondeKanban` — too app-specific
+- `FondeFloatingActionButton` — FAB is a mobile-first pattern; desktop apps typically use toolbar
+  buttons or fixed-position action buttons instead. Implement only if a clear desktop use case emerges
+  (e.g., floating "Create" button above a canvas). `Stack` + `FondeButton.primary` is a viable substitute.
 
 ---
 

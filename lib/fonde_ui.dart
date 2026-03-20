@@ -181,6 +181,30 @@ export 'src/widgets/progress/fonde_progress_indicator.dart';
 // ─── Table View ───────────────────────────────────────────────────────────────
 export 'src/widgets/table_view/fonde_table_view.dart';
 
+// ─── Status Bar ───────────────────────────────────────────────────────────────
+export 'src/widgets/status_bar/fonde_status_bar.dart';
+
+// ─── Shortcut Scope ───────────────────────────────────────────────────────────
+export 'src/widgets/shortcut_scope/fonde_shortcut_scope.dart';
+
+// ─── Tooltip ──────────────────────────────────────────────────────────────────
+export 'src/widgets/tooltip/fonde_tooltip.dart';
+
+// ─── Draggable ────────────────────────────────────────────────────────────────
+export 'src/widgets/draggable/fonde_draggable.dart';
+
+// ─── Split Pane ───────────────────────────────────────────────────────────────
+export 'src/widgets/split_pane/fonde_split_pane.dart';
+
+// ─── Slider ───────────────────────────────────────────────────────────────────
+export 'src/widgets/slider/fonde_slider.dart';
+
+// ─── Notification Overlay ─────────────────────────────────────────────────────
+export 'src/widgets/notification_overlay/fonde_notification_overlay.dart';
+
+// ─── Color Picker ─────────────────────────────────────────────────────────────
+export 'src/widgets/color_picker/fonde_color_picker.dart';
+
 // ─── Platform Menus ───────────────────────────────────────────────────────────
 export 'src/widgets/platform_menus/fonde_platform_menus.dart';
 
