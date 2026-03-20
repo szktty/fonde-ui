@@ -9,7 +9,7 @@
 - FIX
   - Bug fixes
 
-## develop
+## 0.4.0-dev
 
 - [CHANGE] Redesign FondeCheckbox
   - Add `shape` parameter: `FondeCheckboxShape.rectangle` (default) / `.circle`
