@@ -44,8 +44,9 @@ All widgets that use Riverpod internally are ConsumerWidgets. `FondeApp` provide
 
 ## Design principles
 
-- Zero-latency feedback: no animation delays on user input
 - Desktop-first: mouse + keyboard assumed
+- Accessibility first: visibility and perceivability take priority over aesthetics in all component design decisions
+- Animations that delay response to user input (ripple, tab switching, etc.) are disabled; whether to use animation is decided by accessibility (visibility, reduced motion) rather than aesthetics
 - Accessibility: zoom scale, border scale, high contrast via FondeAccessibilityConfig
 - All dimensional values scale with `accessibilityConfig.zoomScale` and `accessibilityConfig.borderScale`
 - `disableZoom: true` parameter available on most widgets to opt out of scaling
@@ -1013,7 +1014,7 @@ FondeListTile({
 })
 ```
 
-Ripple/splash animations are disabled by design (zero-latency principle).
+Ripple/splash animations are disabled by design (animations that delay input response are avoided).
 
 ---
 

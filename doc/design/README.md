@@ -2,9 +2,15 @@
 
 Fonde UI is a desktop-first Flutter UI component library. This document provides design guidelines for using and developing Fonde UI.
 
-## Key Policy
+## Design Principles
 
-**Desktop-First**: These guidelines are optimized for **desktop applications**.
+**Desktop-First** — Optimized for desktop applications (macOS, Windows, Linux). Mouse and keyboard are the primary input methods.
+
+**Accessibility over aesthetics** — Visibility and perceivability take priority over visual beauty in all component design decisions. When a design option is more beautiful but harder to perceive (e.g. low-contrast, thin strokes, outline-only indicators), the more accessible option is the default.
+
+**Animation policy** — Whether to use animation is decided by accessibility, not aesthetics. Animations that delay response to user input (ripple effects, tab switching, etc.) are disabled. Animations that aid state recognition (progress indicators, overlay transitions) are permitted. Reduced-motion and high-contrast contexts minimize or eliminate motion.
+
+For the full priority order applied to individual component decisions, see [01. Basic Concepts and Principles](./01-foundations.md).
 
 ## Document Structure
 

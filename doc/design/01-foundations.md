@@ -27,12 +27,12 @@
 **5. Performance**
 - Efficient widget tree
 - Minimal rebuilds
-- Immediate feedback (zero-latency response to user input is the principle)
+- Animations that delay response to user input (ripple, tab switching, etc.) are disabled
 
-**6. No Animation**
-- **All animations are disabled** (except progress bars, popovers, and dialogs)
-- Improved usability and performance optimization
-- Reduced visual noise
+**6. Animation Policy**
+- Accessibility takes priority: animations that cause visual noise or distract from content are avoided
+- Animations that aid state recognition (progress bars, overlays appearing/disappearing) are permitted
+- `prefers-reduced-motion` / `highContrastMode` contexts should minimize or eliminate motion
 
 ### Desktop-First Design
 

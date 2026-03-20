@@ -13,6 +13,19 @@
 
 - [ADD] Add catalog sample page for FondeRectangleBorder / FondeBorderRadius / FondeBorderSide
 - [UPDATE] Update llms.txt documentation for FondeRectangleBorder, FondeBorderRadius, FondeBorderSide, FondeBorderRadiusValues
+- [CHANGE] Redesign FondeCheckbox
+  - Add `shape` parameter: `FondeCheckboxShape.rectangle` (default) / `.circle`
+  - Add `fillStyle` parameter: `FondeCheckboxFillStyle.filled` (default) / `.outline` / `.iconOnly`
+    - `filled`: background filled with primary color when checked (macOS style, default)
+    - `outline`: no fill, border and icon use primary color when checked (Figma style)
+    - `iconOnly`: no fill, no border color change, only icon is colored
+  - Fix check icon color from hardcoded Colors.black/white to `colorScheme.interactive.button.primaryText`
+  - Replace indeterminate indicator (small rect) with `FondeIconTheme.checkIndeterminate` icon
+- [ADD] Add `checkIndeterminate` and `minus` to `FondeIconTheme`
+- [ADD] Add `checkboxIconSizeRatio` to `FondeIconTheme` — controls icon size relative to checkbox size per icon set
+- [UPDATE] Default Lucide check/indeterminate icons changed to 600-weight (strokeWidth 3.0) for better visibility
+- [ADD] Add design guidelines to `doc/design/` (copied from private repo)
+- [UPDATE] Clarify design principles: accessibility over aesthetics, revise animation policy (remove zero-latency framing)
 
 ## 0.3.0
 
