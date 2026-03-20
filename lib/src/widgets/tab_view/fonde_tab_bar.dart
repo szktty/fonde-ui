@@ -73,6 +73,8 @@ class FondeTabBar extends ConsumerWidget {
           dividerHeight: 0,
           indicatorSize: TabBarIndicatorSize.tab,
           indicatorWeight: 2.0,
+          splashFactory: NoSplash.splashFactory,
+          overlayColor: WidgetStateProperty.all(Colors.transparent),
         ),
       ),
     );

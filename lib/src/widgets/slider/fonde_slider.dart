@@ -74,7 +74,7 @@ class FondeSlider extends ConsumerWidget {
       inactiveTrackColor:
           enabled ? inactiveColor : disabledColor.withValues(alpha: 0.5),
       thumbColor: enabled ? thumbColor : disabledColor,
-      overlayColor: activeColor.withValues(alpha: 0.12),
+      overlayColor: Colors.transparent,
       valueIndicatorColor: colorScheme.uiAreas.dialog.background,
       valueIndicatorTextStyle: TextStyle(
         color: colorScheme.uiAreas.dialog.foreground,
@@ -145,7 +145,7 @@ class FondeRangeSlider extends ConsumerWidget {
       inactiveTrackColor:
           enabled ? inactiveColor : disabledColor.withValues(alpha: 0.5),
       thumbColor: enabled ? thumbColor : disabledColor,
-      overlayColor: activeColor.withValues(alpha: 0.12),
+      overlayColor: Colors.transparent,
       valueIndicatorColor: colorScheme.uiAreas.dialog.background,
       valueIndicatorTextStyle: TextStyle(
         color: colorScheme.uiAreas.dialog.foreground,
