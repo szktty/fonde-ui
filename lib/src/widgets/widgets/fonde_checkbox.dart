@@ -35,7 +35,7 @@ enum FondeCheckboxFillStyle {
 /// Features smooth corners (rectangle) or circle shape,
 /// and uses [FondeIconTheme.check] / [FondeIconTheme.checkIndeterminate]
 /// for the check icons.
-class FondeCheckbox extends ConsumerWidget {
+class FondeCheckbox extends ConsumerStatefulWidget {
   /// Value of the checkbox.
   final bool? value;
 
@@ -81,28 +81,57 @@ class FondeCheckbox extends ConsumerWidget {
   });
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<FondeCheckbox> createState() => _FondeCheckboxState();
+}
+
+class _FondeCheckboxState extends ConsumerState<FondeCheckbox> {
+  bool _isPressed = false;
+
+  void _handleTap() {
+    if (widget.onChanged == null) return;
+    if (widget.tristate) {
+      if (widget.value == false) {
+        widget.onChanged!(true);
+      } else if (widget.value == true) {
+        widget.onChanged!(null);
+      } else {
+        widget.onChanged!(false);
+      }
+    } else {
+      widget.onChanged!(!(widget.value ?? false));
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final appColorScheme = ref.watch(effectiveColorSchemeWithThemeProvider);
     final accessibilityConfig = ref.watch(fondeAccessibilityConfigProvider);
     final iconTheme = ref.watch(fondeDefaultIconThemeProvider);
 
-    final zoomScale = disableZoom ? 1.0 : accessibilityConfig.zoomScale;
-    final borderScale = disableZoom ? 1.0 : accessibilityConfig.borderScale;
-    final effectiveSize = (size ?? 20.0) * zoomScale;
+    final zoomScale = widget.disableZoom ? 1.0 : accessibilityConfig.zoomScale;
+    final borderScale =
+        widget.disableZoom ? 1.0 : accessibilityConfig.borderScale;
+    final effectiveSize = (widget.size ?? 20.0) * zoomScale;
 
-    final isChecked = value == true;
-    final isIndeterminate = value == null && tristate;
+    final isChecked = widget.value == true;
+    final isIndeterminate = widget.value == null && widget.tristate;
     final isActive = isChecked || isIndeterminate;
+    final isEnabled = widget.onChanged != null;
+
+    // Press highlight applies only when unchecked/indeterminate is not active.
+    final pressColor = appColorScheme.interactive.button.background.active;
 
     final Color backgroundColor;
     final Color borderColor;
     final Color iconColor;
 
-    switch (fillStyle) {
+    switch (widget.fillStyle) {
       case FondeCheckboxFillStyle.filled:
         backgroundColor =
             isActive
                 ? appColorScheme.theme.primaryColor
+                : _isPressed
+                ? pressColor
                 : const Color(0x00000000);
         borderColor =
             isActive
@@ -110,22 +139,22 @@ class FondeCheckbox extends ConsumerWidget {
                 : appColorScheme.base.border;
         iconColor = appColorScheme.interactive.button.primaryText;
       case FondeCheckboxFillStyle.outline:
-        // No fill; border and icon use primary color when active.
-        backgroundColor = const Color(0x00000000);
+        backgroundColor =
+            _isPressed && !isActive ? pressColor : const Color(0x00000000);
         borderColor =
             isActive
                 ? appColorScheme.theme.primaryColor
                 : appColorScheme.base.border;
         iconColor = appColorScheme.theme.primaryColor;
       case FondeCheckboxFillStyle.iconOnly:
-        // No fill, no border color change; only the icon is colored.
-        backgroundColor = const Color(0x00000000);
+        backgroundColor =
+            _isPressed && !isActive ? pressColor : const Color(0x00000000);
         borderColor = appColorScheme.base.border;
         iconColor = appColorScheme.theme.primaryColor;
     }
 
     final ShapeBorder shapeBorder;
-    if (shape == FondeCheckboxShape.circle) {
+    if (widget.shape == FondeCheckboxShape.circle) {
       shapeBorder = CircleBorder(
         side: BorderSide(color: borderColor, width: 1.5 * borderScale),
       );
@@ -156,30 +185,16 @@ class FondeCheckbox extends ConsumerWidget {
     }
 
     return GestureDetector(
-      onTap:
-          onChanged != null
-              ? () {
-                if (tristate) {
-                  // false -> true -> null -> false
-                  if (value == false) {
-                    onChanged!(true);
-                  } else if (value == true) {
-                    onChanged!(null);
-                  } else {
-                    onChanged!(false);
-                  }
-                } else {
-                  // false -> true -> false
-                  onChanged!(!(value ?? false));
-                }
-              }
-              : null,
+      onTapDown: isEnabled ? (_) => setState(() => _isPressed = true) : null,
+      onTapUp: isEnabled ? (_) => setState(() => _isPressed = false) : null,
+      onTapCancel: isEnabled ? () => setState(() => _isPressed = false) : null,
+      onTap: isEnabled ? _handleTap : null,
       child: Focus(
-        focusNode: focusNode,
-        autofocus: autofocus,
+        focusNode: widget.focusNode,
+        autofocus: widget.autofocus,
         child: Semantics(
-          label: semanticLabel,
-          checked: value,
+          label: widget.semanticLabel,
+          checked: widget.value,
           child: Container(
             width: effectiveSize,
             height: effectiveSize,
