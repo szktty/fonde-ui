@@ -766,13 +766,27 @@ FondeCheckbox({
   required bool? value,
   required ValueChanged<bool?>? onChanged,
   bool tristate = false,
-  double? size,          // default 20px
+  double? size,                                              // default 20px
+  FondeCheckboxShape shape = FondeCheckboxShape.rectangle,  // or .circle
+  FondeCheckboxFillStyle fillStyle = FondeCheckboxFillStyle.filled,  // or .outline / .iconOnly
   String? semanticLabel,
   bool disableZoom = false,
 })
+
+enum FondeCheckboxShape { rectangle, circle }
+
+enum FondeCheckboxFillStyle {
+  filled,    // background filled with primaryColor when checked (default, macOS style)
+  outline,   // no fill; border + icon use primaryColor when checked (Figma style)
+  iconOnly,  // no fill, no border color change; only icon is colored with primaryColor
+}
 ```
 
-Uses smooth rounded corners (cornerRadius: 4px). Tristate: false → true → null → false.
+Uses smooth rounded corners (cornerRadius: 4px) for rectangle shape.
+Check icon: `FondeIconTheme.check` (default: `LucideIcons.check400`).
+Indeterminate icon: `FondeIconTheme.checkIndeterminate` (default: `LucideIcons.minus400`).
+Both are overridable via `fondeActiveIconThemeProvider`.
+Tristate: false → true → null → false.
 
 ### FondeRadioButton
 
@@ -1233,7 +1247,9 @@ Custom icon theme. When set via `fondeActiveIconThemeProvider`, widgets use it i
 The default icon set is Lucide Icons. `lucideIconTheme` constant provides the default mapping.
 
 Common icon properties on FondeIconTheme:
-- `.check`, `.x`, `.chevronRight`, `.chevronDown`, `.search`, `.plus`, `.minus`, `.settings`, etc.
+- `.check`, `.checkIndeterminate` — checkbox checked / indeterminate state
+- `.minus` — generic horizontal-bar action (decrease, collapse, etc.)
+- `.x`, `.chevronRight`, `.chevronDown`, `.search`, `.plus`, `.settings`, etc.
 
 ---
 

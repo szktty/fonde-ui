@@ -2,14 +2,39 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../internal.dart';
 import 'package:figma_squircle/figma_squircle.dart';
-import 'fonde_rectangle_border.dart';
 import '../icons/icon_theme_providers.dart';
+import 'fonde_rectangle_border.dart';
 
-/// Common Checkbox for App app.
+/// Shape of [FondeCheckbox].
+enum FondeCheckboxShape {
+  /// Rounded rectangle (squircle).
+  rectangle,
+
+  /// Circle.
+  circle,
+}
+
+/// Fill style of [FondeCheckbox].
+enum FondeCheckboxFillStyle {
+  /// Background is filled with the primary color when checked (default, macOS style).
+  /// Most accessible: state is conveyed by surface area, not stroke alone.
+  filled,
+
+  /// No background fill; border changes to primary color and check icon is shown
+  /// in primary color (Figma style).
+  outline,
+
+  /// No background fill, no border color change; only the check icon is colored
+  /// with the primary color. Lightest visual weight.
+  iconOnly,
+}
+
+/// Common Checkbox for Fonde UI.
 ///
 /// Provides a unified Checkbox style across the app.
-/// Features smooth corners and a gray border using FondeRectangleBorder,
-/// and uses LucideIcons.check for the check icon.
+/// Features smooth corners (rectangle) or circle shape,
+/// and uses [FondeIconTheme.check] / [FondeIconTheme.checkIndeterminate]
+/// for the check icons.
 class FondeCheckbox extends ConsumerWidget {
   /// Value of the checkbox.
   final bool? value;
@@ -22,6 +47,12 @@ class FondeCheckbox extends ConsumerWidget {
 
   /// Size of the checkbox.
   final double? size;
+
+  /// Shape of the checkbox.
+  final FondeCheckboxShape shape;
+
+  /// Fill style of the checkbox.
+  final FondeCheckboxFillStyle fillStyle;
 
   /// Focus node of the checkbox.
   final FocusNode? focusNode;
@@ -41,6 +72,8 @@ class FondeCheckbox extends ConsumerWidget {
     required this.onChanged,
     this.tristate = false,
     this.size,
+    this.shape = FondeCheckboxShape.rectangle,
+    this.fillStyle = FondeCheckboxFillStyle.filled,
     this.focusNode,
     this.autofocus = false,
     this.semanticLabel,
@@ -49,35 +82,85 @@ class FondeCheckbox extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    // Get theme color using core_themes API
     final appColorScheme = ref.watch(effectiveColorSchemeWithThemeProvider);
     final accessibilityConfig = ref.watch(fondeAccessibilityConfigProvider);
     final iconTheme = ref.watch(fondeDefaultIconThemeProvider);
 
-    // Determine size (use default value if not specified)
     final zoomScale = disableZoom ? 1.0 : accessibilityConfig.zoomScale;
     final borderScale = disableZoom ? 1.0 : accessibilityConfig.borderScale;
     final effectiveSize = (size ?? 20.0) * zoomScale;
 
-    // FondeRectangleBorder settings
-    final borderRadius = FondeBorderRadius.create(
-      cornerRadius: 4.0 * zoomScale,
-      cornerSmoothing: 0.6,
-    );
+    final isChecked = value == true;
+    final isIndeterminate = value == null && tristate;
+    final isActive = isChecked || isIndeterminate;
 
-    // Determine background and border colors
-    final backgroundColor =
-        value == true
-            ? appColorScheme.theme.primaryColor
-            : const Color(0x00000000);
-    final borderColor = appColorScheme.base.border;
+    final Color backgroundColor;
+    final Color borderColor;
+    final Color iconColor;
+
+    switch (fillStyle) {
+      case FondeCheckboxFillStyle.filled:
+        backgroundColor =
+            isActive
+                ? appColorScheme.theme.primaryColor
+                : const Color(0x00000000);
+        borderColor =
+            isActive
+                ? appColorScheme.theme.primaryColor
+                : appColorScheme.base.border;
+        iconColor = appColorScheme.interactive.button.primaryText;
+      case FondeCheckboxFillStyle.outline:
+        // No fill; border and icon use primary color when active.
+        backgroundColor = const Color(0x00000000);
+        borderColor =
+            isActive
+                ? appColorScheme.theme.primaryColor
+                : appColorScheme.base.border;
+        iconColor = appColorScheme.theme.primaryColor;
+      case FondeCheckboxFillStyle.iconOnly:
+        // No fill, no border color change; only the icon is colored.
+        backgroundColor = const Color(0x00000000);
+        borderColor = appColorScheme.base.border;
+        iconColor = appColorScheme.theme.primaryColor;
+    }
+
+    final ShapeBorder shapeBorder;
+    if (shape == FondeCheckboxShape.circle) {
+      shapeBorder = CircleBorder(
+        side: BorderSide(color: borderColor, width: 1.5 * borderScale),
+      );
+    } else {
+      final borderRadius = FondeBorderRadius.create(
+        cornerRadius: 4.0 * zoomScale,
+        cornerSmoothing: 0.6,
+      );
+      shapeBorder = SmoothRectangleBorder(
+        borderRadius: borderRadius.toSmoothBorderRadius(),
+        side: BorderSide(color: borderColor, width: 1.5 * borderScale),
+      );
+    }
+
+    Widget? innerIcon;
+    if (isChecked) {
+      innerIcon = Icon(
+        iconTheme.check,
+        size: effectiveSize * iconTheme.checkboxIconSizeRatio,
+        color: iconColor,
+      );
+    } else if (isIndeterminate) {
+      innerIcon = Icon(
+        iconTheme.checkIndeterminate,
+        size: effectiveSize * iconTheme.checkboxIconSizeRatio,
+        color: iconColor,
+      );
+    }
 
     return GestureDetector(
       onTap:
           onChanged != null
               ? () {
                 if (tristate) {
-                  // For tristate: false -> true -> null -> false
+                  // false -> true -> null -> false
                   if (value == false) {
                     onChanged!(true);
                   } else if (value == true) {
@@ -86,7 +169,7 @@ class FondeCheckbox extends ConsumerWidget {
                     onChanged!(false);
                   }
                 } else {
-                  // For dual-state: false -> true -> false
+                  // false -> true -> false
                   onChanged!(!(value ?? false));
                 }
               }
@@ -102,30 +185,9 @@ class FondeCheckbox extends ConsumerWidget {
             height: effectiveSize,
             decoration: ShapeDecoration(
               color: backgroundColor,
-              shape: SmoothRectangleBorder(
-                borderRadius: borderRadius.toSmoothBorderRadius(),
-                side: BorderSide(color: borderColor, width: 1.5 * borderScale),
-              ),
+              shape: shapeBorder,
             ),
-            child:
-                value == true
-                    ? Icon(
-                      iconTheme.check,
-                      size: effectiveSize * 0.6,
-                      color:
-                          appColorScheme.brightness == Brightness.dark
-                              ? Colors.black
-                              : Colors.white,
-                    )
-                    : value == null && tristate
-                    ? Container(
-                      margin: EdgeInsets.all(effectiveSize * 0.25),
-                      decoration: BoxDecoration(
-                        color: appColorScheme.base.border,
-                        borderRadius: BorderRadius.circular(1.0 * zoomScale),
-                      ),
-                    )
-                    : null,
+            child: innerIcon,
           ),
         ),
       ),
