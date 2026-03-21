@@ -7,6 +7,7 @@ void main() {
   runApp(
     const FondeApp(
       title: 'Fonde UI Catalog',
+      enableEyeDropper: true,
       home: FondeNotificationOverlay(
         alignment: Alignment.bottomRight,
         child: CatalogShell(),

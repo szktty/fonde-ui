@@ -204,6 +204,7 @@ export 'src/widgets/notification_overlay/fonde_notification_overlay.dart';
 
 // ─── Color Picker ─────────────────────────────────────────────────────────────
 export 'src/widgets/color_picker/fonde_color_picker.dart';
+export 'src/widgets/color_picker/fonde_eye_dropper.dart';
 
 // ─── Platform Menus ───────────────────────────────────────────────────────────
 export 'src/widgets/platform_menus/fonde_platform_menus.dart';

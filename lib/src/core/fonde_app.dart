@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/misc.dart' show Override;
 
+import '../widgets/color_picker/fonde_eye_dropper.dart';
 import 'models/fonde_localization_config.dart';
 import 'models/fonde_theme_data.dart';
 import 'presets.dart';
@@ -65,6 +66,7 @@ class FondeApp extends StatelessWidget {
     this.initialTheme,
     this.overrides = const [],
     this.enableLocalization,
+    this.enableEyeDropper = false,
     required this.home,
   });
 
@@ -91,6 +93,15 @@ class FondeApp extends StatelessWidget {
   /// See [FondeLocalizationConfig] for the full list of affected components.
   final bool? enableLocalization;
 
+  /// Whether to enable the eyedropper tool globally.
+  ///
+  /// When `true`, wraps the application in a [FondeEyeDropper], which allows
+  /// [FondeEyeDropperButton] and [FondeColorPicker] (with `showEyeDropper:
+  /// true`) to sample colors from within the Flutter window.
+  ///
+  /// Defaults to `false`.
+  final bool enableEyeDropper;
+
   /// The widget to show as the application's primary view.
   ///
   /// Typically a [FondeScaffold] or a widget that contains one.
@@ -111,7 +122,11 @@ class FondeApp extends StatelessWidget {
         ),
         ...overrides,
       ],
-      child: _FondeAppBody(title: title, home: home),
+      child: _FondeAppBody(
+        title: title,
+        home: home,
+        enableEyeDropper: enableEyeDropper,
+      ),
     );
   }
 }
@@ -127,20 +142,30 @@ class _InitialThemeNotifier extends FondeActiveTheme {
 }
 
 class _FondeAppBody extends ConsumerWidget {
-  const _FondeAppBody({required this.title, required this.home});
+  const _FondeAppBody({
+    required this.title,
+    required this.home,
+    required this.enableEyeDropper,
+  });
 
   final String title;
   final Widget home;
+  final bool enableEyeDropper;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final themeData = ref.watch(fondeEffectiveThemeDataProvider);
 
+    Widget content = home;
+    if (enableEyeDropper) {
+      content = FondeEyeDropper(child: content);
+    }
+
     return MaterialApp(
       title: title,
       theme: themeData,
       debugShowCheckedModeBanner: false,
-      home: home,
+      home: content,
     );
   }
 }

@@ -3,19 +3,24 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../internal.dart';
 import '../styling/fonde_border_radius.dart';
-import '../typography/fonde_text.dart';
 import '../widgets/fonde_button.dart';
+import '../widgets/fonde_dialog.dart';
+import 'fonde_eye_dropper.dart';
 
 /// A desktop-style color picker widget.
 ///
 /// Supports hue/saturation/value selection via interactive canvases,
-/// plus hex input. No external dependencies.
+/// optional color palette swatches, optional eyedropper (requires
+/// [FondeEyeDropper] in the tree), plus hex input.
+///
+/// No external dependencies.
 ///
 /// Example:
 /// ```dart
 /// FondeColorPicker(
 ///   initialColor: Colors.blue,
 ///   onColorChanged: (color) => setState(() => _selectedColor = color),
+///   palette: [Colors.red, Colors.green, Colors.blue],
 /// )
 /// ```
 class FondeColorPicker extends ConsumerStatefulWidget {
@@ -24,6 +29,8 @@ class FondeColorPicker extends ConsumerStatefulWidget {
     this.initialColor = Colors.blue,
     required this.onColorChanged,
     this.showAlpha = false,
+    this.palette,
+    this.showEyeDropper = false,
     this.width = 240.0,
     this.disableZoom = false,
   });
@@ -33,6 +40,15 @@ class FondeColorPicker extends ConsumerStatefulWidget {
 
   /// Whether to show the alpha channel slider.
   final bool showAlpha;
+
+  /// Optional list of preset colors shown as swatches below the sliders.
+  /// Pass an empty list or null to hide the palette.
+  final List<Color>? palette;
+
+  /// Whether to show the eyedropper button.
+  /// Requires [FondeEyeDropper] to be present in the widget tree
+  /// (e.g. via `FondeApp(enableEyeDropper: true)`).
+  final bool showEyeDropper;
 
   final double width;
   final bool disableZoom;
@@ -100,6 +116,7 @@ class _FondeColorPickerState extends ConsumerState<FondeColorPicker> {
 
     final w = widget.width * zoomScale;
     final svSize = w;
+    final palette = widget.palette;
 
     return SizedBox(
       width: w,
@@ -135,7 +152,7 @@ class _FondeColorPickerState extends ConsumerState<FondeColorPicker> {
 
           SizedBox(height: 12.0 * zoomScale),
 
-          // Preview + hex input
+          // Preview + hex input + eyedropper
           Row(
             children: [
               // Color preview swatch
@@ -204,10 +221,90 @@ class _FondeColorPickerState extends ConsumerState<FondeColorPicker> {
                   ),
                 ),
               ),
+              if (widget.showEyeDropper) ...[
+                SizedBox(width: 8.0 * zoomScale),
+                FondeEyeDropperButton(
+                  onColorPicked: (c) => _updateHsv(HSVColor.fromColor(c)),
+                  size: 20.0 * zoomScale,
+                  color: colorScheme.base.foreground,
+                ),
+              ],
             ],
           ),
+
+          // Palette swatches
+          if (palette != null && palette.isNotEmpty) ...[
+            SizedBox(height: 12.0 * zoomScale),
+            _ColorPalette(
+              colors: palette,
+              selectedColor: _hsv.toColor(),
+              onColorSelected: (c) => _updateHsv(HSVColor.fromColor(c)),
+              zoomScale: zoomScale,
+              borderColor: colorScheme.base.border,
+            ),
+          ],
         ],
       ),
+    );
+  }
+}
+
+/// A row of color swatches for quick selection.
+class _ColorPalette extends StatelessWidget {
+  const _ColorPalette({
+    required this.colors,
+    required this.selectedColor,
+    required this.onColorSelected,
+    required this.zoomScale,
+    required this.borderColor,
+  });
+
+  final List<Color> colors;
+  final Color selectedColor;
+  final ValueChanged<Color> onColorSelected;
+  final double zoomScale;
+  final Color borderColor;
+
+  bool _isSameColor(Color a, Color b) =>
+      a.red == b.red && a.green == b.green && a.blue == b.blue;
+
+  @override
+  Widget build(BuildContext context) {
+    final swatchSize = 20.0 * zoomScale;
+    return Wrap(
+      spacing: 6.0 * zoomScale,
+      runSpacing: 6.0 * zoomScale,
+      children:
+          colors.map((color) {
+            final isSelected = _isSameColor(color, selectedColor);
+            return GestureDetector(
+              onTap: () => onColorSelected(color),
+              child: Container(
+                width: swatchSize,
+                height: swatchSize,
+                decoration: BoxDecoration(
+                  color: color,
+                  borderRadius: BorderRadius.circular(
+                    FondeBorderRadiusValues.small * zoomScale,
+                  ),
+                  border: Border.all(
+                    color: isSelected ? Colors.white : borderColor,
+                    width: isSelected ? 2.0 : 1.0,
+                  ),
+                  boxShadow:
+                      isSelected
+                          ? [
+                            BoxShadow(
+                              color: color.withValues(alpha: 0.6),
+                              blurRadius: 4,
+                              spreadRadius: 1,
+                            ),
+                          ]
+                          : null,
+                ),
+              ),
+            );
+          }).toList(),
     );
   }
 }
@@ -264,7 +361,7 @@ class _SaturationValuePainter extends CustomPainter {
     canvas.drawRect(
       Offset.zero & size,
       Paint()
-        ..shader = LinearGradient(
+        ..shader = const LinearGradient(
           colors: [Colors.white, Colors.transparent],
         ).createShader(Offset.zero & size),
     );
@@ -273,7 +370,7 @@ class _SaturationValuePainter extends CustomPainter {
     canvas.drawRect(
       Offset.zero & size,
       Paint()
-        ..shader = LinearGradient(
+        ..shader = const LinearGradient(
           begin: Alignment.topCenter,
           end: Alignment.bottomCenter,
           colors: [Colors.transparent, Colors.black],
@@ -455,116 +552,46 @@ class _AlphaPainter extends CustomPainter {
 
   @override
   bool shouldRepaint(_AlphaPainter old) =>
-      old.alpha != alpha || old.color != old.color;
+      old.alpha != alpha || old.color != color;
 }
 
-/// Shows a [FondeColorPicker] in a popup dialog.
+/// Shows a [FondeColorPicker] in a dialog using [showFondeDialog].
 Future<Color?> showFondeColorPickerDialog({
   required BuildContext context,
   Color initialColor = Colors.blue,
   bool showAlpha = false,
+  List<Color>? palette,
+  bool showEyeDropper = false,
 }) async {
-  Color? result;
+  Color current = initialColor;
 
-  await showDialog<void>(
+  return showFondeDialog<Color>(
     context: context,
-    barrierColor: Colors.black26,
-    builder: (ctx) {
-      return AlertDialog(
-        backgroundColor: Colors.transparent,
-        contentPadding: EdgeInsets.zero,
-        content: _ColorPickerDialog(
-          initialColor: initialColor,
-          showAlpha: showAlpha,
-          onConfirm: (c) {
-            result = c;
-            Navigator.of(ctx).pop();
-          },
-          onCancel: () => Navigator.of(ctx).pop(),
+    title: 'Color Picker',
+    importance: FondeDialogImportance.utility,
+    width: 296.0,
+    padding: const EdgeInsets.all(16.0),
+    child: FondeColorPicker(
+      initialColor: initialColor,
+      showAlpha: showAlpha,
+      palette: palette,
+      showEyeDropper: showEyeDropper,
+      width: 248.0,
+      onColorChanged: (c) => current = c,
+    ),
+    footer: Row(
+      mainAxisAlignment: MainAxisAlignment.end,
+      children: [
+        FondeButton.cancel(
+          label: 'Cancel',
+          onPressed: () => Navigator.of(context).pop(),
         ),
-      );
-    },
+        const SizedBox(width: 8.0),
+        FondeButton.primary(
+          label: 'OK',
+          onPressed: () => Navigator.of(context).pop(current),
+        ),
+      ],
+    ),
   );
-
-  return result;
-}
-
-class _ColorPickerDialog extends ConsumerStatefulWidget {
-  const _ColorPickerDialog({
-    required this.initialColor,
-    required this.showAlpha,
-    required this.onConfirm,
-    required this.onCancel,
-  });
-
-  final Color initialColor;
-  final bool showAlpha;
-  final ValueChanged<Color> onConfirm;
-  final VoidCallback onCancel;
-
-  @override
-  ConsumerState<_ColorPickerDialog> createState() => _ColorPickerDialogState();
-}
-
-class _ColorPickerDialogState extends ConsumerState<_ColorPickerDialog> {
-  late Color _current;
-
-  @override
-  void initState() {
-    super.initState();
-    _current = widget.initialColor;
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final colorScheme = ref.watch(fondeEffectiveColorSchemeProvider);
-
-    return Container(
-      width: 280.0,
-      padding: const EdgeInsets.all(16.0),
-      decoration: BoxDecoration(
-        color: colorScheme.uiAreas.dialog.background,
-        borderRadius: BorderRadius.circular(FondeBorderRadiusValues.medium),
-        border: Border.all(color: colorScheme.base.border),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.2),
-            blurRadius: 16.0,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          FondeText(
-            'Color Picker',
-            variant: FondeTextVariant.captionText,
-            color: colorScheme.uiAreas.dialog.foreground,
-            fontWeight: FontWeight.w600,
-          ),
-          const SizedBox(height: 12.0),
-          FondeColorPicker(
-            initialColor: widget.initialColor,
-            showAlpha: widget.showAlpha,
-            width: 248.0,
-            onColorChanged: (c) => setState(() => _current = c),
-          ),
-          const SizedBox(height: 16.0),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.end,
-            children: [
-              FondeButton.cancel(label: 'Cancel', onPressed: widget.onCancel),
-              const SizedBox(width: 8.0),
-              FondeButton.primary(
-                label: 'OK',
-                onPressed: () => widget.onConfirm(_current),
-              ),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
 }
