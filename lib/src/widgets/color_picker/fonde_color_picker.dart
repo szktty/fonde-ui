@@ -60,20 +60,28 @@ class FondeColorPicker extends ConsumerStatefulWidget {
 class _FondeColorPickerState extends ConsumerState<FondeColorPicker> {
   late HSVColor _hsv;
   late TextEditingController _hexController;
+  late TextEditingController _opacityController;
   bool _hexFocused = false;
+  bool _opacityFocused = false;
 
   @override
   void initState() {
     super.initState();
     _hsv = HSVColor.fromColor(widget.initialColor);
     _hexController = TextEditingController(text: _colorToHex(_hsv.toColor()));
+    _opacityController = TextEditingController(
+      text: _alphaToPercent(_hsv.alpha),
+    );
   }
 
   @override
   void dispose() {
     _hexController.dispose();
+    _opacityController.dispose();
     super.dispose();
   }
+
+  String _alphaToPercent(double alpha) => '${(alpha * 100).round()}';
 
   String _colorToHex(Color c) {
     return '#${c.red.toRadixString(16).padLeft(2, '0')}${c.green.toRadixString(16).padLeft(2, '0')}${c.blue.toRadixString(16).padLeft(2, '0')}'
@@ -86,8 +94,19 @@ class _FondeColorPickerState extends ConsumerState<FondeColorPicker> {
       if (!_hexFocused) {
         _hexController.text = _colorToHex(hsv.toColor());
       }
+      if (!_opacityFocused) {
+        _opacityController.text = _alphaToPercent(hsv.alpha);
+      }
     });
     widget.onColorChanged(hsv.toColor());
+  }
+
+  void _onOpacitySubmitted(String value) {
+    final parsed = int.tryParse(value.replaceAll('%', ''));
+    if (parsed != null) {
+      final clamped = parsed.clamp(0, 100);
+      _updateHsv(_hsv.withAlpha(clamped / 100.0));
+    }
   }
 
   void _onHexSubmitted(String value) {
@@ -229,6 +248,71 @@ class _FondeColorPickerState extends ConsumerState<FondeColorPicker> {
                   ),
                 ),
               ),
+              // Opacity input (showAlpha のときのみ表示)
+              if (widget.showAlpha) ...[
+                SizedBox(width: 8.0 * zoomScale),
+                SizedBox(
+                  width: 56.0 * zoomScale,
+                  child: Focus(
+                    onFocusChange: (focused) {
+                      setState(() => _opacityFocused = focused);
+                      if (!focused) {
+                        _onOpacitySubmitted(_opacityController.text);
+                      }
+                    },
+                    child: TextField(
+                      controller: _opacityController,
+                      style: TextStyle(
+                        fontSize: 12.0 * zoomScale,
+                        color: colorScheme.base.foreground,
+                      ),
+                      textAlign: TextAlign.right,
+                      decoration: InputDecoration(
+                        isDense: true,
+                        suffixText: '%',
+                        suffixStyle: TextStyle(
+                          fontSize: 12.0 * zoomScale,
+                          color: colorScheme.base.foreground,
+                        ),
+                        contentPadding: EdgeInsets.symmetric(
+                          horizontal: 8.0 * zoomScale,
+                          vertical: 6.0 * zoomScale,
+                        ),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(
+                            FondeBorderRadiusValues.small * zoomScale,
+                          ),
+                          borderSide: BorderSide(
+                            color: colorScheme.base.border,
+                          ),
+                        ),
+                        enabledBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(
+                            FondeBorderRadiusValues.small * zoomScale,
+                          ),
+                          borderSide: BorderSide(
+                            color: colorScheme.base.border,
+                          ),
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(
+                            FondeBorderRadiusValues.small * zoomScale,
+                          ),
+                          borderSide: BorderSide(
+                            color: colorScheme.theme.primaryColor,
+                          ),
+                        ),
+                      ),
+                      keyboardType: TextInputType.number,
+                      inputFormatters: [
+                        FilteringTextInputFormatter.digitsOnly,
+                        LengthLimitingTextInputFormatter(3),
+                      ],
+                      onSubmitted: _onOpacitySubmitted,
+                    ),
+                  ),
+                ),
+              ],
             ],
           ),
 
