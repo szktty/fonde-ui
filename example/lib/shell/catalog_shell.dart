@@ -360,131 +360,237 @@ class _ToolbarControlsState extends ConsumerState<_ToolbarControls> {
     final currentZoom = accessibility.zoomScale;
     final zoomIdx = _zoomIndex(currentZoom);
 
-    return Padding(
-      padding: const EdgeInsets.only(left: 8, right: FondeSpacingValues.xxxl),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          // Font family selector
-          FondeDropdownMenu<String>(
-            enabled: !_fontLoading,
-            width: 180,
-            initialSelection: _selectedFontFamily,
-            onSelected: (value) {
-              if (value != null) _applyFontFamily(value);
-            },
-            dropdownMenuEntries: [
-              for (final (label, value) in _fontFamilies)
-                DropdownMenuEntry(value: value, label: label),
-            ],
-            position: FondeDropdownMenuPosition.below,
-          ),
-          const SizedBox(width: 4),
-          // Font size
-          FondeIconButton(
-            icon: LucideIcons.minus,
-            tooltip: 'Smaller Font',
-            enabled: currentFontSize > 10,
-            onPressed: () => _adjustFontSize(-1),
-          ),
-          _FontSizeLabel(
-            size: currentFontSize,
-            onTap: () => _setFontSize(14.0),
-          ),
-          FondeIconButton(
-            icon: LucideIcons.plus,
-            tooltip: 'Larger Font',
-            enabled: currentFontSize < 24,
-            onPressed: () => _adjustFontSize(1),
-          ),
-          const SizedBox(width: 4),
-          _ToolbarDivider(),
-          const SizedBox(width: 4),
-          // Zoom controls
-          FondeIconButton(
-            icon: LucideIcons.zoomOut,
-            tooltip: 'Zoom Out',
-            enabled: currentZoom > _zoomLevels.first,
-            onPressed: () {
-              if (zoomIdx > 0) {
-                _setZoom(_zoomLevels[zoomIdx - 1]);
-              } else if (zoomIdx < 0) {
-                final lower =
-                    _zoomLevels.where((z) => z < currentZoom).toList();
-                if (lower.isNotEmpty) _setZoom(lower.last);
-              }
-            },
-          ),
-          _ZoomLabel(zoom: currentZoom, onTap: () => _setZoom(1.0)),
-          FondeIconButton(
-            icon: LucideIcons.zoomIn,
-            tooltip: 'Zoom In',
-            enabled: currentZoom < _zoomLevels.last,
-            onPressed: () {
-              if (zoomIdx >= 0 && zoomIdx < _zoomLevels.length - 1) {
-                _setZoom(_zoomLevels[zoomIdx + 1]);
-              } else if (zoomIdx < 0) {
-                final higher =
-                    _zoomLevels.where((z) => z > currentZoom).toList();
-                if (higher.isNotEmpty) _setZoom(higher.first);
-              }
-            },
-          ),
-          const SizedBox(width: 4),
-          _ToolbarDivider(),
-          const SizedBox(width: 4),
-          // Theme toggle
-          FondeIconButton(
-            icon: LucideIcons.monitor,
-            tooltip: 'System',
-            enabled: !isSystem,
-            onPressed:
-                () => ref
-                    .read(fondeActiveThemeProvider.notifier)
-                    .setTheme(FondeThemePresets.system),
-          ),
-          FondeIconButton(
-            icon: LucideIcons.sun,
-            tooltip: 'Light',
-            enabled: isSystem || isDark,
-            onPressed:
-                () => ref
-                    .read(fondeActiveThemeProvider.notifier)
-                    .setTheme(FondeThemePresets.light),
-          ),
-          FondeIconButton(
-            icon: LucideIcons.moon,
-            tooltip: 'Dark',
-            enabled: isSystem || !isDark,
-            onPressed:
-                () => ref
-                    .read(fondeActiveThemeProvider.notifier)
-                    .setTheme(FondeThemePresets.dark),
-          ),
-          const SizedBox(width: 4),
-          _ToolbarDivider(),
-          const SizedBox(width: 8),
-          // Version
-          FondeText(
-            'v$_kPackageVersion',
-            variant: FondeTextVariant.captionText,
-            color: colorScheme.base.foreground.withValues(alpha: 0.45),
-          ),
-          const SizedBox(width: 6),
-          // GitHub
-          FondeIconButton.circle(
-            icon: LucideIcons.github,
-            tooltip: 'GitHub',
-            iconSize: 16,
-            backgroundColor: colorScheme.base.foreground.withValues(
-              alpha: 0.15,
-            ),
-            constraints: const BoxConstraints.tightFor(width: 28, height: 28),
-            onPressed: () => launchUrl(Uri.parse(_kGitHubUrl)),
-          ),
-          const SizedBox(width: 4),
-        ],
+    final overflowItems = <FondeOverflowMenuEntry>[
+      // Font size
+      FondeOverflowMenuItem(
+        value: 'font_smaller',
+        title: 'Smaller Font',
+        icon: LucideIcons.minus,
+        enabled: currentFontSize > 10,
+        onSelected: () => _adjustFontSize(-1),
       ),
+      FondeOverflowMenuItem(
+        value: 'font_reset',
+        title: 'Reset Font Size (${currentFontSize.round()}px)',
+        onSelected: () => _setFontSize(14.0),
+      ),
+      FondeOverflowMenuItem(
+        value: 'font_larger',
+        title: 'Larger Font',
+        icon: LucideIcons.plus,
+        enabled: currentFontSize < 24,
+        onSelected: () => _adjustFontSize(1),
+      ),
+      const FondeOverflowMenuDivider(),
+      // Zoom
+      FondeOverflowMenuItem(
+        value: 'zoom_out',
+        title: 'Zoom Out',
+        icon: LucideIcons.zoomOut,
+        enabled: currentZoom > _zoomLevels.first,
+        onSelected: () {
+          if (zoomIdx > 0) {
+            _setZoom(_zoomLevels[zoomIdx - 1]);
+          } else if (zoomIdx < 0) {
+            final lower = _zoomLevels.where((z) => z < currentZoom).toList();
+            if (lower.isNotEmpty) _setZoom(lower.last);
+          }
+        },
+      ),
+      FondeOverflowMenuItem(
+        value: 'zoom_reset',
+        title: 'Reset Zoom (${(currentZoom * 100).round()}%)',
+        onSelected: () => _setZoom(1.0),
+      ),
+      FondeOverflowMenuItem(
+        value: 'zoom_in',
+        title: 'Zoom In',
+        icon: LucideIcons.zoomIn,
+        enabled: currentZoom < _zoomLevels.last,
+        onSelected: () {
+          if (zoomIdx >= 0 && zoomIdx < _zoomLevels.length - 1) {
+            _setZoom(_zoomLevels[zoomIdx + 1]);
+          } else if (zoomIdx < 0) {
+            final higher = _zoomLevels.where((z) => z > currentZoom).toList();
+            if (higher.isNotEmpty) _setZoom(higher.first);
+          }
+        },
+      ),
+      const FondeOverflowMenuDivider(),
+      // Theme
+      FondeOverflowMenuItem(
+        value: 'theme_system',
+        title: 'System Theme',
+        icon: LucideIcons.monitor,
+        enabled: !isSystem,
+        onSelected:
+            () => ref
+                .read(fondeActiveThemeProvider.notifier)
+                .setTheme(FondeThemePresets.system),
+      ),
+      FondeOverflowMenuItem(
+        value: 'theme_light',
+        title: 'Light Theme',
+        icon: LucideIcons.sun,
+        enabled: isSystem || isDark,
+        onSelected:
+            () => ref
+                .read(fondeActiveThemeProvider.notifier)
+                .setTheme(FondeThemePresets.light),
+      ),
+      FondeOverflowMenuItem(
+        value: 'theme_dark',
+        title: 'Dark Theme',
+        icon: LucideIcons.moon,
+        enabled: isSystem || !isDark,
+        onSelected:
+            () => ref
+                .read(fondeActiveThemeProvider.notifier)
+                .setTheme(FondeThemePresets.dark),
+      ),
+      const FondeOverflowMenuDivider(),
+      FondeOverflowMenuItem(
+        value: 'github',
+        title: 'GitHub',
+        icon: LucideIcons.github,
+        onSelected: () => launchUrl(Uri.parse(_kGitHubUrl)),
+      ),
+    ];
+
+    const hPad = 8.0 + FondeSpacingValues.xxxl;
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final groupWidth = (constraints.maxWidth - hPad).clamp(
+          0.0,
+          double.infinity,
+        );
+        return Padding(
+          padding: const EdgeInsets.only(
+            left: 8,
+            right: FondeSpacingValues.xxxl,
+          ),
+          child: FondeToolbarGroup(
+            spacing: 4.0,
+            overflowItems: overflowItems,
+            overflowTooltip: 'More options',
+            availableWidth: groupWidth,
+            children: [
+              // Font family selector
+              FondeDropdownMenu<String>(
+                enabled: !_fontLoading,
+                width: 180,
+                initialSelection: _selectedFontFamily,
+                onSelected: (value) {
+                  if (value != null) _applyFontFamily(value);
+                },
+                dropdownMenuEntries: [
+                  for (final (label, value) in _fontFamilies)
+                    DropdownMenuEntry(value: value, label: label),
+                ],
+                position: FondeDropdownMenuPosition.below,
+              ),
+              // Font size
+              FondeIconButton(
+                icon: LucideIcons.minus,
+                tooltip: 'Smaller Font',
+                enabled: currentFontSize > 10,
+                onPressed: () => _adjustFontSize(-1),
+              ),
+              _FontSizeLabel(
+                size: currentFontSize,
+                onTap: () => _setFontSize(14.0),
+              ),
+              FondeIconButton(
+                icon: LucideIcons.plus,
+                tooltip: 'Larger Font',
+                enabled: currentFontSize < 24,
+                onPressed: () => _adjustFontSize(1),
+              ),
+              _ToolbarDivider(),
+              // Zoom controls
+              FondeIconButton(
+                icon: LucideIcons.zoomOut,
+                tooltip: 'Zoom Out',
+                enabled: currentZoom > _zoomLevels.first,
+                onPressed: () {
+                  if (zoomIdx > 0) {
+                    _setZoom(_zoomLevels[zoomIdx - 1]);
+                  } else if (zoomIdx < 0) {
+                    final lower =
+                        _zoomLevels.where((z) => z < currentZoom).toList();
+                    if (lower.isNotEmpty) _setZoom(lower.last);
+                  }
+                },
+              ),
+              _ZoomLabel(zoom: currentZoom, onTap: () => _setZoom(1.0)),
+              FondeIconButton(
+                icon: LucideIcons.zoomIn,
+                tooltip: 'Zoom In',
+                enabled: currentZoom < _zoomLevels.last,
+                onPressed: () {
+                  if (zoomIdx >= 0 && zoomIdx < _zoomLevels.length - 1) {
+                    _setZoom(_zoomLevels[zoomIdx + 1]);
+                  } else if (zoomIdx < 0) {
+                    final higher =
+                        _zoomLevels.where((z) => z > currentZoom).toList();
+                    if (higher.isNotEmpty) _setZoom(higher.first);
+                  }
+                },
+              ),
+              _ToolbarDivider(),
+              // Theme toggle
+              FondeIconButton(
+                icon: LucideIcons.monitor,
+                tooltip: 'System',
+                enabled: !isSystem,
+                onPressed:
+                    () => ref
+                        .read(fondeActiveThemeProvider.notifier)
+                        .setTheme(FondeThemePresets.system),
+              ),
+              FondeIconButton(
+                icon: LucideIcons.sun,
+                tooltip: 'Light',
+                enabled: isSystem || isDark,
+                onPressed:
+                    () => ref
+                        .read(fondeActiveThemeProvider.notifier)
+                        .setTheme(FondeThemePresets.light),
+              ),
+              FondeIconButton(
+                icon: LucideIcons.moon,
+                tooltip: 'Dark',
+                enabled: isSystem || !isDark,
+                onPressed:
+                    () => ref
+                        .read(fondeActiveThemeProvider.notifier)
+                        .setTheme(FondeThemePresets.dark),
+              ),
+              _ToolbarDivider(),
+              // Version
+              FondeText(
+                'v$_kPackageVersion',
+                variant: FondeTextVariant.captionText,
+                color: colorScheme.base.foreground.withValues(alpha: 0.45),
+              ),
+              // GitHub
+              FondeIconButton.circle(
+                icon: LucideIcons.github,
+                tooltip: 'GitHub',
+                iconSize: 16,
+                backgroundColor: colorScheme.base.foreground.withValues(
+                  alpha: 0.15,
+                ),
+                constraints: const BoxConstraints.tightFor(
+                  width: 28,
+                  height: 28,
+                ),
+                onPressed: () => launchUrl(Uri.parse(_kGitHubUrl)),
+              ),
+            ],
+          ),
+        );
+      },
     );
   }
 }
