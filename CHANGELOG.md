@@ -40,6 +40,7 @@
 - [ADD] Add `checkboxIconSizeRatio` to `FondeIconTheme` — controls icon size relative to checkbox size per icon set
 - [ADD] Add catalog sample page for FondeRectangleBorder / FondeBorderRadius / FondeBorderSide
 - [ADD] Add design guidelines to `doc/design/` (copied from private repo)
+- [ADD] Example app: show fonde_ui version dynamically in toolbar via `package_info_plus`
 
 ## 0.3.0
 
