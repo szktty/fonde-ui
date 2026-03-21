@@ -3,6 +3,7 @@ import 'package:url_launcher/url_launcher.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fonde_ui/fonde_ui.dart';
 import 'package:fonde_ui/fonde_ui_riverpod.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 
@@ -22,7 +23,11 @@ const _fontFamilies = [
 const _zoomLevels = [0.75, 0.9, 1.0, 1.1, 1.25, 1.5];
 
 const _kGitHubUrl = 'https://github.com/szktty/fonde-ui';
-const _kPackageVersion = '0.1.0';
+
+final _packageVersionProvider = FutureProvider<String>((ref) async {
+  final info = await PackageInfo.fromPlatform();
+  return info.version;
+});
 
 /// Toolbar trailing area: theme toggle, font settings, and zoom controls
 class CatalogToolbarControls extends ConsumerStatefulWidget {
@@ -344,7 +349,9 @@ class _CatalogToolbarControlsState
               _ToolbarDivider(),
               // Version
               FondeText(
-                'v$_kPackageVersion',
+                ref
+                    .watch(_packageVersionProvider)
+                    .maybeWhen(data: (v) => 'v$v', orElse: () => ''),
                 variant: FondeTextVariant.captionText,
                 color: colorScheme.base.foreground.withValues(alpha: 0.45),
               ),
