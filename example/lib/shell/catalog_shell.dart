@@ -843,9 +843,18 @@ class _CatalogCard extends ConsumerWidget {
               height: _kCardSampleHeight,
               child: ColoredBox(
                 color: colorScheme.base.divider,
-                child: Padding(
-                  padding: const EdgeInsets.all(FondeSpacingValues.md),
-                  child: sample,
+                child: ClipRect(
+                  child: Padding(
+                    padding: const EdgeInsets.all(FondeSpacingValues.md),
+                    child: OverflowBox(
+                      alignment: Alignment.topLeft,
+                      minHeight: 0,
+                      maxHeight: double.infinity,
+                      minWidth: width - FondeSpacingValues.md * 2,
+                      maxWidth: width - FondeSpacingValues.md * 2,
+                      child: sample,
+                    ),
+                  ),
                 ),
               ),
             ),
@@ -988,113 +997,128 @@ class _NavigationSample extends ConsumerWidget {
     final colorScheme = ref.watch(fondeEffectiveColorSchemeProvider);
     return ClipRRect(
       borderRadius: FondeBorderRadiusValues.smallRadius,
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          // Launch Bar
-          Container(
-            width: 28,
-            color: colorScheme.uiAreas.launchBar.background,
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Column(
-                  children: [
-                    for (final (icon, active) in [
-                      (LucideIcons.layoutGrid, true),
-                      (LucideIcons.search, false),
-                      (LucideIcons.gitBranch, false),
-                    ])
-                      Container(
-                        width: 28,
-                        height: 28,
-                        color:
-                            active
-                                ? colorScheme
-                                    .uiAreas
-                                    .launchBar
-                                    .activeItemBackground
-                                : null,
-                        child: Icon(
-                          icon,
-                          size: 13,
+      child: SizedBox(
+        height: _kCardSampleHeight - FondeSpacingValues.md * 2,
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            // Launch Bar
+            Container(
+              width: 28,
+              color: colorScheme.uiAreas.launchBar.background,
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Column(
+                    children: [
+                      for (final (icon, active) in [
+                        (LucideIcons.layoutGrid, true),
+                        (LucideIcons.search, false),
+                        (LucideIcons.gitBranch, false),
+                      ])
+                        Container(
+                          width: 28,
+                          height: 28,
                           color:
                               active
-                                  ? colorScheme.uiAreas.launchBar.activeItem
-                                  : colorScheme.uiAreas.launchBar.inactiveItem,
+                                  ? colorScheme
+                                      .uiAreas
+                                      .launchBar
+                                      .activeItemBackground
+                                  : null,
+                          child: Icon(
+                            icon,
+                            size: 13,
+                            color:
+                                active
+                                    ? colorScheme.uiAreas.launchBar.activeItem
+                                    : colorScheme
+                                        .uiAreas
+                                        .launchBar
+                                        .inactiveItem,
+                          ),
+                        ),
+                    ],
+                  ),
+                  Container(
+                    width: 28,
+                    height: 28,
+                    child: Icon(
+                      LucideIcons.settings2,
+                      size: 13,
+                      color: colorScheme.uiAreas.launchBar.inactiveItem,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            // Vertical divider
+            Container(width: 1, color: colorScheme.uiAreas.sideBar.divider),
+            // Sidebar list
+            Expanded(
+              child: Container(
+                color: colorScheme.uiAreas.sideBar.background,
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    for (final (icon, label, selected) in [
+                      (LucideIcons.inbox, 'Inbox', true),
+                      (LucideIcons.send, 'Sent', false),
+                      (LucideIcons.archive, 'Archive', false),
+                      (LucideIcons.trash2, 'Trash', false),
+                    ])
+                      Container(
+                        color:
+                            selected
+                                ? colorScheme
+                                    .uiAreas
+                                    .sideBar
+                                    .activeItemBackground
+                                : null,
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: FondeSpacingValues.sm,
+                          vertical: 5,
+                        ),
+                        child: Row(
+                          children: [
+                            Icon(
+                              icon,
+                              size: 12,
+                              color:
+                                  selected
+                                      ? colorScheme
+                                          .uiAreas
+                                          .sideBar
+                                          .activeItemText
+                                      : colorScheme
+                                          .uiAreas
+                                          .sideBar
+                                          .inactiveItemText,
+                            ),
+                            const SizedBox(width: FondeSpacingValues.xs),
+                            FondeText(
+                              label,
+                              variant: FondeTextVariant.captionText,
+                              color:
+                                  selected
+                                      ? colorScheme
+                                          .uiAreas
+                                          .sideBar
+                                          .activeItemText
+                                      : colorScheme
+                                          .uiAreas
+                                          .sideBar
+                                          .inactiveItemText,
+                            ),
+                          ],
                         ),
                       ),
                   ],
                 ),
-                Container(
-                  width: 28,
-                  height: 28,
-                  child: Icon(
-                    LucideIcons.settings2,
-                    size: 13,
-                    color: colorScheme.uiAreas.launchBar.inactiveItem,
-                  ),
-                ),
-              ],
-            ),
-          ),
-          // Vertical divider
-          Container(width: 1, color: colorScheme.uiAreas.sideBar.divider),
-          // Sidebar list
-          Expanded(
-            child: Container(
-              color: colorScheme.uiAreas.sideBar.background,
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  for (final (icon, label, selected) in [
-                    (LucideIcons.inbox, 'Inbox', true),
-                    (LucideIcons.send, 'Sent', false),
-                    (LucideIcons.archive, 'Archive', false),
-                    (LucideIcons.trash2, 'Trash', false),
-                  ])
-                    Container(
-                      color:
-                          selected
-                              ? colorScheme.uiAreas.sideBar.activeItemBackground
-                              : null,
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: FondeSpacingValues.sm,
-                        vertical: 5,
-                      ),
-                      child: Row(
-                        children: [
-                          Icon(
-                            icon,
-                            size: 12,
-                            color:
-                                selected
-                                    ? colorScheme.uiAreas.sideBar.activeItemText
-                                    : colorScheme
-                                        .uiAreas
-                                        .sideBar
-                                        .inactiveItemText,
-                          ),
-                          const SizedBox(width: FondeSpacingValues.xs),
-                          FondeText(
-                            label,
-                            variant: FondeTextVariant.captionText,
-                            color:
-                                selected
-                                    ? colorScheme.uiAreas.sideBar.activeItemText
-                                    : colorScheme
-                                        .uiAreas
-                                        .sideBar
-                                        .inactiveItemText,
-                          ),
-                        ],
-                      ),
-                    ),
-                ],
               ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
