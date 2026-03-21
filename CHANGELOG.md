@@ -19,9 +19,23 @@
     - `iconOnly`: no fill, no border color change, only icon is colored
   - Fix check icon color from hardcoded Colors.black/white to `colorScheme.interactive.button.primaryText`
   - Replace indeterminate indicator (small rect) with `FondeIconTheme.checkIndeterminate` icon
+- [UPDATE] FondeColorPicker: enable alpha slider by default (`showAlpha: true`)
+- [UPDATE] FondeColorPicker: reorder bottom row to preview → eyedropper → hex input → opacity %
+- [UPDATE] FondeColorPicker: fix alpha slider checkerboard to respect rounded corners
+- [UPDATE] FondeDatePicker: remove header/weekdays/grid border decorations
+- [UPDATE] FondeDatePicker: suppress month-switch animation and selection animation
+- [UPDATE] FondeToolbarGroup: add `overflowItems`, `overflowTooltip`, `availableWidth` params; items that don't fit are hidden behind an ellipsis (⋯) popup menu
+- [UPDATE] FondeMainToolbar: pass a finite width to trailing so overflow detection in `FondeToolbarGroup` works correctly; trailing is right-aligned within its allocated space
 - [UPDATE] Default Lucide check/indeterminate icons changed to 600-weight (strokeWidth 3.0) for better visibility
 - [UPDATE] Update llms.txt documentation for FondeRectangleBorder, FondeBorderRadius, FondeBorderSide, FondeBorderRadiusValues
 - [UPDATE] Clarify design principles: accessibility over aesthetics, revise animation policy (remove zero-latency framing)
+- [ADD] Add FondeEyeDropper / FondeEyeDropperButton for in-window color sampling
+  - `FondeApp(enableEyeDropper: true)` opts in to wrapping the tree with `FondeEyeDropper`
+  - Cursor changes to crosshair; zoom loupe follows the pointer; click to pick, right-click to cancel
+  - Only samples pixels within the Flutter window
+- [ADD] FondeColorPicker: add `palette` parameter for swatch row
+- [ADD] FondeColorPicker: add `showEyeDropper` parameter; requires `FondeEyeDropper` in the tree
+- [ADD] FondeColorPicker: add opacity percentage input field next to hex input (shown when `showAlpha: true`)
 - [ADD] Add `checkIndeterminate` and `minus` to `FondeIconTheme`
 - [ADD] Add `checkboxIconSizeRatio` to `FondeIconTheme` — controls icon size relative to checkbox size per icon set
 - [ADD] Add catalog sample page for FondeRectangleBorder / FondeBorderRadius / FondeBorderSide
