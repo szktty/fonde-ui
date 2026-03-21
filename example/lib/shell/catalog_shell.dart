@@ -457,7 +457,7 @@ class _ToolbarControlsState extends ConsumerState<_ToolbarControls> {
       ),
     ];
 
-    const hPad = 8.0 + FondeSpacingValues.xxxl;
+    const hPad = FondeSpacingValues.xxxl * 2;
     return LayoutBuilder(
       builder: (context, constraints) {
         final groupWidth = (constraints.maxWidth - hPad).clamp(
@@ -465,9 +465,8 @@ class _ToolbarControlsState extends ConsumerState<_ToolbarControls> {
           double.infinity,
         );
         return Padding(
-          padding: const EdgeInsets.only(
-            left: 8,
-            right: FondeSpacingValues.xxxl,
+          padding: const EdgeInsets.symmetric(
+            horizontal: FondeSpacingValues.xxxl,
           ),
           child: FondeToolbarGroup(
             spacing: 4.0,
