@@ -28,7 +28,7 @@ class FondeColorPicker extends ConsumerStatefulWidget {
     super.key,
     this.initialColor = Colors.blue,
     required this.onColorChanged,
-    this.showAlpha = false,
+    this.showAlpha = true,
     this.palette,
     this.showEyeDropper = false,
     this.width = 240.0,
@@ -152,7 +152,7 @@ class _FondeColorPickerState extends ConsumerState<FondeColorPicker> {
 
           SizedBox(height: 12.0 * zoomScale),
 
-          // Preview + hex input + eyedropper
+          // Preview + eyedropper + hex input
           Row(
             children: [
               // Color preview swatch
@@ -167,6 +167,14 @@ class _FondeColorPickerState extends ConsumerState<FondeColorPicker> {
                   border: Border.all(color: colorScheme.base.border),
                 ),
               ),
+              if (widget.showEyeDropper) ...[
+                SizedBox(width: 8.0 * zoomScale),
+                FondeEyeDropperButton(
+                  onColorPicked: (c) => _updateHsv(HSVColor.fromColor(c)),
+                  size: 20.0 * zoomScale,
+                  color: colorScheme.base.foreground,
+                ),
+              ],
               SizedBox(width: 8.0 * zoomScale),
               // Hex input
               Expanded(
@@ -221,14 +229,6 @@ class _FondeColorPickerState extends ConsumerState<FondeColorPicker> {
                   ),
                 ),
               ),
-              if (widget.showEyeDropper) ...[
-                SizedBox(width: 8.0 * zoomScale),
-                FondeEyeDropperButton(
-                  onColorPicked: (c) => _updateHsv(HSVColor.fromColor(c)),
-                  size: 20.0 * zoomScale,
-                  color: colorScheme.base.foreground,
-                ),
-              ],
             ],
           ),
 
@@ -512,7 +512,10 @@ class _AlphaPainter extends CustomPainter {
     final radius = Radius.circular(size.height / 2);
     final rRect = RRect.fromRectAndRadius(rect, radius);
 
-    // Checkerboard background
+    // Checkerboard background + alpha gradient (both clipped to rounded rect)
+    canvas.save();
+    canvas.clipRRect(rRect);
+
     const cellSize = 4.0;
     final cols = (size.width / cellSize).ceil();
     final rows = (size.height / cellSize).ceil();
@@ -536,7 +539,8 @@ class _AlphaPainter extends CustomPainter {
           colors: [Colors.transparent, color.withValues(alpha: 1.0)],
         ).createShader(rect),
     );
-    canvas.restore();
+    canvas.restore(); // gradient clip
+    canvas.restore(); // checkerboard clip
 
     // Thumb
     final thumbX = alpha * size.width;
