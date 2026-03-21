@@ -12,7 +12,35 @@ class ColorPickerPage extends StatefulWidget {
 
 class _ColorPickerPageState extends State<ColorPickerPage> {
   Color _selected = const Color(0xFF4B6EF5);
-  Color _selectedAlpha = const Color(0xFF4B6EF5);
+  Color _dialogSelected = const Color(0xFF4B6EF5);
+
+  static const _palette = [
+    Color(0xFFEF4444),
+    Color(0xFFF97316),
+    Color(0xFFEAB308),
+    Color(0xFF22C55E),
+    Color(0xFF3B82F6),
+    Color(0xFF6366F1),
+    Color(0xFF8B5CF6),
+    Color(0xFFEC4899),
+    Color(0xFF6B7280),
+    Color(0xFFFFFFFF),
+    Color(0xFF000000),
+  ];
+
+  String _hexOf(Color c) =>
+      '#${c.red.toRadixString(16).padLeft(2, '0')}${c.green.toRadixString(16).padLeft(2, '0')}${c.blue.toRadixString(16).padLeft(2, '0')}'
+          .toUpperCase();
+
+  Widget _colorSwatch(Color color) => Container(
+    width: 48,
+    height: 48,
+    decoration: BoxDecoration(
+      color: color,
+      borderRadius: BorderRadius.circular(8),
+      border: Border.all(color: Colors.grey.shade400),
+    ),
+  );
 
   @override
   Widget build(BuildContext context) {
@@ -22,15 +50,17 @@ class _ColorPickerPageState extends State<ColorPickerPage> {
           title: 'Color Picker',
           description:
               'FondeColorPicker provides an HSV color picker with saturation-value canvas, '
-              'hue slider, optional alpha slider, and hex input.',
+              'hue slider, palette swatches, eyedropper, and hex input.',
           children: [
             CatalogDemo(
-              label: 'Inline picker',
+              label: 'Inline',
               child: Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   FondeColorPicker(
                     initialColor: _selected,
+                    palette: _palette,
+                    showEyeDropper: true,
                     onColorChanged: (c) => setState(() => _selected = c),
                   ),
                   const SizedBox(width: 24),
@@ -43,19 +73,10 @@ class _ColorPickerPageState extends State<ColorPickerPage> {
                         variant: FondeTextVariant.captionText,
                       ),
                       const SizedBox(height: 8),
-                      Container(
-                        width: 64,
-                        height: 64,
-                        decoration: BoxDecoration(
-                          color: _selected,
-                          borderRadius: BorderRadius.circular(8),
-                          border: Border.all(color: Colors.grey.shade400),
-                        ),
-                      ),
+                      _colorSwatch(_selected),
                       const SizedBox(height: 8),
                       FondeText(
-                        '#${_selected.red.toRadixString(16).padLeft(2, '0')}${_selected.green.toRadixString(16).padLeft(2, '0')}${_selected.blue.toRadixString(16).padLeft(2, '0')}'
-                            .toUpperCase(),
+                        _hexOf(_selected),
                         variant: FondeTextVariant.smallText,
                       ),
                     ],
@@ -63,40 +84,64 @@ class _ColorPickerPageState extends State<ColorPickerPage> {
                 ],
               ),
             ),
+          ],
+        ),
+        CatalogSection(
+          title: 'Dialog',
+          description:
+              'showFondeColorPickerDialog opens a color picker in a FondeDialog.',
+          children: [
             CatalogDemo(
-              label: 'With alpha channel',
-              child: FondeColorPicker(
-                initialColor: _selectedAlpha,
-                showAlpha: true,
-                onColorChanged: (c) => setState(() => _selectedAlpha = c),
-              ),
-            ),
-            CatalogDemo(
-              label: 'Dialog (showFondeColorPickerDialog)',
+              label: 'showFondeColorPickerDialog',
               child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Container(
-                    width: 32,
-                    height: 32,
-                    decoration: BoxDecoration(
-                      color: _selected,
-                      borderRadius: BorderRadius.circular(6),
-                      border: Border.all(color: Colors.grey.shade400),
-                    ),
-                  ),
+                  _colorSwatch(_dialogSelected),
                   const SizedBox(width: 8),
                   FondeButton.normal(
                     label: 'Choose Color…',
                     onPressed: () async {
                       final result = await showFondeColorPickerDialog(
                         context: context,
-                        initialColor: _selected,
+                        initialColor: _dialogSelected,
+                        palette: _palette,
+                        showEyeDropper: true,
                       );
                       if (result != null) {
-                        setState(() => _selected = result);
+                        setState(() => _dialogSelected = result);
                       }
                     },
+                  ),
+                  const SizedBox(width: 8),
+                  FondeText(
+                    _hexOf(_dialogSelected),
+                    variant: FondeTextVariant.smallText,
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+        CatalogSection(
+          title: 'Eyedropper',
+          description:
+              'FondeEyeDropperButton can be used independently to pick any color '
+              'from within the Flutter window.',
+          children: [
+            CatalogDemo(
+              label: 'FondeEyeDropperButton',
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  _colorSwatch(_selected),
+                  const SizedBox(width: 12),
+                  FondeEyeDropperButton(
+                    onColorPicked: (c) => setState(() => _selected = c),
+                  ),
+                  const SizedBox(width: 8),
+                  FondeText(
+                    _hexOf(_selected),
+                    variant: FondeTextVariant.smallText,
                   ),
                 ],
               ),

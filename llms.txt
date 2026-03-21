@@ -863,6 +863,75 @@ final date = await showFondeDatePickerDialog(
 
 ---
 
+## Color picker widgets
+
+### FondeColorPicker
+
+HSV color picker with saturation-value canvas, hue slider, optional alpha slider, optional palette swatches, optional eyedropper button, hex input, and opacity percentage input. No external dependencies.
+
+```dart
+FondeColorPicker({
+  Color initialColor = Colors.blue,
+  required ValueChanged<Color> onColorChanged,
+  bool showAlpha = true,             // alpha slider + opacity % field
+  List<Color>? palette,              // null = no palette
+  bool showEyeDropper = false,       // requires FondeEyeDropper in tree
+  double width = 240.0,
+  bool disableZoom = false,
+})
+```
+
+Bottom row layout (left to right): color preview swatch → eyedropper button (if enabled) → HEX input → opacity % input (if showAlpha).
+
+Palette is displayed as a `Wrap` of swatches below the sliders. Selected swatch is highlighted.
+
+Helper to show in a dialog:
+
+```dart
+final color = await showFondeColorPickerDialog(
+  context: context,
+  initialColor: currentColor,
+  showAlpha: true,
+  palette: [Colors.red, Colors.blue, ...],
+  showEyeDropper: true,
+);
+```
+
+### FondeEyeDropper
+
+Wraps the widget tree with a `RepaintBoundary` to enable in-window color sampling. Must be present in the tree for `FondeEyeDropperButton` and `FondeColorPicker(showEyeDropper: true)` to work. Enabled via `FondeApp(enableEyeDropper: true)`.
+
+```dart
+// Enabled automatically via FondeApp:
+FondeApp(
+  enableEyeDropper: true,
+  home: ...,
+)
+
+// Or wrap manually:
+FondeEyeDropper(child: myWidget)
+```
+
+**Limitation:** only samples pixels within the Flutter window. Cannot capture colors from outside the app (OS desktop, other apps).
+
+### FondeEyeDropperButton
+
+Button that activates eyedropper mode. Cursor changes to crosshair and a zoom loupe follows the pointer. Click to pick a color; right-click to cancel.
+
+```dart
+FondeEyeDropperButton({
+  required ValueChanged<Color> onColorPicked,
+  IconData icon = LucideIcons.pipette,
+  String tooltip = 'Pick color from screen',
+  double size = 24.0,
+  Color? color,
+})
+```
+
+Requires `FondeEyeDropper` in the widget tree (e.g. via `FondeApp(enableEyeDropper: true)`). Automatically disabled (greyed out) when not found.
+
+---
+
 ## Dialog and overlay widgets
 
 ### FondeDialog

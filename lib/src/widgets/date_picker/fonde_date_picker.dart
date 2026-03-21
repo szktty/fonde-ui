@@ -160,6 +160,10 @@ class _FondeDatePickerState extends ConsumerState<FondeDatePicker> {
         rowHeight: rowHeight,
         daysOfWeekHeight: dowHeight,
         pageAnimationEnabled: false,
+        // pageAnimationEnabled: false alone does not suppress the chevron-button
+        // month transition animation. As a workaround, set duration to 1 ms
+        // (Duration.zero triggers an assertion in Flutter's scroll internals).
+        pageAnimationDuration: const Duration(milliseconds: 1),
         availableGestures: AvailableGestures.none,
         headerStyle: HeaderStyle(
           titleCentered: true,
@@ -184,16 +188,10 @@ class _FondeDatePickerState extends ConsumerState<FondeDatePicker> {
           leftChevronMargin: EdgeInsets.only(left: 4.0 * zoomScale),
           rightChevronMargin: EdgeInsets.only(right: 4.0 * zoomScale),
           headerPadding: EdgeInsets.symmetric(vertical: 8.0 * zoomScale),
-          decoration: BoxDecoration(
-            border: Border(bottom: BorderSide(color: borderColor)),
-          ),
         ),
         daysOfWeekStyle: DaysOfWeekStyle(
           weekdayStyle: dowStyle,
           weekendStyle: dowStyle,
-          decoration: BoxDecoration(
-            border: Border(bottom: BorderSide(color: borderColor)),
-          ),
         ),
         calendarStyle: CalendarStyle(
           outsideDaysVisible: true,
@@ -227,6 +225,41 @@ class _FondeDatePickerState extends ConsumerState<FondeDatePicker> {
           markerSize: 4.0 * zoomScale,
           markersMaxCount: 3,
           cellPadding: EdgeInsets.all(2.0 * zoomScale),
+        ),
+        calendarBuilders: CalendarBuilders(
+          // Use plain Container instead of AnimatedContainer to remove selection animation
+          selectedBuilder: (context, day, focusedDay) {
+            return Container(
+              margin: EdgeInsets.all(2.0 * zoomScale),
+              decoration: selectedDecoration,
+              alignment: Alignment.center,
+              child: Text('${day.day}', style: selectedStyle),
+            );
+          },
+          todayBuilder: (context, day, focusedDay) {
+            return Container(
+              margin: EdgeInsets.all(2.0 * zoomScale),
+              decoration: todayDecoration,
+              alignment: Alignment.center,
+              child: Text('${day.day}', style: todayStyle),
+            );
+          },
+          rangeStartBuilder: (context, day, focusedDay) {
+            return Container(
+              margin: EdgeInsets.all(2.0 * zoomScale),
+              decoration: selectedDecoration,
+              alignment: Alignment.center,
+              child: Text('${day.day}', style: selectedStyle),
+            );
+          },
+          rangeEndBuilder: (context, day, focusedDay) {
+            return Container(
+              margin: EdgeInsets.all(2.0 * zoomScale),
+              decoration: selectedDecoration,
+              alignment: Alignment.center,
+              child: Text('${day.day}', style: selectedStyle),
+            );
+          },
         ),
         selectedDayPredicate:
             widget.rangeSelectionMode

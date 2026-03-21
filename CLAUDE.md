@@ -35,3 +35,12 @@ Desktop-first Flutter UI optimized for native-grade instant feedback, with acces
 
 - Design guidelines: @doc/design/
 - LLM documentation: @llms.txt
+
+## CHANGELOG
+
+Entries within each version must follow this category order:
+
+1. CHANGE — breaking changes
+2. UPDATE — backward-compatible changes
+3. ADD — backward-compatible additions
+4. FIX — bug fixes
