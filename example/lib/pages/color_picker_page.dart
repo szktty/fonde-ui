@@ -12,23 +12,20 @@ class ColorPickerPage extends StatefulWidget {
 
 class _ColorPickerPageState extends State<ColorPickerPage> {
   Color _selected = const Color(0xFF4B6EF5);
-  Color _selectedAlpha = const Color(0xFF4B6EF5);
-  Color _selectedPalette = const Color(0xFF4B6EF5);
-  Color _selectedEyeDropper = const Color(0xFF4B6EF5);
   Color _dialogSelected = const Color(0xFF4B6EF5);
 
   static const _palette = [
-    Color(0xFFEF4444), // red
-    Color(0xFFF97316), // orange
-    Color(0xFFEAB308), // yellow
-    Color(0xFF22C55E), // green
-    Color(0xFF3B82F6), // blue
-    Color(0xFF6366F1), // indigo
-    Color(0xFF8B5CF6), // violet
-    Color(0xFFEC4899), // pink
-    Color(0xFF6B7280), // graphite
-    Color(0xFFFFFFFF), // white
-    Color(0xFF000000), // black
+    Color(0xFFEF4444),
+    Color(0xFFF97316),
+    Color(0xFFEAB308),
+    Color(0xFF22C55E),
+    Color(0xFF3B82F6),
+    Color(0xFF6366F1),
+    Color(0xFF8B5CF6),
+    Color(0xFFEC4899),
+    Color(0xFF6B7280),
+    Color(0xFFFFFFFF),
+    Color(0xFF000000),
   ];
 
   String _hexOf(Color c) =>
@@ -53,15 +50,17 @@ class _ColorPickerPageState extends State<ColorPickerPage> {
           title: 'Color Picker',
           description:
               'FondeColorPicker provides an HSV color picker with saturation-value canvas, '
-              'hue slider, optional alpha slider, optional palette swatches, and hex input.',
+              'hue slider, palette swatches, eyedropper, and hex input.',
           children: [
             CatalogDemo(
-              label: 'Inline picker',
+              label: 'Inline',
               child: Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   FondeColorPicker(
                     initialColor: _selected,
+                    palette: _palette,
+                    showEyeDropper: true,
                     onColorChanged: (c) => setState(() => _selected = c),
                   ),
                   const SizedBox(width: 24),
@@ -78,78 +77,6 @@ class _ColorPickerPageState extends State<ColorPickerPage> {
                       const SizedBox(height: 8),
                       FondeText(
                         _hexOf(_selected),
-                        variant: FondeTextVariant.smallText,
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-            ),
-            CatalogDemo(
-              label: 'With palette',
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  FondeColorPicker(
-                    initialColor: _selectedPalette,
-                    palette: _palette,
-                    onColorChanged: (c) => setState(() => _selectedPalette = c),
-                  ),
-                  const SizedBox(width: 24),
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      const FondeText(
-                        'Selected color',
-                        variant: FondeTextVariant.captionText,
-                      ),
-                      const SizedBox(height: 8),
-                      _colorSwatch(_selectedPalette),
-                      const SizedBox(height: 8),
-                      FondeText(
-                        _hexOf(_selectedPalette),
-                        variant: FondeTextVariant.smallText,
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-            ),
-            CatalogDemo(
-              label: 'With alpha channel',
-              child: FondeColorPicker(
-                initialColor: _selectedAlpha,
-                showAlpha: true,
-                onColorChanged: (c) => setState(() => _selectedAlpha = c),
-              ),
-            ),
-            CatalogDemo(
-              label: 'With eyedropper (FondeApp enableEyeDropper: true)',
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  FondeColorPicker(
-                    initialColor: _selectedEyeDropper,
-                    showEyeDropper: true,
-                    palette: _palette,
-                    onColorChanged:
-                        (c) => setState(() => _selectedEyeDropper = c),
-                  ),
-                  const SizedBox(width: 24),
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      const FondeText(
-                        'Selected color',
-                        variant: FondeTextVariant.captionText,
-                      ),
-                      const SizedBox(height: 8),
-                      _colorSwatch(_selectedEyeDropper),
-                      const SizedBox(height: 8),
-                      FondeText(
-                        _hexOf(_selectedEyeDropper),
                         variant: FondeTextVariant.smallText,
                       ),
                     ],
@@ -196,25 +123,24 @@ class _ColorPickerPageState extends State<ColorPickerPage> {
           ],
         ),
         CatalogSection(
-          title: 'Eyedropper standalone',
+          title: 'Eyedropper',
           description:
               'FondeEyeDropperButton can be used independently to pick any color '
-              'from within the Flutter window. Requires FondeEyeDropper in the tree.',
+              'from within the Flutter window.',
           children: [
             CatalogDemo(
               label: 'FondeEyeDropperButton',
               child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  _colorSwatch(_selectedEyeDropper),
+                  _colorSwatch(_selected),
                   const SizedBox(width: 12),
                   FondeEyeDropperButton(
-                    onColorPicked:
-                        (c) => setState(() => _selectedEyeDropper = c),
+                    onColorPicked: (c) => setState(() => _selected = c),
                   ),
                   const SizedBox(width: 8),
                   FondeText(
-                    _hexOf(_selectedEyeDropper),
+                    _hexOf(_selected),
                     variant: FondeTextVariant.smallText,
                   ),
                 ],
