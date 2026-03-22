@@ -50,6 +50,9 @@ Desktop-first Flutter UI optimized for native-grade instant feedback, with acces
 
 Use `-dev` suffix for in-progress versions (e.g. `0.5.0-dev`).
 
+When bumping the version, update **both** `pubspec.yaml` and `example/pubspec.yaml` to the same value.
+The example app displays its own version at runtime via `package_info_plus`, which reads `example/pubspec.yaml`.
+
 ## CHANGELOG
 
 Entries within each version must follow this category order:
