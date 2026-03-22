@@ -6,6 +6,8 @@
 
 ![Screenshot](doc/images/screenshot.png)
 
+**[Live Demo](https://szktty.github.io/fonde-ui/)**
+
 ## Overview
 
 `fonde_ui` is a Flutter UI component library for desktop applications, developed for [RinneGraph](https://github.com/szktty/rinne-graph). It provides improved multi-pane layouts, instant feedback interaction, and accessibility support out-of-the-box.
@@ -81,6 +83,7 @@ Fonde UI's goal is to provide **operational and visual comfort** in desktop apps
 - Number Field — numeric input with − / + buttons, min/max/step
 - Checkbox — rectangle/circle shape; filled/outline/iconOnly fill style
 - Radio Button
+- Switch — toggle switch; compact and wide styles
 - Dropdown Menu
 - Expansion Tile
 - Date Picker — monthly calendar, single and range selection
