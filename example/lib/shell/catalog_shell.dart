@@ -17,6 +17,7 @@ import '../pages/number_field_page.dart';
 import '../pages/date_picker_page.dart';
 import '../pages/checkbox_page.dart';
 import '../pages/radio_button_page.dart';
+import '../pages/switch_page.dart';
 import '../pages/dropdown_menu_page.dart';
 import '../pages/typography_page.dart';
 import '../pages/tab_view_page.dart';
@@ -102,6 +103,7 @@ class _CatalogShellState extends ConsumerState<CatalogShell> {
       'fonde_date_picker' => const DatePickerPage(),
       'fonde_checkbox' => const CheckboxPage(),
       'fonde_radio_button' => const RadioButtonPage(),
+      'fonde_switch' => const SwitchPage(),
       'fonde_dropdown_menu' => const DropdownMenuPage(),
       // Typography
       'fonde_text' => const TypographyPage(),

@@ -13,6 +13,7 @@
 
 **Release date**: 2026-03-23
 
+- [ADD] `FondeSwitch` — toggle switch widget with `compact` (32×20px) and `wide` (38×18px, pill knob) styles; 300ms easeInOut animation always enabled
 - [ADD] `FondeSidebarStyle` enum (`standard` / `floatingPanel`) — pass via `FondeSidebar.style`
   - `floatingPanel`: toolbar and content float together as a squircle panel over a lighter outer background (macOS-style)
   - `FondeSidebar` now accepts a `toolbar` parameter; when provided, `FondeSidebarPane` wrapping is skipped to avoid duplicate toolbars

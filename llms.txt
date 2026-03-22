@@ -815,6 +815,32 @@ Tristate: false → true → null → false.
 
 Standard radio button, theme-aware.
 
+### FondeSwitch
+
+Toggle switch with animated knob slide (300ms easeInOut, always enabled).
+
+```dart
+FondeSwitch({
+  required bool value,
+  required ValueChanged<bool>? onChanged,
+  FondeSwitchStyle style = FondeSwitchStyle.compact,
+  FocusNode? focusNode,
+  bool autofocus = false,
+  String? semanticLabel,
+  bool disableZoom = false,
+})
+
+enum FondeSwitchStyle {
+  compact,  // 32×20px track, 16px circular knob (default)
+  wide,     // 38×18px track, 22×14px pill knob
+}
+```
+
+Track color: OFF → `base.border`, ON → `theme.primaryColor`.
+Knob color: `interactive.button.primaryText`.
+Disabled: opacity 0.4.
+Animation is intentionally always active (instant transition is visually jarring; the slide reduces eye strain).
+
 ### FondeDropdownMenu
 
 Dropdown selector, uses smooth corner styling.

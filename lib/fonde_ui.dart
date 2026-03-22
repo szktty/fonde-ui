@@ -96,6 +96,7 @@ export 'src/widgets/tags_field/fonde_tags_field.dart';
 export 'src/widgets/number_field/fonde_number_field.dart';
 export 'src/widgets/widgets/fonde_checkbox.dart';
 export 'src/widgets/widgets/fonde_radio_button.dart';
+export 'src/widgets/widgets/fonde_switch.dart';
 export 'src/widgets/widgets/fonde_dropdown_menu.dart';
 export 'src/widgets/widgets/fonde_popup_menu.dart';
 export 'src/widgets/widgets/fonde_expansion_tile.dart';
