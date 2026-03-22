@@ -1,0 +1,22 @@
+# CI / GitHub
+.github/
+
+# Documentation source (not needed by consumers)
+doc/
+
+# Example app
+example/
+
+# Development tooling
+.fvm/
+.dart_tool/
+build/
+
+# IDE
+.idea/
+.vscode/
+*.iml
+
+# OS
+.DS_Store
+Thumbs.db
