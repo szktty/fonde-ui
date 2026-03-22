@@ -1,3 +1,4 @@
+import 'package:figma_squircle/figma_squircle.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../internal.dart';
@@ -10,10 +11,14 @@ enum FondeSidebarListItemStyle {
 
   /// Selected items use a subtle grey background with accent-colored text.
   subtle,
+
+  /// Selected items use a floating rounded rectangle (macOS-style inset card).
+  /// Hover state also shows a subtle rounded rectangle.
+  inset,
 }
 
 /// A widget that displays a single navigation item.
-class FondeSidebarListItem extends ConsumerWidget {
+class FondeSidebarListItem extends ConsumerStatefulWidget {
   /// The unique identifier for the item.
   final String id;
 
@@ -92,9 +97,17 @@ class FondeSidebarListItem extends ConsumerWidget {
   });
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<FondeSidebarListItem> createState() =>
+      _FondeSidebarListItemState();
+}
+
+class _FondeSidebarListItemState extends ConsumerState<FondeSidebarListItem> {
+  bool _isHovered = false;
+
+  @override
+  Widget build(BuildContext context) {
     final accessibilityConfig = ref.watch(fondeAccessibilityConfigProvider);
-    final zoomScale = disableZoom ? 1.0 : accessibilityConfig.zoomScale;
+    final zoomScale = widget.disableZoom ? 1.0 : accessibilityConfig.zoomScale;
 
     // Get the color scope (use the sidebar scope or the default)
     final colorScope = ref.watch(fondeSideBarColorScopeProvider);
@@ -102,62 +115,108 @@ class FondeSidebarListItem extends ConsumerWidget {
     // Get the text theme
     final themeData = ref.watch(fondeEffectiveThemeDataProvider);
 
-    final effectiveSelectedBackground = switch (style) {
-      FondeSidebarListItemStyle.filled => colorScope.selection,
-      FondeSidebarListItemStyle.subtle => colorScope.subtleSelection,
-    };
-    final effectiveBackgroundColor =
-        isSelected
-            ? selectedBackgroundColor ?? effectiveSelectedBackground
-            : backgroundColor;
+    final Color? effectiveBackgroundColor;
+    final Color effectiveContentColor;
 
-    final effectiveContentColor = switch (style) {
-      FondeSidebarListItemStyle.filled =>
-        isSelected ? colorScope.accent : colorScope.text,
-      FondeSidebarListItemStyle.subtle =>
-        isSelected ? colorScope.accent : colorScope.text,
-    };
+    switch (widget.style) {
+      case FondeSidebarListItemStyle.filled:
+        effectiveBackgroundColor =
+            widget.isSelected
+                ? widget.selectedBackgroundColor ?? colorScope.selection
+                : widget.backgroundColor;
+        effectiveContentColor =
+            widget.isSelected ? colorScope.accent : colorScope.text;
+      case FondeSidebarListItemStyle.subtle:
+        effectiveBackgroundColor =
+            widget.isSelected
+                ? widget.selectedBackgroundColor ?? colorScope.subtleSelection
+                : widget.backgroundColor;
+        effectiveContentColor =
+            widget.isSelected ? colorScope.accent : colorScope.text;
+      case FondeSidebarListItemStyle.inset:
+        effectiveBackgroundColor = null; // handled by inset decoration
+        effectiveContentColor =
+            widget.isSelected ? colorScope.accent : colorScope.text;
+    }
 
     final effectiveTitleStyle =
-        titleStyle ??
+        widget.titleStyle ??
         themeData.textTheme.bodyLarge?.copyWith(color: effectiveContentColor);
 
-    Widget content = Container(
-      padding: padding * zoomScale,
+    Widget content = Padding(
+      padding: widget.padding * zoomScale,
       child: Row(
         children: [
-          if (leading != null)
+          if (widget.leading != null)
             Padding(
               padding: EdgeInsets.only(right: 12 * zoomScale),
               child: IconTheme.merge(
                 data: IconThemeData(color: effectiveContentColor),
-                child: leading!,
+                child: widget.leading!,
               ),
             ),
           Expanded(
             child: Text(
-              title,
+              widget.title,
               style: effectiveTitleStyle,
               overflow: TextOverflow.ellipsis,
             ),
           ),
-          if (trailing != null) trailing!,
+          if (widget.trailing != null) widget.trailing!,
         ],
       ),
     );
 
     // Apply if indent is specified
-    if (indent > 0) {
+    if (widget.indent > 0) {
       content = Padding(
-        padding: EdgeInsets.only(left: indent * zoomScale),
+        padding: EdgeInsets.only(left: widget.indent * zoomScale),
+        child: content,
+      );
+    }
+
+    if (widget.style == FondeSidebarListItemStyle.inset) {
+      final insetColor =
+          widget.isSelected
+              ? widget.selectedBackgroundColor ?? colorScope.selection
+              : _isHovered
+              ? colorScope.hover
+              : null;
+
+      content = MouseRegion(
+        onEnter: (_) => setState(() => _isHovered = true),
+        onExit: (_) => setState(() => _isHovered = false),
+        child: Container(
+          decoration:
+              insetColor != null
+                  ? ShapeDecoration(
+                    color: insetColor,
+                    shape: SmoothRectangleBorder(
+                      borderRadius: SmoothBorderRadius(
+                        cornerRadius: 6.0 * zoomScale,
+                        cornerSmoothing: 0.6,
+                      ),
+                    ),
+                  )
+                  : null,
+          child: content,
+        ),
+      );
+
+      return FondeGestureDetector(
+        onTap: widget.onTap,
+        onTapDown: widget.onTapDown,
+        onTapUp: widget.onTapUp,
+        cursor: SystemMouseCursors.basic,
+        behavior: HitTestBehavior.opaque,
         child: content,
       );
     }
 
     return FondeGestureDetector(
-      onTap: onTap,
-      onTapDown: onTapDown,
-      onTapUp: onTapUp,
+      onTap: widget.onTap,
+      onTapDown: widget.onTapDown,
+      onTapUp: widget.onTapUp,
       cursor: SystemMouseCursors.basic,
       behavior: HitTestBehavior.opaque,
       child: Container(color: effectiveBackgroundColor, child: content),

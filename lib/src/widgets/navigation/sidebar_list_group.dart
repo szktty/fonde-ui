@@ -1,3 +1,4 @@
+import 'package:figma_squircle/figma_squircle.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../internal.dart';
@@ -107,6 +108,7 @@ class _NavigationGroupState extends ConsumerState<FondeSidebarListGroup>
   late bool _isExpandedState;
   late AnimationController _animationController;
   late Animation<double> _sizeAnimation;
+  bool _isHovered = false;
 
   @override
   void initState() {
@@ -152,14 +154,17 @@ class _NavigationGroupState extends ConsumerState<FondeSidebarListGroup>
 
     final theme = Theme.of(context);
     final colorScope = ref.watch(fondeSideBarColorScopeProvider);
-    final effectiveSelectedBackground = switch (widget.style) {
-      FondeSidebarListItemStyle.filled => colorScope.selection,
-      FondeSidebarListItemStyle.subtle => colorScope.subtleSelection,
-    };
-    final effectiveBackgroundColor =
+    final effectiveBackgroundColor = switch (widget.style) {
+      FondeSidebarListItemStyle.filled =>
         widget.isSelected
-            ? widget.selectedBackgroundColor ?? effectiveSelectedBackground
-            : widget.backgroundColor;
+            ? widget.selectedBackgroundColor ?? colorScope.selection
+            : widget.backgroundColor,
+      FondeSidebarListItemStyle.subtle =>
+        widget.isSelected
+            ? widget.selectedBackgroundColor ?? colorScope.subtleSelection
+            : widget.backgroundColor,
+      FondeSidebarListItemStyle.inset => null, // handled by inset decoration
+    };
     final effectiveContentColor =
         widget.isSelected ? colorScope.accent : colorScope.text;
     final effectiveTitleStyle =
@@ -194,60 +199,88 @@ class _NavigationGroupState extends ConsumerState<FondeSidebarListGroup>
       widget.onExpansionChanged?.call(_isExpandedState);
     }
 
-    // Header part: expansion icon (toggle) + content area (select)
-    final header = Container(
-      color: effectiveBackgroundColor,
-      child: Row(
-        children: [
-          // Expansion icon: tapping toggles expand/collapse
-          FondeGestureDetector(
-            onTapUp: (_) => toggleExpansion(),
+    final headerRow = Row(
+      children: [
+        // Expansion icon: tapping toggles expand/collapse
+        FondeGestureDetector(
+          onTapUp: (_) => toggleExpansion(),
+          cursor: SystemMouseCursors.basic,
+          behavior: HitTestBehavior.opaque,
+          child: Padding(
+            padding: EdgeInsets.only(
+              left: 16 * zoomScale,
+              top: 8 * zoomScale,
+              bottom: 8 * zoomScale,
+              right: 8 * zoomScale,
+            ),
+            child: expansionIcon(),
+          ),
+        ),
+        // Content area: tapping selects the group
+        Expanded(
+          child: FondeGestureDetector(
+            onTapUp: (_) => widget.onTap?.call(),
             cursor: SystemMouseCursors.basic,
             behavior: HitTestBehavior.opaque,
             child: Padding(
               padding: EdgeInsets.only(
-                left: 16 * zoomScale,
+                right: 16 * zoomScale,
                 top: 8 * zoomScale,
                 bottom: 8 * zoomScale,
-                right: 8 * zoomScale,
               ),
-              child: expansionIcon(),
-            ),
-          ),
-          // Content area: tapping selects the group
-          Expanded(
-            child: FondeGestureDetector(
-              onTapUp: (_) => widget.onTap?.call(),
-              cursor: SystemMouseCursors.basic,
-              behavior: HitTestBehavior.opaque,
-              child: Padding(
-                padding: EdgeInsets.only(
-                  right: 16 * zoomScale,
-                  top: 8 * zoomScale,
-                  bottom: 8 * zoomScale,
-                ),
-                child: Row(
-                  children: [
-                    if (widget.icon != null)
-                      Padding(
-                        padding: EdgeInsets.only(right: 12 * zoomScale),
-                        child: IconTheme.merge(
-                          data: IconThemeData(color: effectiveContentColor),
-                          child: widget.icon!,
-                        ),
+              child: Row(
+                children: [
+                  if (widget.icon != null)
+                    Padding(
+                      padding: EdgeInsets.only(right: 12 * zoomScale),
+                      child: IconTheme.merge(
+                        data: IconThemeData(color: effectiveContentColor),
+                        child: widget.icon!,
                       ),
-                    Expanded(
-                      child: Text(widget.title, style: effectiveTitleStyle),
                     ),
-                    if (widget.trailing != null) widget.trailing!,
-                  ],
-                ),
+                  Expanded(
+                    child: Text(widget.title, style: effectiveTitleStyle),
+                  ),
+                  if (widget.trailing != null) widget.trailing!,
+                ],
               ),
             ),
           ),
-        ],
-      ),
+        ),
+      ],
     );
+
+    // Header part: expansion icon (toggle) + content area (select)
+    final Widget header;
+    if (widget.style == FondeSidebarListItemStyle.inset) {
+      final insetColor =
+          widget.isSelected
+              ? widget.selectedBackgroundColor ?? colorScope.selection
+              : _isHovered
+              ? colorScope.hover
+              : null;
+      header = MouseRegion(
+        onEnter: (_) => setState(() => _isHovered = true),
+        onExit: (_) => setState(() => _isHovered = false),
+        child: Container(
+          decoration:
+              insetColor != null
+                  ? ShapeDecoration(
+                    color: insetColor,
+                    shape: SmoothRectangleBorder(
+                      borderRadius: SmoothBorderRadius(
+                        cornerRadius: 6.0 * zoomScale,
+                        cornerSmoothing: 0.6,
+                      ),
+                    ),
+                  )
+                  : null,
+          child: headerRow,
+        ),
+      );
+    } else {
+      header = Container(color: effectiveBackgroundColor, child: headerRow);
+    }
 
     // Indented child widgets
     final indentedChildren =

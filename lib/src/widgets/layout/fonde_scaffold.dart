@@ -9,6 +9,7 @@ import '../../riverpod/widgets/sidebar_state_providers.dart';
 import '../icons/icon_theme_providers.dart';
 import '../toolbar/secondary_sidebar_toolbar.dart';
 import '../widgets/fonde_icon_button.dart';
+import '../navigation/sidebar.dart';
 import 'collapsed_sidebar_layout.dart';
 import 'main_content_area.dart';
 import 'primary_side.dart';
@@ -198,12 +199,22 @@ class _FondeScaffoldState extends ConsumerState<FondeScaffold> {
           builder: (context, area) {
             switch (area.id) {
               case 'primary_sidebar':
+                Widget? sidebarPane;
+                if (widget.primarySidebar != null) {
+                  // If FondeSidebar has its own toolbar (either floatingPanel
+                  // or standard with an explicit toolbar), skip FondeSidebarPane
+                  // to avoid double toolbars.
+                  final sidebarHasToolbar =
+                      widget.primarySidebar is FondeSidebar &&
+                      (widget.primarySidebar! as FondeSidebar).toolbar != null;
+                  sidebarPane =
+                      sidebarHasToolbar
+                          ? widget.primarySidebar!
+                          : FondeSidebarPane(child: widget.primarySidebar!);
+                }
                 return FondePrimarySide(
                   launchBar: widget.launchBar,
-                  sidebar:
-                      widget.primarySidebar != null
-                          ? FondeSidebarPane(child: widget.primarySidebar!)
-                          : null,
+                  sidebar: sidebarPane,
                   showLaunchBar: widget.showLaunchBar,
                   showSidebar: widget.showPrimarySidebar,
                   zoomScale: zoomScale,

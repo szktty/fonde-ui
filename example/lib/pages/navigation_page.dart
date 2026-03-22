@@ -24,6 +24,11 @@ class NavigationPage extends StatelessWidget {
               child: SizedBox(height: 320, child: _BasicNavigationDemo()),
             ),
             CatalogDemo(
+              label: 'Floating panel sidebar (macOS)',
+              description: 'FondeSidebarStyle.floatingPanel',
+              child: SizedBox(height: 320, child: _FloatingPanelDemo()),
+            ),
+            CatalogDemo(
               label: 'Hidden sidebar',
               description: 'showPrimarySidebar: false',
               child: SizedBox(height: 200, child: _NoSidebarDemo()),
@@ -140,6 +145,105 @@ class _BasicNavigationDemoState extends ConsumerState<_BasicNavigationDemo> {
               leading: const Icon(LucideIcons.trash2, size: 16),
             ),
           ],
+        ),
+        content: Center(
+          child: FondeText(
+            _selectedLabel,
+            variant: FondeTextVariant.bodyText,
+            color: colorScheme.base.foreground.withValues(alpha: 0.4),
+          ),
+        ),
+      ),
+    );
+  }
+
+  String get _selectedLabel {
+    const labels = {
+      'inbox': 'Inbox',
+      'drafts': 'Drafts',
+      'sent': 'Sent',
+      'archive': 'Archive',
+      'trash': 'Trash',
+    };
+    return labels[_selectedItemId] ?? 'Navigation Demo';
+  }
+}
+
+class _FloatingPanelDemo extends ConsumerStatefulWidget {
+  const _FloatingPanelDemo();
+
+  @override
+  ConsumerState<_FloatingPanelDemo> createState() => _FloatingPanelDemoState();
+}
+
+class _FloatingPanelDemoState extends ConsumerState<_FloatingPanelDemo> {
+  String? _selectedItemId = 'inbox';
+  List<String> _expandedGroupIds = ['mail'];
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = ref.watch(fondeEffectiveColorSchemeProvider);
+    return ClipRect(
+      child: FondeScaffold(
+        disableZoom: true,
+        toolbar: FondeMainToolbar(
+          center: FondeText(
+            _selectedLabel,
+            variant: FondeTextVariant.sectionTitleSecondary,
+          ),
+        ),
+        primarySidebar: FondeSidebar(
+          style: FondeSidebarStyle.floatingPanel,
+          child: FondeSidebarList(
+            shrinkWrap: false,
+            selectedItemId: _selectedItemId,
+            expandedGroupIds: _expandedGroupIds,
+            onItemSelected: (id) => setState(() => _selectedItemId = id),
+            onGroupToggled:
+                (id) => setState(() {
+                  if (_expandedGroupIds.contains(id)) {
+                    _expandedGroupIds = List.of(_expandedGroupIds)..remove(id);
+                  } else {
+                    _expandedGroupIds = List.of(_expandedGroupIds)..add(id);
+                  }
+                }),
+            style: FondeSidebarListItemStyle.inset,
+            children: [
+              FondeSidebarListGroup(
+                id: 'mail',
+                title: 'Mail',
+                icon: const Icon(LucideIcons.mail, size: 16),
+                isExpanded: _expandedGroupIds.contains('mail'),
+                children: [
+                  FondeSidebarListItem(
+                    id: 'inbox',
+                    title: 'Inbox',
+                    leading: const Icon(LucideIcons.inbox, size: 16),
+                  ),
+                  FondeSidebarListItem(
+                    id: 'drafts',
+                    title: 'Drafts',
+                    leading: const Icon(LucideIcons.pencil, size: 16),
+                  ),
+                  FondeSidebarListItem(
+                    id: 'sent',
+                    title: 'Sent',
+                    leading: const Icon(LucideIcons.send, size: 16),
+                  ),
+                ],
+              ),
+              FondeSidebarListItem(
+                id: 'archive',
+                title: 'Archive',
+                leading: const Icon(LucideIcons.archive, size: 16),
+              ),
+              FondeSidebarListItem(
+                id: 'trash',
+                title: 'Trash',
+                leading: const Icon(LucideIcons.trash2, size: 16),
+              ),
+            ],
+          ),
         ),
         content: Center(
           child: FondeText(

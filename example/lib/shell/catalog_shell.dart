@@ -60,6 +60,30 @@ class _CatalogShellState extends ConsumerState<CatalogShell> {
   String? _selectedItemId;
   List<String> _expandedGroupIds = catalogCategories.map((c) => c.id).toList();
   int _launchBarIndex = 0;
+  FondeSidebarStyle _sidebarStyle = FondeSidebarStyle.standard;
+
+  Widget _buildPrimarySidebar() {
+    final toolbar = _CatalogSidebarToolbar(
+      sidebarStyle: _sidebarStyle,
+      onSidebarStyleChanged: (style) => setState(() => _sidebarStyle = style),
+    );
+    final list = CatalogSidebar(
+      selectedItemId: _selectedItemId ?? '_welcome',
+      expandedGroupIds: _expandedGroupIds,
+      onItemSelected:
+          (id) =>
+              setState(() => _selectedItemId = id == '_welcome' ? null : id),
+      onGroupToggled:
+          (id) => setState(() {
+            if (_expandedGroupIds.contains(id)) {
+              _expandedGroupIds = List.of(_expandedGroupIds)..remove(id);
+            } else {
+              _expandedGroupIds = List.of(_expandedGroupIds)..add(id);
+            }
+          }),
+    );
+    return FondeSidebar(style: _sidebarStyle, toolbar: toolbar, child: list);
+  }
 
   Widget _buildContent() {
     return switch (_selectedItemId) {
@@ -178,21 +202,7 @@ class _CatalogShellState extends ConsumerState<CatalogShell> {
         ],
       ),
       showPrimarySidebar: _launchBarIndex == 0,
-      primarySidebar: CatalogSidebar(
-        selectedItemId: _selectedItemId ?? '_welcome',
-        expandedGroupIds: _expandedGroupIds,
-        onItemSelected:
-            (id) =>
-                setState(() => _selectedItemId = id == '_welcome' ? null : id),
-        onGroupToggled:
-            (id) => setState(() {
-              if (_expandedGroupIds.contains(id)) {
-                _expandedGroupIds = List.of(_expandedGroupIds)..remove(id);
-              } else {
-                _expandedGroupIds = List.of(_expandedGroupIds)..add(id);
-              }
-            }),
-      ),
+      primarySidebar: _buildPrimarySidebar(),
       content:
           _launchBarIndex == 0
               ? _buildContent()
@@ -252,6 +262,86 @@ class _LaunchBarPlaceholder extends ConsumerWidget {
         'This is a sample screen for the Launch Bar.\nCurrent: $label',
         variant: FondeTextVariant.bodyText,
         color: colorScheme.base.foreground.withValues(alpha: 0.4),
+      ),
+    );
+  }
+}
+
+class _CatalogSidebarToolbar extends ConsumerWidget {
+  const _CatalogSidebarToolbar({
+    required this.sidebarStyle,
+    required this.onSidebarStyleChanged,
+  });
+
+  final FondeSidebarStyle sidebarStyle;
+  final void Function(FondeSidebarStyle) onSidebarStyleChanged;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final colorScheme = ref.watch(fondeEffectiveColorSchemeProvider);
+    final isFloating = sidebarStyle == FondeSidebarStyle.floatingPanel;
+
+    final backgroundColor =
+        isFloating
+            ? colorScheme.uiAreas.sideBar.floatingPanelBackground
+            : colorScheme.uiAreas.toolbar.background;
+    final borderColor =
+        isFloating ? Colors.transparent : colorScheme.uiAreas.toolbar.border;
+
+    return SizedBox(
+      height: 50,
+      child: ColoredBox(
+        color: backgroundColor,
+        child: Column(
+          children: [
+            Expanded(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 8.0,
+                  vertical: 4.0,
+                ),
+                child: Row(
+                  children: [
+                    FondeIconButton(
+                      icon: LucideIcons.panelLeftClose,
+                      iconSize: 20,
+                      onPressed:
+                          () =>
+                              ref
+                                  .read(
+                                    fondePrimarySidebarStateProvider.notifier,
+                                  )
+                                  .hide(),
+                      tooltip: 'Close Sidebar',
+                      padding: EdgeInsets.zero,
+                      hoverColor: Colors.transparent,
+                    ),
+                    const Spacer(),
+                    FondeIconButton(
+                      icon:
+                          isFloating
+                              ? LucideIcons.panelLeft
+                              : LucideIcons.appWindowMac,
+                      iconSize: 16,
+                      tooltip:
+                          isFloating
+                              ? 'Switch to Standard Style'
+                              : 'Switch to Floating Panel Style',
+                      onPressed:
+                          () => onSidebarStyleChanged(
+                            isFloating
+                                ? FondeSidebarStyle.standard
+                                : FondeSidebarStyle.floatingPanel,
+                          ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            if (borderColor != Colors.transparent)
+              Divider(height: 1, thickness: 1, color: borderColor),
+          ],
+        ),
       ),
     );
   }

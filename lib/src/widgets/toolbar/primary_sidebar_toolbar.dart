@@ -10,30 +10,52 @@ import '../icons/icon_theme_providers.dart';
 /// A title bar placed at the top of the primary sidebar area, including a
 /// sidebar collapse button.
 class FondePrimarySidebarToolbar extends ConsumerWidget {
-  const FondePrimarySidebarToolbar({super.key});
+  const FondePrimarySidebarToolbar({
+    this.backgroundColor,
+    this.borderColor,
+    super.key,
+  });
+
+  /// Override the toolbar background color.
+  /// When null, defaults to [FondeToolbarColors.background].
+  final Color? backgroundColor;
+
+  /// Override the bottom border color.
+  /// When null, defaults to [FondeToolbarColors.border].
+  final Color? borderColor;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final appColorScheme = ref.watch(fondeEffectiveColorSchemeProvider);
     final iconTheme = ref.watch(fondeDefaultIconThemeProvider);
 
-    return Container(
-      height: 50, // Same height as the main area title bar
-      decoration: BoxDecoration(
-        color: appColorScheme.uiAreas.toolbar.background,
-        border: Border(
-          bottom: BorderSide(
-            color: appColorScheme.uiAreas.toolbar.border,
-            width: 1.0,
-          ),
-        ),
-      ),
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0),
-        child: Row(
+    final effectiveBackground =
+        backgroundColor ?? appColorScheme.uiAreas.toolbar.background;
+    final effectiveBorderColor =
+        borderColor ?? appColorScheme.uiAreas.toolbar.border;
+
+    return SizedBox(
+      height: 50,
+      child: ColoredBox(
+        color: effectiveBackground,
+        child: Column(
           children: [
-            _buildPrimarySidebarToggle(ref, iconTheme),
-            const Expanded(child: SizedBox()),
+            Expanded(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 8.0,
+                  vertical: 4.0,
+                ),
+                child: Row(
+                  children: [
+                    _buildPrimarySidebarToggle(ref, iconTheme),
+                    const Expanded(child: SizedBox()),
+                  ],
+                ),
+              ),
+            ),
+            if (effectiveBorderColor != Colors.transparent)
+              Divider(height: 1, thickness: 1, color: effectiveBorderColor),
           ],
         ),
       ),

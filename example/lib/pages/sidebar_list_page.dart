@@ -33,6 +33,10 @@ class SidebarListPage extends StatelessWidget {
               child: SizedBox(width: 220, child: _SubtleDemo()),
             ),
             CatalogDemo(
+              label: 'Inset style (macOS)',
+              child: SizedBox(width: 220, child: _InsetDemo()),
+            ),
+            CatalogDemo(
               label: 'With header',
               child: SizedBox(width: 220, child: _HeaderDemo()),
             ),
@@ -242,6 +246,79 @@ class _SubtleDemoState extends ConsumerState<_SubtleDemo> {
           id: 'shared',
           title: 'Shared with me',
           leading: const Icon(LucideIcons.users, size: 16),
+        ),
+      ],
+    );
+  }
+}
+
+// Inset style demo
+class _InsetDemo extends ConsumerStatefulWidget {
+  const _InsetDemo();
+
+  @override
+  ConsumerState<_InsetDemo> createState() => _InsetDemoState();
+}
+
+class _InsetDemoState extends ConsumerState<_InsetDemo> {
+  String? _selected = 'home';
+  List<String> _expanded = ['workspace'];
+
+  @override
+  Widget build(BuildContext context) {
+    return FondeSidebarList(
+      shrinkWrap: true,
+      physics: const NeverScrollableScrollPhysics(),
+      selectedItemId: _selected,
+      expandedGroupIds: _expanded,
+      onItemSelected: (id) => setState(() => _selected = id),
+      onGroupToggled:
+          (id) => setState(() {
+            if (_expanded.contains(id)) {
+              _expanded = List.of(_expanded)..remove(id);
+            } else {
+              _expanded = List.of(_expanded)..add(id);
+            }
+          }),
+      style: FondeSidebarListItemStyle.inset,
+      children: [
+        FondeSidebarListItem(
+          id: 'home',
+          title: 'Home',
+          leading: const Icon(LucideIcons.house, size: 16),
+        ),
+        FondeSidebarListItem(
+          id: 'search',
+          title: 'Search',
+          leading: const Icon(LucideIcons.search, size: 16),
+        ),
+        FondeSidebarListItem(
+          id: 'notifications',
+          title: 'Notifications',
+          leading: const Icon(LucideIcons.bell, size: 16),
+        ),
+        FondeSidebarListGroup(
+          id: 'workspace',
+          title: 'Workspace',
+          icon: const Icon(LucideIcons.folder, size: 16),
+          isExpanded: _expanded.contains('workspace'),
+          children: [
+            FondeSidebarListItem(
+              id: 'docs',
+              title: 'Documents',
+              leading: const Icon(LucideIcons.fileText, size: 16),
+            ),
+            FondeSidebarListItem(
+              id: 'images',
+              title: 'Images',
+              leading: const Icon(LucideIcons.image, size: 16),
+            ),
+          ],
+        ),
+        FondeSidebarListItem(
+          id: 'settings',
+          title: 'Settings',
+          leading: const Icon(LucideIcons.settings, size: 16),
         ),
       ],
     );

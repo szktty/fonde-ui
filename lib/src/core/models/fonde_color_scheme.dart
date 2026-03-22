@@ -18,6 +18,8 @@ class _AppColorConstants {
   // Dark mode background colors (for existing UI elements)
   static const Color darkNavigationBackground = Color(0xFF2C2C2E);
   static const Color darkSystemBackground = Color(0xFF2D2D30);
+  static const Color darkFloatingPanelOuter = Color(0xFF2C2C2E);
+  static const Color darkFloatingPanel = Color(0xFF1C1C1E);
   static const Color darkLaunchBarActiveBackground = Color(0xFF3C3C3E);
   static const Color darkSidebarHoverBackground = Color(0xFF3A3A3C);
   static const Color darkButtonHoverBackground = Color(0xFF3A3A3C);
@@ -29,6 +31,8 @@ class _AppColorConstants {
   // Light mode background colors (for existing UI elements)
   static const Color lightNavigationBackground = Color(0xFFF2F2F7);
   static const Color lightSystemBackground = Color(0xFFF3F3F3);
+  static const Color lightFloatingPanelOuter = Color(0xFFF2F2F7);
+  static const Color lightFloatingPanel = Color(0xFFE5E5EA);
   static const Color lightLaunchBarActiveBackground = Color(0xFFE8E8ED);
   static const Color lightSidebarHoverBackground = Color(0xFFE5E5EA);
   static const Color lightButtonHoverBackground = Color(0xFFE5E5EA);
@@ -186,6 +190,14 @@ class FondeColorScheme {
           isDark
               ? _AppColorConstants.darkSidebarHoverBackground
               : _AppColorConstants.lightSidebarHoverBackground,
+      floatingPanelOuterBackground:
+          isDark
+              ? _AppColorConstants.darkFloatingPanelOuter
+              : _AppColorConstants.lightFloatingPanelOuter,
+      floatingPanelBackground:
+          isDark
+              ? _AppColorConstants.darkFloatingPanel
+              : _AppColorConstants.lightFloatingPanel,
     );
 
     // Define status bar colors (Level 3: System background)

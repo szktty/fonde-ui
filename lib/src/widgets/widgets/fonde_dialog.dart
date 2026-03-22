@@ -179,7 +179,6 @@ class FondeDialog extends ConsumerWidget {
       );
     }
 
-    debugPrint('scaledHeight: $scaledHeight');
     final hasFooter = footer != null;
 
     return Dialog(
