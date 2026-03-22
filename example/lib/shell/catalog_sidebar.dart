@@ -130,7 +130,7 @@ const catalogCategories = [
   ),
 ];
 
-/// Catalog navigation displayed in the sidebar
+/// Catalog navigation list displayed in the sidebar
 class CatalogSidebar extends ConsumerWidget {
   const CatalogSidebar({
     super.key,

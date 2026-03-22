@@ -110,7 +110,6 @@ class FondeThemeData {
   /// Converts to Flutter's ThemeData.
   ThemeData toThemeData() {
     // Based on the color scheme, ThemeMode is applied at the app value layer.
-    debugPrint('toThemeData: brightness=${appColorScheme.brightness}');
     final ColorScheme effectiveColorScheme = appColorScheme.toColorScheme();
 
     // Reflect typography settings.
@@ -120,10 +119,6 @@ class FondeThemeData {
       // Use typography.toTextTheme().
       textTheme = typography!.toTextTheme();
     }
-
-    debugPrint(
-      'effectiveColorScheme.brightness=${effectiveColorScheme.brightness}',
-    );
     return ThemeData(
       useMaterial3: true,
       colorScheme: effectiveColorScheme,

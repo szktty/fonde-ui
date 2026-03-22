@@ -42,6 +42,14 @@ Desktop-first Flutter UI optimized for native-grade instant feedback, with acces
 - Merge `develop` into `main` when UI component changes or fixes should be reflected in the demo
   - Timing is decided by the user, not automatically
 
+## Versioning
+
+- **Patch** (x.y.Z): bug fixes only
+- **Minor** (x.Y.0): any breaking changes or additions
+- **Major** (X.0.0): significant development milestones, decided by the user
+
+Use `-dev` suffix for in-progress versions (e.g. `0.5.0-dev`).
+
 ## CHANGELOG
 
 Entries within each version must follow this category order:

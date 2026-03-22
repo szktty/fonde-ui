@@ -168,6 +168,13 @@ class FondeSideBarColors {
   /// Background on mouse hover
   final Color hoverBackground;
 
+  /// Outer background for floating panel style (= standard sidebar background).
+  final Color floatingPanelOuterBackground;
+
+  /// Panel (inset card) background for floating panel style.
+  /// Darker than [floatingPanelOuterBackground] so the panel appears inset.
+  final Color floatingPanelBackground;
+
   const FondeSideBarColors({
     required this.background,
     required this.divider,
@@ -176,6 +183,8 @@ class FondeSideBarColors {
     required this.activeItemText,
     required this.inactiveItemText,
     required this.hoverBackground,
+    required this.floatingPanelOuterBackground,
+    required this.floatingPanelBackground,
   });
 
   FondeSideBarColors copyWith({
@@ -186,6 +195,8 @@ class FondeSideBarColors {
     Color? activeItemText,
     Color? inactiveItemText,
     Color? hoverBackground,
+    Color? floatingPanelOuterBackground,
+    Color? floatingPanelBackground,
   }) {
     return FondeSideBarColors(
       background: background ?? this.background,
@@ -195,6 +206,10 @@ class FondeSideBarColors {
       activeItemText: activeItemText ?? this.activeItemText,
       inactiveItemText: inactiveItemText ?? this.inactiveItemText,
       hoverBackground: hoverBackground ?? this.hoverBackground,
+      floatingPanelOuterBackground:
+          floatingPanelOuterBackground ?? this.floatingPanelOuterBackground,
+      floatingPanelBackground:
+          floatingPanelBackground ?? this.floatingPanelBackground,
     );
   }
 
@@ -208,7 +223,9 @@ class FondeSideBarColors {
         other.activeItemBackground == activeItemBackground &&
         other.activeItemText == activeItemText &&
         other.inactiveItemText == inactiveItemText &&
-        other.hoverBackground == hoverBackground;
+        other.hoverBackground == hoverBackground &&
+        other.floatingPanelOuterBackground == floatingPanelOuterBackground &&
+        other.floatingPanelBackground == floatingPanelBackground;
   }
 
   @override
@@ -221,6 +238,8 @@ class FondeSideBarColors {
       activeItemText,
       inactiveItemText,
       hoverBackground,
+      floatingPanelOuterBackground,
+      floatingPanelBackground,
     );
   }
 }

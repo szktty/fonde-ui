@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../internal.dart';
+import 'sidebar.dart';
 import 'sidebar_list_item.dart';
 import 'sidebar_list_group.dart';
 
@@ -78,8 +79,16 @@ class FondeSidebarList extends ConsumerWidget {
     final accessibilityConfig = ref.watch(fondeAccessibilityConfigProvider);
     final zoomScale = disableZoom ? 1.0 : accessibilityConfig.zoomScale;
 
+    final colorScheme = ref.watch(fondeEffectiveColorSchemeProvider);
+    final isFloatingPanel = FondeFloatingPanelScope.of(context);
+    final resolvedBackground =
+        backgroundColor ??
+        (isFloatingPanel
+            ? Colors.transparent
+            : colorScheme.uiAreas.sideBar.background);
+
     return Container(
-      color: backgroundColor ?? Theme.of(context).scaffoldBackgroundColor,
+      color: resolvedBackground,
       child: ListView(
         padding: padding * zoomScale,
         physics: physics,

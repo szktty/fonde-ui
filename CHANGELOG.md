@@ -9,6 +9,19 @@
 - FIX
   - Bug fixes
 
+## 0.5.0-dev
+
+**Release date**: 2026-03-23
+
+- [ADD] `FondeSidebarStyle` enum (`standard` / `floatingPanel`) — pass via `FondeSidebar.style`
+  - `floatingPanel`: toolbar and content float together as a squircle panel over a lighter outer background (macOS-style)
+  - `FondeSidebar` now accepts a `toolbar` parameter; when provided, `FondeSidebarPane` wrapping is skipped to avoid duplicate toolbars
+- [ADD] `FondeSidebarListItemStyle.inset` — individual items render as squircle rounded rectangles (macOS sidebar item style)
+- [ADD] `FondeFloatingPanelScope` — `InheritedWidget` that `FondeSidebarList` uses to detect floating panel context and apply transparent background
+- [ADD] `FondeSideBar` color scheme entries: `floatingPanelOuterBackground` / `floatingPanelBackground`
+- [UPDATE] `FondePrimarySidebarToolbar`: add `backgroundColor` / `borderColor` parameters
+- [UPDATE] Example app: sidebar style toggle button in the sidebar toolbar (standard ↔ floating panel)
+
 ## 0.4.0
 
 **Release date**: 2026-03-22
