@@ -38,15 +38,17 @@ Fonde UI's goal is to provide **operational and visual comfort** in desktop apps
 - Scaffold — integrated three-pane layout with Launch Bar, primary/secondary sidebar, and main content
 - Master Detail Layout — master/detail split layout
 - Tab View — tab bar and tab view
-- Panel — container with header/content/footer structure
+- Split Pane — resizable split pane
+- Panel — container with themed background and border
 - Section
+- Scroll View
 
 ### Navigation
 
-- Tool Bar — main, sidebar
+- Toolbar — main, primary/secondary sidebar
 - Launch Bar — vertical icon navigation bar with top/bottom sections
-- Sidebar — resizable primary and secondary sidebar areas
-- Sidebar List
+- Sidebar — resizable primary and secondary sidebar areas; standard and floating panel (macOS) styles
+- Sidebar List — with `filled`, `subtle`, and `inset` item styles
 
 ### Data View
 
@@ -62,11 +64,12 @@ Fonde UI's goal is to provide **operational and visual comfort** in desktop apps
 - Segmented Button
 - Split Button — button with dropdown for secondary actions
 - Button Group
+- Overflow Menu Button — collapses excess items into a popup menu
 
 ### Menus
 
 - Context Menu
-- Overflow Menu — collapses excess buttons into a menu
+- Overflow Menu
 - Dropdown Menu
 - Popup Menu
 
@@ -75,9 +78,14 @@ Fonde UI's goal is to provide **operational and visual comfort** in desktop apps
 - Text Field
 - Search Field
 - Tags Field
-- Checkbox
+- Number Field — numeric input with − / + buttons, min/max/step
+- Checkbox — rectangle/circle shape; filled/outline/iconOnly fill style
 - Radio Button
+- Dropdown Menu
 - Expansion Tile
+- Date Picker — monthly calendar, single and range selection
+- Slider
+- Color Picker — HSV canvas, hue/alpha sliders, palette swatches, eyedropper
 
 ### Feedback
 
@@ -86,12 +94,14 @@ Fonde UI's goal is to provide **operational and visual comfort** in desktop apps
 - Toast
 - Snack Bar
 - Popover
+- Notification Overlay
+- Tooltip
 - Linear Progress Indicator
 - Circular Progress Indicator
 
 ### Typography
 
-- Text — with semantic variants
+- Text — with semantic variants (page title, body, caption, code, table, etc.)
 
 ### Visual
 
@@ -99,20 +109,24 @@ Fonde UI's goal is to provide **operational and visual comfort** in desktop apps
 - Tag
 - Container
 - Selection Decorator
+- Rectangle Border — Figma-style squircle border container
+- Eye Dropper — in-window color sampling with zoom loupe
 
 ### Interaction
 
-- Gesture Detector — detects single/double tap without delay, with hover and cursor support
+- Gesture Detector — single/double tap without delay, hover and cursor support
+- Draggable
+- Shortcut Scope
 
 ### Platform
 
-- Platform Menus
+- Platform Menus — macOS native menu bar
 
 ### Design Tokens
 
-- Spacing — zoomable spacing
+- Spacing — zoomable spacing (4px grid)
 - Padding — zoomable padding
-- Border Radius — smooth curve
+- Border Radius — smooth squircle curve
 - Border
 
 ## State Management
@@ -127,7 +141,7 @@ Add to your `pubspec.yaml`:
 
 ```yaml
 dependencies:
-  fonde_ui: ^0.1.0
+  fonde_ui: ^0.5.0-dev
 ```
 
 ### Minimal Example

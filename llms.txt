@@ -7,7 +7,7 @@ Developed for [RinneGraph](https://github.com/szktty/rinne-graph). Currently pro
 ## Package info
 
 - name: fonde_ui
-- version: 0.4.0
+- version: 0.5.0-dev
 - Dart SDK: ^3.7.0
 - Flutter: >=3.41.2
 
@@ -164,6 +164,8 @@ FondeColorScheme
       .inactiveItemText
       .hoverBackground
       .divider
+      .floatingPanelOuterBackground   // outer area behind the floating panel
+      .floatingPanelBackground        // panel surface color (darker than outer)
     .toolbar                   // FondeToolbarColors
       .background
       .border
@@ -428,10 +430,22 @@ FondeSidebar({
   required Widget child,
   double width = 280.0,
   Color? backgroundColor,    // defaults to colorScheme.uiAreas.sideBar.background
-  Border? border,            // defaults to right divider
+  Border? border,            // defaults to right divider; ignored in floatingPanel style
+  FondeSidebarStyle style = FondeSidebarStyle.standard,
+  Widget? toolbar,           // custom toolbar; when set, FondeSidebarPane wrapping is skipped
   bool disableZoom = false,
 })
+
+enum FondeSidebarStyle {
+  standard,       // flat background with right divider (default)
+  floatingPanel,  // macOS-style: toolbar + content in a squircle panel over a lighter outer bg
+}
 ```
+
+When `style == floatingPanel`, the sidebar renders toolbar and content together inside a
+rounded-rectangle panel. The outer area uses `sideBar.floatingPanelOuterBackground` and the
+panel uses `sideBar.floatingPanelBackground`. Pass a custom `toolbar` to control the toolbar
+appearance; defaults to `FondePrimarySidebarToolbar` with panel background color.
 
 ### FondePrimarySide
 
@@ -553,6 +567,8 @@ FondeToolbarItem({
 
 - `FondeMainToolbar` — for main content area
 - `FondePrimarySidebarToolbar` — for primary sidebar (close button; used automatically by `FondeSidebarPane`)
+  - `backgroundColor`: override toolbar background (useful for floating panel style)
+  - `borderColor`: override bottom border color; pass `Colors.transparent` to hide
 - `FondeSecondarySidebarToolbar` — for secondary sidebar (used automatically by `FondeScaffold`)
 
 ---
@@ -582,10 +598,16 @@ FondeSidebarListItem({
   bool disableZoom = false,
 })
 
-enum FondeSidebarListItemStyle { filled, subtle }
+enum FondeSidebarListItemStyle {
+  filled,  // default: selected item fills with selectedBackground color
+  subtle,  // no fill on selection, text color change only
+  inset,   // item renders as an individual squircle rounded rectangle (macOS style)
+}
 ```
 
 Uses `fondeSideBarColorScopeProvider` for colors automatically.
+Inside a `FondeSidebar(style: floatingPanel)`, `FondeSidebarList` automatically uses a
+transparent background (via `FondeFloatingPanelScope`) so the panel color shows through.
 
 ### FondeSidebarListGroup
 
