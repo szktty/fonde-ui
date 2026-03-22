@@ -81,6 +81,7 @@ const catalogCategories = [
       CatalogItem(id: 'fonde_number_field', label: 'Number Field'),
       CatalogItem(id: 'fonde_checkbox', label: 'Checkbox'),
       CatalogItem(id: 'fonde_radio_button', label: 'Radio Button'),
+      CatalogItem(id: 'fonde_switch', label: 'Switch'),
       CatalogItem(id: 'fonde_date_picker', label: 'Date Picker'),
       CatalogItem(id: 'fonde_slider', label: 'Slider'),
       CatalogItem(id: 'fonde_color_picker', label: 'Color Picker'),
