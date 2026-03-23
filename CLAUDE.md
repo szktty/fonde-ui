@@ -42,6 +42,24 @@ Desktop-first Flutter UI optimized for native-grade instant feedback, with acces
 - Merge `develop` into `main` when UI component changes or fixes should be reflected in the demo
   - Timing is decided by the user, not automatically
 
+## Release Procedure
+
+Use git flow for releases:
+
+```bash
+git flow release start <version>       # e.g. 1.2.0
+# Update version in pubspec.yaml, example/pubspec.yaml, llms.txt
+# Update CHANGELOG.md (remove -dev suffix, confirm release date)
+fvm dart format .
+cd example && fvm flutter build macos  # verify build
+git add -p && git commit -m "Release version <version>"
+git flow release finish <version>      # merges to main + develop, creates tag v<version>
+git push origin main develop --tags
+```
+
+- The `-dev` suffix is removed from the version on release
+- After release, bump version to next `-dev` on `develop`
+
 ## Versioning
 
 - **Patch** (x.y.Z): bug fixes only
