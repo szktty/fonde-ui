@@ -38,7 +38,7 @@ Desktop-first Flutter UI optimized for native-grade instant feedback, with acces
 
 ## Branch Strategy
 
-- Development is done on `develop`
+- All changes go to `develop` first — never commit directly to `main`
 - Merge `develop` into `main` when UI component changes or fixes should be reflected in the demo
   - Timing is decided by the user, not automatically
 
