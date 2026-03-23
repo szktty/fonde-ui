@@ -1,6 +1,6 @@
 # fonde_ui
 
-**Desktop-first Flutter UI optimized for native-grade instant feedback, with accessibility built in.**
+**Desktop-first Flutter UI optimized for native-quality instant feedback, with accessibility built in.**
 
 Developed for [RinneGraph](https://github.com/szktty/rinne-graph). Currently prototype status; API is not stable.
 

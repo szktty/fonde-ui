@@ -1,6 +1,6 @@
 # Fonde UI
 
-**Desktop-first Flutter UI optimized for native-grade instant feedback, with accessibility built in.**
+**Desktop-first Flutter UI optimized for native-quality instant feedback, with accessibility built in.**
 
 * **Fonde** (pronounced *fond*) — named after *fond de veau*.
 
