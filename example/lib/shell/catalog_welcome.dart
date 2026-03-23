@@ -25,7 +25,7 @@ class CatalogWelcomePage extends ConsumerWidget {
           const FondeText('Fonde UI', variant: FondeTextVariant.pageTitle),
           const FondeSpacing.sm(),
           FondeText(
-            'Desktop-first Flutter UI optimized for native-grade instant feedback, with accessibility built in.',
+            'Desktop-first Flutter UI optimized for native-quality instant feedback, with accessibility built in.',
             variant: FondeTextVariant.bodyText,
             color: colorScheme.base.foreground.withValues(alpha: 0.55),
           ),
