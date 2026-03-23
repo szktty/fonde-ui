@@ -1,6 +1,6 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../core/context_extensions.dart';
 import '../../internal.dart';
 import '../styling/fonde_border_radius.dart';
 import 'fonde_rectangle_border.dart';
@@ -16,7 +16,7 @@ import 'fonde_rectangle_border.dart';
 /// - Form section
 /// - Information panel
 /// - Dashboard widget
-class FondePanel extends ConsumerStatefulWidget {
+class FondePanel extends StatefulWidget {
   /// Panel header section
   final Widget? header;
 
@@ -112,16 +112,16 @@ class FondePanel extends ConsumerStatefulWidget {
   });
 
   @override
-  ConsumerState<FondePanel> createState() => _AppPanelState();
+  State<FondePanel> createState() => _AppPanelState();
 }
 
-class _AppPanelState extends ConsumerState<FondePanel> {
+class _AppPanelState extends State<FondePanel> {
   DateTime? _lastTapTime;
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = ref.watch(fondeEffectiveColorSchemeProvider);
-    final accessibilityConfig = ref.watch(fondeAccessibilityConfigProvider);
+    final colorScheme = context.fondeColorScheme;
+    final accessibilityConfig = context.fondeAccessibility;
 
     // Zoom support
     final zoomScale = widget.disableZoom ? 1.0 : accessibilityConfig.zoomScale;

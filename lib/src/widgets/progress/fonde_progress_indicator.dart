@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../internal.dart';
+import '../../core/context_extensions.dart';
 
 /// Linear progress indicator with accessibility support.
 ///
 /// Supports zoom scaling and theme-aware colors.
 /// Use [value] for determinate progress (0.0–1.0), or null for indeterminate.
-class FondeLinearProgressIndicator extends ConsumerWidget {
+class FondeLinearProgressIndicator extends StatelessWidget {
   const FondeLinearProgressIndicator({
     super.key,
     this.value,
@@ -40,12 +40,11 @@ class FondeLinearProgressIndicator extends ConsumerWidget {
   final Duration animationDuration;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final colorScheme = ref.watch(effectiveColorSchemeWithThemeProvider);
-    final accessibility = ref.watch(fondeAccessibilityConfigProvider);
+  Widget build(BuildContext context) {
+    final colorScheme = context.fondeColorScheme;
+    final zoomScale = disableZoom ? 1.0 : context.fondeZoomScale;
 
-    final effectiveHeight =
-        disableZoom ? height : height * accessibility.zoomScale;
+    final effectiveHeight = height * zoomScale;
     final effectiveColor = color ?? colorScheme.theme.primaryColor;
     final effectiveBackgroundColor =
         backgroundColor ?? colorScheme.base.divider;
@@ -95,7 +94,7 @@ class FondeLinearProgressIndicator extends ConsumerWidget {
 ///
 /// Supports zoom scaling and theme-aware colors.
 /// Use [value] for determinate progress (0.0–1.0), or null for indeterminate.
-class FondeCircularProgressIndicator extends ConsumerWidget {
+class FondeCircularProgressIndicator extends StatelessWidget {
   const FondeCircularProgressIndicator({
     super.key,
     this.value,
@@ -125,11 +124,9 @@ class FondeCircularProgressIndicator extends ConsumerWidget {
   final bool disableZoom;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final colorScheme = ref.watch(effectiveColorSchemeWithThemeProvider);
-    final accessibility = ref.watch(fondeAccessibilityConfigProvider);
-
-    final scale = disableZoom ? 1.0 : accessibility.zoomScale;
+  Widget build(BuildContext context) {
+    final colorScheme = context.fondeColorScheme;
+    final scale = disableZoom ? 1.0 : context.fondeZoomScale;
     final effectiveSize = size * scale;
     final effectiveStrokeWidth = strokeWidth * scale;
     final effectiveColor = color ?? colorScheme.theme.primaryColor;

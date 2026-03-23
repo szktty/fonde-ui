@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../core/context_extensions.dart';
 import '../../internal.dart';
 import '../icons/icon_theme_providers.dart';
 import '../typography/fonde_text.dart';
@@ -8,7 +8,7 @@ import 'fonde_outline_item.dart';
 /// An outline view with standard App application styling.
 ///
 /// Provides hierarchical outline display and manages the tree structure of expandable items.
-class FondeOutlineView<T> extends ConsumerWidget {
+class FondeOutlineView<T> extends StatelessWidget {
   const FondeOutlineView({
     super.key,
     required this.items,
@@ -77,11 +77,10 @@ class FondeOutlineView<T> extends ConsumerWidget {
   final bool disableZoom;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final appColorScheme = ref.watch(fondeEffectiveColorSchemeProvider);
-    final accessibilityConfig = ref.watch(fondeAccessibilityConfigProvider);
-    final iconTheme = ref.watch(fondeDefaultIconThemeProvider);
-    final zoomScale = disableZoom ? 1.0 : accessibilityConfig.zoomScale;
+  Widget build(BuildContext context) {
+    final appColorScheme = context.fondeColorScheme;
+    final iconTheme = context.fondeIconTheme;
+    final zoomScale = disableZoom ? 1.0 : context.fondeZoomScale;
 
     final effectiveBackgroundColor =
         backgroundColor ?? appColorScheme.base.background;

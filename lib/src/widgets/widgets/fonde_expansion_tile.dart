@@ -1,10 +1,8 @@
+import 'package:figma_squircle/figma_squircle.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../internal.dart';
 import 'fonde_icon.dart';
 import 'fonde_container.dart';
-import 'fonde_rectangle_border.dart';
-import '../icons/icon_theme_providers.dart';
 
 /// Enum to specify the icon position of ExpansionTile.
 enum FondeExpansionIconPosition {
@@ -20,7 +18,7 @@ enum FondeExpansionIconPosition {
 /// By default, the icon is positioned on the left.
 /// Animations are disabled, and the state switches instantly.
 /// Background color, borders, and icon position are customizable.
-class FondeExpansionTile extends ConsumerStatefulWidget {
+class FondeExpansionTile extends StatefulWidget {
   const FondeExpansionTile({
     super.key,
     required this.title,
@@ -82,10 +80,10 @@ class FondeExpansionTile extends ConsumerStatefulWidget {
   final bool disableZoom;
 
   @override
-  ConsumerState<FondeExpansionTile> createState() => _AppExpansionTileState();
+  State<FondeExpansionTile> createState() => _AppExpansionTileState();
 }
 
-class _AppExpansionTileState extends ConsumerState<FondeExpansionTile> {
+class _AppExpansionTileState extends State<FondeExpansionTile> {
   // Animation removed per design guidelines - Design Principle #6: Animation Prohibition
   bool _isExpanded = false;
   // ExpansionTileController? _internalController; // Not needed if passed directly
@@ -159,17 +157,12 @@ class _AppExpansionTileState extends ConsumerState<FondeExpansionTile> {
 
   @override
   Widget build(BuildContext context) {
-    return Consumer(
-      builder: (context, ref, _) {
-        // Get accessibility config for zoom scaling
-        final accessibilityConfig = ref.watch(fondeAccessibilityConfigProvider);
-        final zoomScale =
-            widget.disableZoom ? 1.0 : accessibilityConfig.zoomScale;
-        final iconTheme = ref.watch(fondeDefaultIconThemeProvider);
+    // Get accessibility config for zoom scaling
+    final accessibilityConfig = context.fondeAccessibility;
+    final zoomScale = widget.disableZoom ? 1.0 : accessibilityConfig.zoomScale;
+    final iconTheme = context.fondeIconTheme;
 
-        return _buildTile(context, accessibilityConfig, zoomScale, iconTheme);
-      },
-    );
+    return _buildTile(context, accessibilityConfig, zoomScale, iconTheme);
   }
 
   Widget _buildTile(
@@ -225,6 +218,16 @@ class _AppExpansionTileState extends ConsumerState<FondeExpansionTile> {
         widget.shape != null ||
         widget.collapsedBackgroundColor != null ||
         widget.collapsedShape != null) {
+      final defaultShape = SmoothRectangleBorder(
+        borderRadius: SmoothBorderRadius(
+          cornerRadius: 12.0,
+          cornerSmoothing: 0.6,
+        ),
+        side: BorderSide(
+          color: context.fondeColorScheme.base.border,
+          width: 1.5,
+        ),
+      );
       header = Container(
         decoration: ShapeDecoration(
           color:
@@ -233,9 +236,8 @@ class _AppExpansionTileState extends ConsumerState<FondeExpansionTile> {
                   : widget.collapsedBackgroundColor,
           shape:
               _isExpanded
-                  ? (widget.shape ?? ref.watch(fondeRectangleBorderProvider))
-                  : (widget.collapsedShape ??
-                      ref.watch(fondeRectangleBorderProvider)),
+                  ? (widget.shape ?? defaultShape)
+                  : (widget.collapsedShape ?? defaultShape),
         ),
         child: header,
       );

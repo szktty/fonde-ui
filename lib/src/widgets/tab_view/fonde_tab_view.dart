@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../internal.dart';
+import '../../core/context_extensions.dart';
 import 'fonde_tab_bar.dart';
 
 /// Definition of tab content.
@@ -167,103 +167,94 @@ class _AppTabViewState extends State<FondeTabView> {
 
   @override
   Widget build(BuildContext context) {
-    return Consumer(
-      builder: (context, ref, child) {
-        final accessibilityConfig = ref.watch(fondeAccessibilityConfigProvider);
-        final zoomScale =
-            widget.disableZoom ? 1.0 : accessibilityConfig.zoomScale;
-        final borderScale =
-            widget.disableZoom ? 1.0 : accessibilityConfig.borderScale;
+    final zoomScale = widget.disableZoom ? 1.0 : context.fondeZoomScale;
+    final borderScale = widget.disableZoom ? 1.0 : context.fondeBorderScale;
+    final appColorScheme = context.fondeColorScheme;
 
-        // Get the App color scheme using core_themes
-        final appColorScheme = ref.watch(fondeEffectiveColorSchemeProvider);
-
-        // Build the tab bar
-        final tabBar =
-            widget.tabBarBuilder?.call(
-              context,
-              widget.tabs,
-              _selectedTabId,
-              _handleTabSelected,
-              widget.onTabClosed != null ? _handleTabClosed : null,
-            ) ??
-            FondeTabBar(
-              tabs: widget.tabs,
-              selectedTabId: _selectedTabId,
-              onTabSelected: _handleTabSelected,
-              onTabClosed: widget.onTabClosed != null ? _handleTabClosed : null,
-              height: (widget.tabBarHeight * zoomScale).toDouble(),
-              backgroundColor: widget.tabBarBackgroundColor,
-              disableZoom: widget.disableZoom,
-              alignment: widget.alignment,
-            );
-
-        // Get the currently selected content
-        Widget? selectedContent;
-        for (final content in widget.contents) {
-          if (content.id == _selectedTabId) {
-            selectedContent = content.content;
-            break;
-          }
-        }
-
-        // Content area
-        final contentArea = Container(
-          color: widget.contentBackgroundColor,
-          child: Padding(
-            padding: EdgeInsets.fromLTRB(
-              (widget.contentPadding.left * zoomScale).toDouble(),
-              (widget.contentPadding.top * zoomScale).toDouble(),
-              (widget.contentPadding.right * zoomScale).toDouble(),
-              (widget.contentPadding.bottom * zoomScale).toDouble(),
-            ),
-            child: selectedContent ?? const SizedBox.shrink(),
-          ),
+    // Build the tab bar
+    final tabBar =
+        widget.tabBarBuilder?.call(
+          context,
+          widget.tabs,
+          _selectedTabId,
+          _handleTabSelected,
+          widget.onTabClosed != null ? _handleTabClosed : null,
+        ) ??
+        FondeTabBar(
+          tabs: widget.tabs,
+          selectedTabId: _selectedTabId,
+          onTabSelected: _handleTabSelected,
+          onTabClosed: widget.onTabClosed != null ? _handleTabClosed : null,
+          height: (widget.tabBarHeight * zoomScale).toDouble(),
+          backgroundColor: widget.tabBarBackgroundColor,
+          disableZoom: widget.disableZoom,
+          alignment: widget.alignment,
         );
 
-        // Divider
-        final divider =
-            widget.showDivider
-                ? Container(
-                  height: (widget.dividerThickness * borderScale).toDouble(),
-                  color:
-                      widget.dividerColor ??
-                      appColorScheme.base.divider.withValues(alpha: 0.2),
-                )
-                : null;
+    // Get the currently selected content
+    Widget? selectedContent;
+    for (final content in widget.contents) {
+      if (content.id == _selectedTabId) {
+        selectedContent = content.content;
+        break;
+      }
+    }
 
-        // Build the layout
-        if (widget.tabBarPosition == FondeTabBarPosition.top) {
-          return LayoutBuilder(
-            builder: (context, constraints) {
-              return Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  tabBar,
-                  if (divider != null) divider,
-                  Expanded(child: contentArea),
-                ],
-              );
-            },
-          );
-        } else {
-          return LayoutBuilder(
-            builder: (context, constraints) {
-              return Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Expanded(child: contentArea),
-                  if (divider != null) divider,
-                  tabBar,
-                ],
-              );
-            },
-          );
-        }
-      },
+    // Content area
+    final contentArea = Container(
+      color: widget.contentBackgroundColor,
+      child: Padding(
+        padding: EdgeInsets.fromLTRB(
+          (widget.contentPadding.left * zoomScale).toDouble(),
+          (widget.contentPadding.top * zoomScale).toDouble(),
+          (widget.contentPadding.right * zoomScale).toDouble(),
+          (widget.contentPadding.bottom * zoomScale).toDouble(),
+        ),
+        child: selectedContent ?? const SizedBox.shrink(),
+      ),
     );
+
+    // Divider
+    final divider =
+        widget.showDivider
+            ? Container(
+              height: (widget.dividerThickness * borderScale).toDouble(),
+              color:
+                  widget.dividerColor ??
+                  appColorScheme.base.divider.withValues(alpha: 0.2),
+            )
+            : null;
+
+    // Build the layout
+    if (widget.tabBarPosition == FondeTabBarPosition.top) {
+      return LayoutBuilder(
+        builder: (context, constraints) {
+          return Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              tabBar,
+              if (divider != null) divider,
+              Expanded(child: contentArea),
+            ],
+          );
+        },
+      );
+    } else {
+      return LayoutBuilder(
+        builder: (context, constraints) {
+          return Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Expanded(child: contentArea),
+              if (divider != null) divider,
+              tabBar,
+            ],
+          );
+        },
+      );
+    }
   }
 }
 

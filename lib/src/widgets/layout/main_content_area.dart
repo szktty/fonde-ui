@@ -1,20 +1,20 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../internal.dart'; // Import ThemeConfig and fondeEffectiveColorSchemeProvider
+import '../../core/context_extensions.dart';
+import '../../internal.dart';
 
 /// A widget that displays the main content area of the application.
 ///
 /// Applies the appropriate background color based on the theme settings.
-class FondeMainContentArea extends ConsumerWidget {
+class FondeMainContentArea extends StatelessWidget {
   /// The content to display.
   final Widget child;
 
   const FondeMainContentArea({required this.child, super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  Widget build(BuildContext context) {
     // Get the effective FondeColorScheme
-    final appColorScheme = ref.watch(fondeEffectiveColorSchemeProvider);
+    final appColorScheme = context.fondeColorScheme;
 
     // Determine the background color of the main content area
     final backgroundColor = appColorScheme.base.background;

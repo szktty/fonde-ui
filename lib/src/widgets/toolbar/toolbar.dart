@@ -1,14 +1,14 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
+import '../../core/context_extensions.dart';
+import '../../core/controllers.dart';
 import '../../internal.dart';
 import '../overflow_menu/overflow_menu.dart';
 
 import 'toolbar_state.dart';
-import 'toolbar_providers.dart';
 
-/// Toolbar widget.
-class _Toolbar extends ConsumerWidget {
+/// Internal toolbar layout widget.
+class _Toolbar extends StatelessWidget {
   const _Toolbar({
     required this.children,
     this.axis = Axis.horizontal,
@@ -19,33 +19,19 @@ class _Toolbar extends ConsumerWidget {
     this.disableZoom = false,
   });
 
-  /// Widgets within the toolbar.
   final List<Widget> children;
-
-  /// Direction of the toolbar (horizontal/vertical).
   final Axis axis;
-
-  /// Space between items.
   final double spacing;
-
-  /// Internal padding of the toolbar.
   final EdgeInsetsGeometry padding;
-
-  /// Decoration of the toolbar.
   final BoxDecoration? decoration;
-
-  /// Clipping behavior.
   final Clip clipBehavior;
-
-  /// Whether to disable the zoom function.
   final bool disableZoom;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final accessibilityConfig = ref.watch(fondeAccessibilityConfigProvider);
-    final zoomScale = disableZoom ? 1.0 : accessibilityConfig.zoomScale;
-    final borderScale = disableZoom ? 1.0 : accessibilityConfig.borderScale;
+    final zoomScale = disableZoom ? 1.0 : context.fondeZoomScale;
+    final borderScale = disableZoom ? 1.0 : context.fondeBorderScale;
 
     return Container(
       decoration:
@@ -96,12 +82,7 @@ class _Toolbar extends ConsumerWidget {
 }
 
 /// Item group for the toolbar.
-///
-/// When [overflowItems] is provided and [availableWidth] is given (finite),
-/// the group hides children that don't fit and shows an overflow menu button
-/// (⋯) for the hidden ones. The [availableWidth] must be provided by the
-/// parent (e.g. via [LayoutBuilder]) for overflow to work correctly.
-class FondeToolbarGroup extends ConsumerWidget {
+class FondeToolbarGroup extends StatelessWidget {
   const FondeToolbarGroup({
     super.key,
     required this.children,
@@ -114,25 +95,14 @@ class FondeToolbarGroup extends ConsumerWidget {
 
   final List<Widget> children;
   final double spacing;
-
-  /// Menu entries shown in the overflow popup when children don't fit.
-  /// When null, no overflow handling is performed (original behaviour).
   final List<FondeOverflowMenuEntry>? overflowItems;
-
-  /// Tooltip for the overflow menu button.
   final String? overflowTooltip;
-
-  /// The finite width available for this group. Must be provided for
-  /// overflow handling to work. Obtain this from a parent [LayoutBuilder].
   final double? availableWidth;
-
-  /// Whether to disable the zoom function.
   final bool disableZoom;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final accessibilityConfig = ref.watch(fondeAccessibilityConfigProvider);
-    final zoomScale = disableZoom ? 1.0 : accessibilityConfig.zoomScale;
+  Widget build(BuildContext context) {
+    final zoomScale = disableZoom ? 1.0 : context.fondeZoomScale;
     final scaledSpacing = spacing * zoomScale;
 
     final hasOverflow =
@@ -164,8 +134,6 @@ class FondeToolbarGroup extends ConsumerWidget {
   }
 }
 
-/// Internal stateful widget that measures each child's width and hides
-/// children that don't fit, placing them behind an overflow menu button.
 class _FondeOverflowToolbarGroup extends StatefulWidget {
   const _FondeOverflowToolbarGroup({
     required this.children,
@@ -190,13 +158,8 @@ class _FondeOverflowToolbarGroup extends StatefulWidget {
 
 class _FondeOverflowToolbarGroupState
     extends State<_FondeOverflowToolbarGroup> {
-  // Keys used only during the measurement frame.
   late List<GlobalKey> _keys;
-
-  // Cached natural widths of each child (null = not yet measured).
   List<double>? _childWidths;
-
-  // How many children fit in the available width (-1 = not yet computed).
   int _visibleCount = -1;
 
   @override
@@ -218,8 +181,6 @@ class _FondeOverflowToolbarGroupState
   @override
   Widget build(BuildContext context) {
     if (_childWidths == null) {
-      // Measurement frame: render all children unconstrained to get their
-      // natural widths, then cache and compute the visible count.
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (!mounted) return;
         final widths = <double>[];
@@ -234,8 +195,6 @@ class _FondeOverflowToolbarGroupState
         });
       });
 
-      // Render all children in an unconstrained box for measurement.
-      // ClipRect prevents visual overflow during this single frame.
       final measureChildren = <Widget>[];
       for (var i = 0; i < widget.children.length; i++) {
         if (i > 0) measureChildren.add(SizedBox(width: widget.spacing));
@@ -252,7 +211,6 @@ class _FondeOverflowToolbarGroupState
       );
     }
 
-    // Recompute when availableWidth changes (parent LayoutBuilder re-runs).
     final newCount = _computeCount(_childWidths!, widget.availableWidth);
     if (newCount != _visibleCount) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -284,11 +242,8 @@ class _FondeOverflowToolbarGroupState
     return Row(mainAxisSize: MainAxisSize.min, children: rowChildren);
   }
 
-  /// Computes how many children fit in [availableWidth] using cached widths.
   int _computeCount(List<double> widths, double availableWidth) {
-    // Overflow menu button width (approximate: 32px).
     const overflowButtonWidth = 32.0;
-
     double usedWidth = 0;
     int count = 0;
 
@@ -312,8 +267,8 @@ class _FondeOverflowToolbarGroupState
   }
 }
 
-/// Toolbar item.
-class FondeToolbarItem extends ConsumerWidget {
+/// Toolbar item widget.
+class FondeToolbarItem extends StatelessWidget {
   const FondeToolbarItem({
     super.key,
     required this.child,
@@ -327,14 +282,11 @@ class FondeToolbarItem extends ConsumerWidget {
   final VoidCallback? onPressed;
   final String? tooltip;
   final bool enabled;
-
-  /// Whether to disable the zoom function.
   final bool disableZoom;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final accessibilityConfig = ref.watch(fondeAccessibilityConfigProvider);
-    final zoomScale = disableZoom ? 1.0 : accessibilityConfig.zoomScale;
+  Widget build(BuildContext context) {
+    final zoomScale = disableZoom ? 1.0 : context.fondeZoomScale;
 
     final button = IconButton(
       onPressed: enabled ? onPressed : null,
@@ -350,8 +302,12 @@ class FondeToolbarItem extends ConsumerWidget {
   }
 }
 
-/// Toolbar widget using Riverpod.
-class FondeToolbar extends ConsumerWidget {
+/// Data-driven toolbar backed by [FondeToolbarController].
+///
+/// Wrap the toolbar (and its siblings) in a [FondeToolbarControllerScope] to
+/// provide a shared [FondeToolbarController]. When no scope is found, the
+/// toolbar renders all items as enabled with no selection.
+class FondeToolbar extends StatefulWidget {
   const FondeToolbar({
     super.key,
     required this.axis,
@@ -361,35 +317,53 @@ class FondeToolbar extends ConsumerWidget {
 
   final Axis axis;
   final List<FondeToolbarItemData> items;
-
-  /// Whether to disable the zoom function.
   final bool disableZoom;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final state = ref.watch(toolbarStateProvider);
-    final toolbarNotifier = ref.read(toolbarStateProvider.notifier);
-    final accessibilityConfig = ref.watch(fondeAccessibilityConfigProvider);
-    final zoomScale = disableZoom ? 1.0 : accessibilityConfig.zoomScale;
+  State<FondeToolbar> createState() => _FondeToolbarState();
+}
+
+class _FondeToolbarState extends State<FondeToolbar> {
+  FondeToolbarController? _controller;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final controller = FondeToolbarControllerScope.of(context);
+    if (controller != _controller) {
+      _controller?.removeListener(_onStateChanged);
+      _controller = controller;
+      _controller?.addListener(_onStateChanged);
+    }
+  }
+
+  @override
+  void dispose() {
+    _controller?.removeListener(_onStateChanged);
+    super.dispose();
+  }
+
+  void _onStateChanged() => setState(() {});
+
+  @override
+  Widget build(BuildContext context) {
+    final state = _controller?.state ?? const FondeToolbarState();
+    final zoomScale = widget.disableZoom ? 1.0 : context.fondeZoomScale;
 
     return _Toolbar(
-      axis: axis,
+      axis: widget.axis,
       spacing: 8.0 * zoomScale,
       padding: EdgeInsets.all(8.0 * zoomScale),
-      decoration: null,
-      clipBehavior: Clip.none,
-      disableZoom: disableZoom,
+      disableZoom: widget.disableZoom,
       children:
-          items.map((item) {
-            // Deleted because it is not used
+          widget.items.map((item) {
             final isEnabled = state.enabledTools.contains(item.id);
-
             return FondeToolbarItem(
               onPressed:
-                  isEnabled ? () => toolbarNotifier.selectTool(item.id) : null,
+                  isEnabled ? () => _controller?.selectTool(item.id) : null,
               tooltip: item.tooltip,
               enabled: isEnabled,
-              disableZoom: disableZoom,
+              disableZoom: widget.disableZoom,
               child: item.icon,
             );
           }).toList(),

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../core/context_extensions.dart';
 import '../../internal.dart';
 import '../widgets/fonde_icon.dart';
 import '../widgets/fonde_gesture_detector.dart';
@@ -26,7 +26,7 @@ class FondeLaunchBarItem {
 /// Launch bar
 ///
 /// Displays items divided into two sections (top: main functions, bottom: meta functions).
-class FondeLaunchBar extends ConsumerWidget {
+class FondeLaunchBar extends StatelessWidget {
   const FondeLaunchBar({
     required this.topItems,
     required this.bottomItems,
@@ -43,8 +43,8 @@ class FondeLaunchBar extends ConsumerWidget {
   final bool disableZoom;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final appColorScheme = ref.watch(fondeEffectiveColorSchemeProvider);
+  Widget build(BuildContext context) {
+    final appColorScheme = context.fondeColorScheme;
 
     return Container(
       color: appColorScheme.uiAreas.launchBar.background,
@@ -89,7 +89,7 @@ class FondeLaunchBar extends ConsumerWidget {
 }
 
 /// Individual launch bar item
-class _LaunchBarItemWidget extends ConsumerWidget {
+class _LaunchBarItemWidget extends StatelessWidget {
   const _LaunchBarItemWidget({
     required this.item,
     this.isSelected = false,
@@ -101,12 +101,11 @@ class _LaunchBarItemWidget extends ConsumerWidget {
   final bool disableZoom;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final appColorScheme = ref.watch(fondeEffectiveColorSchemeProvider);
-    final accessibilityConfig = ref.watch(fondeAccessibilityConfigProvider);
-    final zoomScale = disableZoom ? 1.0 : accessibilityConfig.zoomScale;
-    final borderScale = disableZoom ? 1.0 : accessibilityConfig.borderScale;
+    final appColorScheme = context.fondeColorScheme;
+    final zoomScale = disableZoom ? 1.0 : context.fondeZoomScale;
+    final borderScale = disableZoom ? 1.0 : context.fondeBorderScale;
 
     return Tooltip(
       message: item.label,

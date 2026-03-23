@@ -1,8 +1,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fonde_ui/fonde_ui.dart';
-import 'package:fonde_ui/fonde_ui_riverpod.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 import '../pages/button_page.dart';
@@ -50,14 +48,14 @@ import 'catalog_sidebar.dart';
 import 'catalog_toolbar.dart';
 import 'catalog_welcome.dart';
 
-class CatalogShell extends ConsumerStatefulWidget {
+class CatalogShell extends StatefulWidget {
   const CatalogShell({super.key});
 
   @override
-  ConsumerState<CatalogShell> createState() => _CatalogShellState();
+  State<CatalogShell> createState() => _CatalogShellState();
 }
 
-class _CatalogShellState extends ConsumerState<CatalogShell> {
+class _CatalogShellState extends State<CatalogShell> {
   String? _selectedItemId;
   List<String> _expandedGroupIds = catalogCategories.map((c) => c.id).toList();
   int _launchBarIndex = 0;
@@ -244,7 +242,7 @@ class _CatalogShellState extends ConsumerState<CatalogShell> {
   }
 }
 
-class _LaunchBarPlaceholder extends ConsumerWidget {
+class _LaunchBarPlaceholder extends StatelessWidget {
   const _LaunchBarPlaceholder({required this.index});
   final int index;
 
@@ -256,8 +254,8 @@ class _LaunchBarPlaceholder extends ConsumerWidget {
   };
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final colorScheme = ref.watch(fondeEffectiveColorSchemeProvider);
+  Widget build(BuildContext context) {
+    final colorScheme = context.fondeColorScheme;
     final label = _labels[index] ?? 'Launch Bar';
     return Center(
       child: FondeText(
@@ -269,7 +267,7 @@ class _LaunchBarPlaceholder extends ConsumerWidget {
   }
 }
 
-class _CatalogSidebarToolbar extends ConsumerWidget {
+class _CatalogSidebarToolbar extends StatelessWidget {
   const _CatalogSidebarToolbar({
     required this.sidebarStyle,
     required this.onSidebarStyleChanged,
@@ -279,8 +277,8 @@ class _CatalogSidebarToolbar extends ConsumerWidget {
   final void Function(FondeSidebarStyle) onSidebarStyleChanged;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final colorScheme = ref.watch(fondeEffectiveColorSchemeProvider);
+  Widget build(BuildContext context) {
+    final colorScheme = context.fondeColorScheme;
     final isFloating = sidebarStyle == FondeSidebarStyle.floatingPanel;
 
     final backgroundColor =
@@ -309,11 +307,9 @@ class _CatalogSidebarToolbar extends ConsumerWidget {
                       iconSize: 20,
                       onPressed:
                           () =>
-                              ref
-                                  .read(
-                                    fondePrimarySidebarStateProvider.notifier,
-                                  )
-                                  .hide(),
+                              FondeSidebarControllerScope.primaryOf(
+                                context,
+                              )?.hide(),
                       tooltip: 'Close Sidebar',
                       padding: EdgeInsets.zero,
                       hoverColor: Colors.transparent,

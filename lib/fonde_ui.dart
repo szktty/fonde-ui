@@ -20,19 +20,12 @@ export 'src/core/l10n/fonde_ui_localizations.dart';
 // ─── Core: Presets & Utilities ────────────────────────────────────────────────
 export 'src/core/presets.dart';
 export 'src/core/color_extensions.dart';
+export 'src/core/context_extensions.dart';
+export 'src/core/controllers.dart';
+export 'src/core/fonde_theme_scope.dart';
 
 // ─── Core: Color Scope ────────────────────────────────────────────────────────
-export 'src/core/color_scope.dart'
-    hide
-        fondeThemeModeProvider,
-        fondeIsDarkModeProvider,
-        fondeColorSchemeProvider,
-        fondeDefaultColorScopeProvider,
-        fondeLaunchBarColorScopeProvider,
-        fondeSideBarColorScopeProvider,
-        fondeMainContentColorScopeProvider,
-        fondeDialogColorScopeProvider,
-        fondeColorScopeProvider;
+export 'src/core/color_scope.dart';
 
 // ─── Core: App ────────────────────────────────────────────────────────────────
 export 'src/core/fonde_app.dart';
@@ -70,11 +63,7 @@ export 'src/widgets/outline/index.dart';
 export 'src/widgets/master_detail/master_detail_layout.dart';
 
 // ─── List & Grid ─────────────────────────────────────────────────────────────
-export 'src/widgets/list_tiles/fonde_list_tile.dart'
-    hide
-        effectiveAppColorSchemeForListTile,
-        effectiveAppColorSchemeForListTileProvider,
-        EffectiveAppColorSchemeForListTileProvider;
+export 'src/widgets/list_tiles/fonde_list_tile.dart';
 
 // ─── Section ──────────────────────────────────────────────────────────────────
 export 'src/widgets/section/section.dart';
@@ -107,7 +96,8 @@ export 'package:table_calendar/table_calendar.dart' show StartingDayOfWeek;
 
 // ─── Dialogs & Overlays ───────────────────────────────────────────────────────
 export 'src/widgets/widgets/fonde_dialog.dart';
-export 'src/widgets/widgets/fonde_popover.dart' hide appPopoverConfigProvider;
+export 'src/widgets/widgets/fonde_popover.dart'
+    hide appPopoverConfigFromContext;
 export 'src/widgets/widgets/fonde_toast.dart';
 export 'src/widgets/widgets/fonde_snack_bar.dart';
 export 'src/widgets/dialogs/confirmation_dialog.dart';
@@ -147,33 +137,9 @@ export 'src/widgets/widgets/fonde_container.dart'
         fondeContainerLeadingWidth,
         fondeContainerLeadingWidthProvider,
         FondeContainerLeadingWidthProvider;
-export 'src/widgets/widgets/fonde_divider.dart'
-    hide
-        effectiveAppColorSchemeForDivider,
-        effectiveAppColorSchemeForDividerProvider,
-        EffectiveAppColorSchemeForDividerProvider,
-        fondeDividerColor,
-        fondeDividerColorProvider,
-        FondeDividerColorProvider,
-        fondeVerticalDividerColor,
-        fondeVerticalDividerColorProvider,
-        FondeVerticalDividerColorProvider;
+export 'src/widgets/widgets/fonde_divider.dart';
 export 'src/widgets/widgets/fonde_physical_model.dart';
-export 'src/widgets/widgets/fonde_rectangle_border.dart'
-    hide
-        fondeRectangleBorder,
-        fondeRectangleBorderProvider,
-        FondeRectangleBorderProvider,
-        fondeShapeDecoration,
-        fondeShapeDecorationProvider,
-        FondeShapeDecorationFamily,
-        FondeShapeDecorationProvider,
-        fondeBorderRadius,
-        fondeBorderRadiusProvider,
-        FondeBorderRadiusProvider,
-        fondeBorderSide,
-        fondeBorderSideProvider,
-        FondeBorderSideProvider;
+export 'src/widgets/widgets/fonde_rectangle_border.dart';
 export 'src/widgets/widgets/tag.dart';
 
 // ─── Progress ─────────────────────────────────────────────────────────────────

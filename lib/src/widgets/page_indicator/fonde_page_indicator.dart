@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:dots_indicator/dots_indicator.dart';
 import '../../internal.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../core/context_extensions.dart';
 
 /// App-specific page indicator.
 ///
 /// This widget uses the `dots_indicator` package to create a pagination
 /// dot indicator. The app's theme color is automatically applied.
-class FondePageIndicator extends ConsumerWidget {
+class FondePageIndicator extends StatelessWidget {
   /// Constructs the page indicator.
   ///
   /// [dotsCount] specifies the total number of pages, and [position] specifies
@@ -49,8 +49,8 @@ class FondePageIndicator extends ConsumerWidget {
   final DotsDecorator? decorator;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final appColorScheme = ref.watch(fondeEffectiveColorSchemeProvider);
+  Widget build(BuildContext context) {
+    final appColorScheme = context.fondeColorScheme;
 
     // Default dot decorator based on theme
     final defaultDecorator = DotsDecorator(

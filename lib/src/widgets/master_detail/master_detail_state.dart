@@ -1,42 +1,38 @@
-import 'package:riverpod_annotation/riverpod_annotation.dart';
+import 'package:flutter/foundation.dart';
 
-part 'master_detail_state.g.dart';
+/// Controller for managing selected item state in master-detail layout.
+class FondeMasterDetailController extends ChangeNotifier {
+  FondeMasterDetailController({
+    String? initialSelectedId,
+    double initialMasterWidth = 280.0,
+    bool initialDetailVisible = false,
+  }) : _selectedId = initialSelectedId,
+       _masterWidth = initialMasterWidth,
+       _detailVisible = initialDetailVisible;
 
-/// Management of selection state.
-@riverpod
-class SelectedItem extends _$SelectedItem {
-  @override
-  String? build() {
-    return null;
-  }
+  String? _selectedId;
+  double _masterWidth;
+  bool _detailVisible;
+
+  String? get selectedId => _selectedId;
+  double get masterWidth => _masterWidth;
+  bool get detailVisible => _detailVisible;
 
   void setSelectedId(String? id) {
-    state = id;
-  }
-}
-
-/// Management of master width.
-@riverpod
-class MasterWidth extends _$MasterWidth {
-  @override
-  double build() {
-    return 280.0; // Default value
+    if (_selectedId == id) return;
+    _selectedId = id;
+    notifyListeners();
   }
 
   void setWidth(double width) {
-    state = width;
-  }
-}
-
-/// Management of detail display visibility.
-@riverpod
-class DetailVisibility extends _$DetailVisibility {
-  @override
-  bool build() {
-    return false; // Default is hidden
+    if (_masterWidth == width) return;
+    _masterWidth = width;
+    notifyListeners();
   }
 
   void setVisible(bool visible) {
-    state = visible;
+    if (_detailVisible == visible) return;
+    _detailVisible = visible;
+    notifyListeners();
   }
 }

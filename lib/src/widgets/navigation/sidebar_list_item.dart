@@ -1,6 +1,6 @@
 import 'package:figma_squircle/figma_squircle.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../core/context_extensions.dart';
 import '../../internal.dart';
 import '../widgets/fonde_gesture_detector.dart';
 
@@ -18,7 +18,7 @@ enum FondeSidebarListItemStyle {
 }
 
 /// A widget that displays a single navigation item.
-class FondeSidebarListItem extends ConsumerStatefulWidget {
+class FondeSidebarListItem extends StatefulWidget {
   /// The unique identifier for the item.
   final String id;
 
@@ -97,23 +97,21 @@ class FondeSidebarListItem extends ConsumerStatefulWidget {
   });
 
   @override
-  ConsumerState<FondeSidebarListItem> createState() =>
-      _FondeSidebarListItemState();
+  State<FondeSidebarListItem> createState() => _FondeSidebarListItemState();
 }
 
-class _FondeSidebarListItemState extends ConsumerState<FondeSidebarListItem> {
+class _FondeSidebarListItemState extends State<FondeSidebarListItem> {
   bool _isHovered = false;
 
   @override
   Widget build(BuildContext context) {
-    final accessibilityConfig = ref.watch(fondeAccessibilityConfigProvider);
-    final zoomScale = widget.disableZoom ? 1.0 : accessibilityConfig.zoomScale;
+    final zoomScale = widget.disableZoom ? 1.0 : context.fondeZoomScale;
 
     // Get the color scope (use the sidebar scope or the default)
-    final colorScope = ref.watch(fondeSideBarColorScopeProvider);
+    final colorScope = context.fondeColorScope;
 
     // Get the text theme
-    final themeData = ref.watch(fondeEffectiveThemeDataProvider);
+    final themeData = Theme.of(context);
 
     final Color? effectiveBackgroundColor;
     final Color effectiveContentColor;

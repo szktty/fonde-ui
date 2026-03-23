@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../core/context_extensions.dart';
 import '../../internal.dart';
 
 /// A tag view widget for displaying entity labels or tags.
 ///
 /// Supports accessibility zoom features and allows customization of color and label.
 /// Padding, border radius, and font size are automatically scaled.
-class FondeTagView extends ConsumerWidget {
+class FondeTagView extends StatelessWidget {
   final String label;
   final Color? color;
 
@@ -25,9 +25,9 @@ class FondeTagView extends ConsumerWidget {
   });
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final accessibilityConfig = ref.watch(fondeAccessibilityConfigProvider);
-    final appColorScheme = ref.watch(fondeEffectiveColorSchemeProvider);
+  Widget build(BuildContext context) {
+    final accessibilityConfig = context.fondeAccessibility;
+    final appColorScheme = context.fondeColorScheme;
     final theme = Theme.of(context);
 
     // Apply zoom scaling to padding, border radius, and font size

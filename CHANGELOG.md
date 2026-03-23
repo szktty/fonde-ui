@@ -9,6 +9,22 @@
 - FIX
   - Bug fixes
 
+## 0.5.0-dev
+
+- [CHANGE] Remove `flutter_riverpod` dependency — all state management is now plain Flutter (`ChangeNotifier`, `InheritedWidget`)
+  - `fonde_ui_riverpod.dart` is deprecated and no longer exports any symbols
+  - Replace `ref.watch(fondeEffectiveColorSchemeProvider)` → `context.fondeColorScheme`
+  - Replace `ref.watch(fondeAccessibilityConfigProvider)` → `context.fondeAccessibility`
+  - Replace `ref.read(fondeActiveThemeProvider.notifier).setTheme(x)` → `context.fondeThemeController?.setTheme(x)`
+  - Replace `ref.read(fondeAccessibilityConfigProvider.notifier).updateConfig(x)` → `context.fondeAccessibilityController?.updateConfig(x)`
+  - Replace sidebar/navigation/toolbar/search Riverpod providers with `FondeSidebarControllerScope`, `FondeNavigationControllerScope`, `FondeToolbarControllerScope`, `FondeSearchControllerScope`
+- [ADD] `FondeThemeController`, `FondeThemeColorController`, `FondeAccessibilityController`, `FondeIconThemeController` — `ChangeNotifier`-based theme management
+- [ADD] `FondePrimarySidebarController`, `FondeSecondarySidebarController`, `FondeSidebarWidthController`, `FondeSecondarySidebarWidthController` — sidebar state controllers
+- [ADD] `FondeNavigationController`, `FondeToolbarController`, `FondeSearchController`, `FondeNotificationController`, `FondeMasterDetailController`
+- [ADD] `context.fondeColorScheme`, `context.fondeAccessibility`, `context.fondeIconTheme`, `context.fondeColorScope`, `context.fondeZoomScale`, `context.fondeBorderScale` and related `BuildContext` extensions
+- [ADD] `FondeThemeScope`, `FondeColorScopeWidget` — `InheritedWidget`-based theme and color propagation
+- [ADD] `FondeNotificationControllerScope` — replaces `fondeNotificationProvider`
+
 ## 0.5.0
 
 **Release date**: 2026-03-23

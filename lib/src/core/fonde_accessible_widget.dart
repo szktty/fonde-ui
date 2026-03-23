@@ -1,11 +1,10 @@
 import 'dart:math' as math;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 /// Base widget that enforces accessibility support.
 /// Serves as the foundation for other components, standardizing zoom support and semantic information.
-abstract class FondeAccessibleWidget extends ConsumerWidget {
+abstract class FondeAccessibleWidget extends StatelessWidget {
   /// Whether to disable zoom support.
   final bool disableZoom;
 
@@ -19,8 +18,8 @@ abstract class FondeAccessibleWidget extends ConsumerWidget {
   });
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final widget = buildAccessibleWidget(context: context, ref: ref);
+  Widget build(BuildContext context) {
+    final widget = buildAccessibleWidget(context: context);
 
     if (disableSemantics) {
       return widget;
@@ -32,10 +31,7 @@ abstract class FondeAccessibleWidget extends ConsumerWidget {
 
   /// Method to build the actual widget.
   /// To be implemented in subclasses.
-  Widget buildAccessibleWidget({
-    required BuildContext context,
-    required WidgetRef ref,
-  });
+  Widget buildAccessibleWidget({required BuildContext context});
 
   /// Method to build semantic information.
   /// Override in subclasses as needed.

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:table_calendar/table_calendar.dart';
+import '../../core/context_extensions.dart';
 import '../../internal.dart';
 import '../styling/fonde_border_radius.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
@@ -17,7 +17,7 @@ import 'package:lucide_icons_flutter/lucide_icons.dart';
 ///   onDaySelected: (date) => print(date),
 /// )
 /// ```
-class FondeDatePicker extends ConsumerStatefulWidget {
+class FondeDatePicker extends StatefulWidget {
   /// The earliest selectable date.
   final DateTime firstDate;
 
@@ -79,10 +79,10 @@ class FondeDatePicker extends ConsumerStatefulWidget {
   });
 
   @override
-  ConsumerState<FondeDatePicker> createState() => _FondeDatePickerState();
+  State<FondeDatePicker> createState() => _FondeDatePickerState();
 }
 
-class _FondeDatePickerState extends ConsumerState<FondeDatePicker> {
+class _FondeDatePickerState extends State<FondeDatePicker> {
   late DateTime _focusedDay;
   DateTime? _selectedDay;
   DateTime? _rangeStart;
@@ -100,9 +100,8 @@ class _FondeDatePickerState extends ConsumerState<FondeDatePicker> {
 
   @override
   Widget build(BuildContext context) {
-    final appColorScheme = ref.watch(fondeColorSchemeProvider);
-    final accessibilityConfig = ref.watch(fondeAccessibilityConfigProvider);
-    final zoomScale = widget.disableZoom ? 1.0 : accessibilityConfig.zoomScale;
+    final appColorScheme = context.fondeColorScheme;
+    final zoomScale = widget.disableZoom ? 1.0 : context.fondeZoomScale;
 
     final bg = appColorScheme.base.background;
     final fg = appColorScheme.base.foreground;

@@ -1,10 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/gestures.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:figma_squircle/figma_squircle.dart';
 import '../../internal.dart';
 import 'dart:ui' as ui;
-import '../widgets/fonde_rectangle_border.dart';
 import '../typography/fonde_text.dart';
 
 /// App-specific text field
@@ -13,7 +12,7 @@ import '../typography/fonde_text.dart';
 /// Label text cannot be used due to height constraints.
 /// To maintain consistent design system, do not use InputDecoration,
 /// use dedicated properties instead.
-class FondeTextField extends ConsumerStatefulWidget {
+class FondeTextField extends StatefulWidget {
   /// Constructor
   const FondeTextField({
     super.key,
@@ -299,10 +298,10 @@ class FondeTextField extends ConsumerStatefulWidget {
   final bool disableZoom;
 
   @override
-  ConsumerState<FondeTextField> createState() => _AppTextFieldState();
+  State<FondeTextField> createState() => _AppTextFieldState();
 }
 
-class _AppTextFieldState extends ConsumerState<FondeTextField> {
+class _AppTextFieldState extends State<FondeTextField> {
   late FocusNode _focusNode;
   bool _isFocused = false;
 
@@ -332,13 +331,13 @@ class _AppTextFieldState extends ConsumerState<FondeTextField> {
   @override
   Widget build(BuildContext context) {
     final flutterTheme = Theme.of(context);
-    final accessibilityConfig = ref.watch(fondeAccessibilityConfigProvider);
+    final accessibilityConfig = context.fondeAccessibility;
     final zoomScale = widget.disableZoom ? 1.0 : accessibilityConfig.zoomScale;
     final borderScale =
         widget.disableZoom ? 1.0 : accessibilityConfig.borderScale;
 
     // Use the new color scheme provider that responds to theme mode changes
-    final appColorScheme = ref.watch(fondeColorSchemeProvider);
+    final appColorScheme = context.fondeColorScheme;
 
     // Set default colors using color scheme
     final backgroundColor =
@@ -352,11 +351,13 @@ class _AppTextFieldState extends ConsumerState<FondeTextField> {
     return Container(
       width: double.infinity,
       height: 32.0 * zoomScale, // Explicitly specify height
-      decoration: ref.watch(
-        fondeShapeDecorationProvider(
-          color: backgroundColor,
-          cornerRadius: widget.radius * zoomScale,
-          cornerSmoothing: 0.6,
+      decoration: ShapeDecoration(
+        color: backgroundColor,
+        shape: SmoothRectangleBorder(
+          borderRadius: SmoothBorderRadius(
+            cornerRadius: widget.radius * zoomScale,
+            cornerSmoothing: 0.6,
+          ),
           side: BorderSide(
             color: _isFocused ? activeBorderColor : borderColor,
             width: widget.borderWidth * borderScale,

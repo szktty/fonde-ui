@@ -1,12 +1,10 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:multi_split_view/multi_split_view.dart';
+import '../../core/context_extensions.dart';
+import '../../core/controllers.dart';
 import '../../internal.dart';
 
-import '../../riverpod/widgets/sidebar_width_provider.dart';
-import '../../riverpod/widgets/sidebar_state_providers.dart';
-import '../icons/icon_theme_providers.dart';
 import '../toolbar/secondary_sidebar_toolbar.dart';
 import '../widgets/fonde_icon_button.dart';
 import '../navigation/sidebar.dart';
@@ -24,7 +22,12 @@ import 'sidebar_pane.dart';
 ///   - Primary sidebar (variable width)
 ///   - Main content (flex)
 ///   - Secondary sidebar (variable width, optional)
-class FondeScaffold extends ConsumerStatefulWidget {
+///
+/// Sidebar visibility and width are managed internally. Supply external
+/// [FondePrimarySidebarController] / [FondeSecondarySidebarController]
+/// instances (and width controllers) if you need to drive them from outside
+/// the widget tree.
+class FondeScaffold extends StatefulWidget {
   const FondeScaffold({
     required this.toolbar,
     required this.content,
@@ -37,6 +40,10 @@ class FondeScaffold extends ConsumerStatefulWidget {
     this.showSecondarySidebar = true,
     this.disableZoom = false,
     this.useSafeArea,
+    this.primarySidebarController,
+    this.secondarySidebarController,
+    this.primarySidebarWidthController,
+    this.secondarySidebarWidthController,
     super.key,
   });
 
@@ -47,28 +54,32 @@ class FondeScaffold extends ConsumerStatefulWidget {
   final Widget? secondarySidebar;
 
   /// Optional status bar displayed at the bottom of the scaffold.
-  /// Typically a [FondeStatusBar] widget.
   final Widget? statusBar;
 
-  /// Whether to show the launch bar.
   final bool showLaunchBar;
-
-  /// Whether to show the primary sidebar.
   final bool showPrimarySidebar;
-
-  /// Whether to show the secondary sidebar.
   final bool showSecondarySidebar;
-
-  /// Whether to disable the zoom function.
   final bool disableZoom;
 
   /// Whether to wrap the scaffold in a [SafeArea].
   /// Defaults to `true` on iOS and Android, `false` otherwise.
-  /// Set explicitly to override the default behaviour.
   final bool? useSafeArea;
 
+  /// External primary sidebar visibility controller.
+  /// When `null`, [FondeScaffold] creates and owns an internal one.
+  final FondePrimarySidebarController? primarySidebarController;
+
+  /// External secondary sidebar visibility controller.
+  final FondeSecondarySidebarController? secondarySidebarController;
+
+  /// External primary sidebar width controller.
+  final FondeSidebarWidthController? primarySidebarWidthController;
+
+  /// External secondary sidebar width controller.
+  final FondeSecondarySidebarWidthController? secondarySidebarWidthController;
+
   @override
-  ConsumerState<FondeScaffold> createState() => _FondeScaffoldState();
+  State<FondeScaffold> createState() => _FondeScaffoldState();
 }
 
 bool get _isMobilePlatform =>
@@ -76,31 +87,115 @@ bool get _isMobilePlatform =>
     (defaultTargetPlatform == TargetPlatform.iOS ||
         defaultTargetPlatform == TargetPlatform.android);
 
-class _FondeScaffoldState extends ConsumerState<FondeScaffold> {
+class _FondeScaffoldState extends State<FondeScaffold> {
+  late FondePrimarySidebarController _primarySidebarCtrl;
+  late FondeSecondarySidebarController _secondarySidebarCtrl;
+  late FondeSidebarWidthController _primaryWidthCtrl;
+  late FondeSecondarySidebarWidthController _secondaryWidthCtrl;
+
+  bool _ownsPrimary = false;
+  bool _ownsSecondary = false;
+  bool _ownsPrimaryWidth = false;
+  bool _ownsSecondaryWidth = false;
+
   bool get _effectiveUseSafeArea => widget.useSafeArea ?? _isMobilePlatform;
+
+  @override
+  void initState() {
+    super.initState();
+    _initControllers();
+    _primarySidebarCtrl.addListener(_onSidebarChanged);
+    _secondarySidebarCtrl.addListener(_onSidebarChanged);
+    _primaryWidthCtrl.addListener(_onSidebarChanged);
+    _secondaryWidthCtrl.addListener(_onSidebarChanged);
+  }
+
+  void _initControllers() {
+    if (widget.primarySidebarController != null) {
+      _primarySidebarCtrl = widget.primarySidebarController!;
+    } else {
+      _primarySidebarCtrl = FondePrimarySidebarController();
+      _ownsPrimary = true;
+    }
+    if (widget.secondarySidebarController != null) {
+      _secondarySidebarCtrl = widget.secondarySidebarController!;
+    } else {
+      _secondarySidebarCtrl = FondeSecondarySidebarController();
+      _ownsSecondary = true;
+    }
+    if (widget.primarySidebarWidthController != null) {
+      _primaryWidthCtrl = widget.primarySidebarWidthController!;
+    } else {
+      _primaryWidthCtrl = FondeSidebarWidthController();
+      _ownsPrimaryWidth = true;
+    }
+    if (widget.secondarySidebarWidthController != null) {
+      _secondaryWidthCtrl = widget.secondarySidebarWidthController!;
+    } else {
+      _secondaryWidthCtrl = FondeSecondarySidebarWidthController();
+      _ownsSecondaryWidth = true;
+    }
+  }
+
+  void _onSidebarChanged() => setState(() {});
+
+  @override
+  void dispose() {
+    _primarySidebarCtrl.removeListener(_onSidebarChanged);
+    _secondarySidebarCtrl.removeListener(_onSidebarChanged);
+    _primaryWidthCtrl.removeListener(_onSidebarChanged);
+    _secondaryWidthCtrl.removeListener(_onSidebarChanged);
+    if (_ownsPrimary) _primarySidebarCtrl.dispose();
+    if (_ownsSecondary) _secondarySidebarCtrl.dispose();
+    if (_ownsPrimaryWidth) _primaryWidthCtrl.dispose();
+    if (_ownsSecondaryWidth) _secondaryWidthCtrl.dispose();
+    super.dispose();
+  }
 
   Widget _wrapSafeArea(Widget child) =>
       _effectiveUseSafeArea ? SafeArea(child: child) : child;
+
   @override
   Widget build(BuildContext context) {
-    final accessibilityConfig = ref.watch(fondeAccessibilityConfigProvider);
-    final zoomScale = widget.disableZoom ? 1.0 : accessibilityConfig.zoomScale;
-    final borderScale =
-        widget.disableZoom ? 1.0 : accessibilityConfig.borderScale;
-    final appColorScheme = ref.watch(fondeEffectiveColorSchemeProvider);
+    final accessibility = context.fondeAccessibility;
+    final zoomScale = widget.disableZoom ? 1.0 : accessibility.zoomScale;
+    final borderScale = widget.disableZoom ? 1.0 : accessibility.borderScale;
+    final appColorScheme = context.fondeColorScheme;
+    final iconTheme = context.fondeIconTheme;
 
-    // Watch the visibility state of the sidebars
     final sidebarVisible =
-        widget.showPrimarySidebar &&
-        ref.watch(fondePrimarySidebarStateProvider);
-    final secondarySidebarVisible = ref.watch(
-      fondeSecondarySidebarStateProvider,
-    );
+        widget.showPrimarySidebar && _primarySidebarCtrl.isVisible;
+    final secondarySidebarVisible = _secondarySidebarCtrl.isVisible;
 
-    // If the sidebar is hidden, use CollapsedSidebarLayout
+    return FondeSidebarControllerScope(
+      primaryController: _primarySidebarCtrl,
+      secondaryController: _secondarySidebarCtrl,
+      primaryWidthController: _primaryWidthCtrl,
+      secondaryWidthController: _secondaryWidthCtrl,
+      child: _wrapSafeArea(
+        _buildBody(
+          context,
+          sidebarVisible: sidebarVisible,
+          secondarySidebarVisible: secondarySidebarVisible,
+          zoomScale: zoomScale,
+          borderScale: borderScale,
+          appColorScheme: appColorScheme,
+          iconTheme: iconTheme,
+        ),
+      ),
+    );
+  }
+
+  Widget _buildBody(
+    BuildContext context, {
+    required bool sidebarVisible,
+    required bool secondarySidebarVisible,
+    required double zoomScale,
+    required double borderScale,
+    required FondeColorScheme appColorScheme,
+    required FondeIconTheme iconTheme,
+  }) {
     if (!sidebarVisible) {
-      final iconTheme = ref.watch(fondeDefaultIconThemeProvider);
-      // Width of the open-sidebar button area (left padding 8px + icon 20px)
       const double openButtonWidth = 28.0;
       final openButtonArea = Container(
         width: openButtonWidth,
@@ -110,43 +205,34 @@ class _FondeScaffoldState extends ConsumerState<FondeScaffold> {
         child: FondeIconButton(
           icon: iconTheme.panelLeft,
           iconSize: 20,
-          onPressed: () {
-            ref.read(fondePrimarySidebarStateProvider.notifier).show();
-          },
+          onPressed: _primarySidebarCtrl.show,
           tooltip: 'Open Sidebar',
           padding: EdgeInsets.zero,
           hoverColor: Colors.transparent,
         ),
       );
-      return _wrapSafeArea(
-        FondeCollapsedSidebarLayout(
-          toolbar: Stack(
-            children: [
-              Padding(
-                padding: const EdgeInsets.only(left: openButtonWidth),
-                child: widget.toolbar,
-              ),
-              Positioned(left: 0, top: 0, bottom: 0, child: openButtonArea),
-            ],
-          ),
-          mainContent: _buildMainContent(context, zoomScale, 288.0 * zoomScale),
-          launchBar: widget.launchBar,
-          showLaunchBar: widget.showLaunchBar,
-          zoomScale: zoomScale,
-          borderScale: borderScale,
-          disableZoom: widget.disableZoom,
+      return FondeCollapsedSidebarLayout(
+        toolbar: Stack(
+          children: [
+            Padding(
+              padding: const EdgeInsets.only(left: openButtonWidth),
+              child: widget.toolbar,
+            ),
+            Positioned(left: 0, top: 0, bottom: 0, child: openButtonArea),
+          ],
         ),
+        mainContent: _buildMainContent(context, zoomScale, 288.0 * zoomScale),
+        launchBar: widget.launchBar,
+        showLaunchBar: widget.showLaunchBar,
+        zoomScale: zoomScale,
+        borderScale: borderScale,
+        disableZoom: widget.disableZoom,
       );
     }
 
-    // Get the sidebar width from the provider
-    final primarySidebarBaseWidth = ref.watch(sidebarWidthProvider);
-    final primarySidebarTotalWidth = primarySidebarBaseWidth * zoomScale;
+    final primarySidebarTotalWidth = _primaryWidthCtrl.width * zoomScale;
+    final secondarySidebarTotalWidth = _secondaryWidthCtrl.width * zoomScale;
 
-    final secondarySidebarBaseWidth = ref.watch(secondarySidebarWidthProvider);
-    final secondarySidebarTotalWidth = secondarySidebarBaseWidth * zoomScale;
-
-    // If the secondary sidebar is visible, split into 3 parts, otherwise 2 parts
     final areas = <Area>[
       Area(
         id: 'primary_sidebar',
@@ -166,109 +252,84 @@ class _FondeScaffoldState extends ConsumerState<FondeScaffold> {
         ),
     ];
 
-    // Controller for MultiSplitView
     final controller = MultiSplitViewController(areas: areas);
 
-    return _wrapSafeArea(
-      MultiSplitViewTheme(
-        data: MultiSplitViewThemeData(
-          dividerThickness: 2.0 * borderScale,
-          dividerPainter: DividerPainters.background(
-            color: appColorScheme.base.divider,
-            highlightedColor: appColorScheme.theme.primaryColor,
-          ),
-          dividerHandleBuffer: 6,
+    return MultiSplitViewTheme(
+      data: MultiSplitViewThemeData(
+        dividerThickness: 2.0 * borderScale,
+        dividerPainter: DividerPainters.background(
+          color: appColorScheme.base.divider,
+          highlightedColor: appColorScheme.theme.primaryColor,
         ),
-        child: MultiSplitView(
-          controller: controller,
-          onDividerDragUpdate: (dividerIndex) {
-            // Update the state when the sidebar width is changed
-            final areas = controller.areas;
-            if (dividerIndex == 0 && areas.isNotEmpty) {
-              // Primary sidebar width change
-              final newWidth = areas[0].size! / zoomScale;
-              ref.read(sidebarWidthProvider.notifier).setWidth(newWidth);
-            } else if (dividerIndex == 1 && areas.length > 2) {
-              // Secondary sidebar width change
-              final newWidth = areas[2].size! / zoomScale;
-              ref
-                  .read(secondarySidebarWidthProvider.notifier)
-                  .setWidth(newWidth);
-            }
-          },
-          builder: (context, area) {
-            switch (area.id) {
-              case 'primary_sidebar':
-                Widget? sidebarPane;
-                if (widget.primarySidebar != null) {
-                  // If FondeSidebar has its own toolbar (either floatingPanel
-                  // or standard with an explicit toolbar), skip FondeSidebarPane
-                  // to avoid double toolbars.
-                  final sidebarHasToolbar =
-                      widget.primarySidebar is FondeSidebar &&
-                      (widget.primarySidebar! as FondeSidebar).toolbar != null;
-                  sidebarPane =
-                      sidebarHasToolbar
-                          ? widget.primarySidebar!
-                          : FondeSidebarPane(child: widget.primarySidebar!);
-                }
-                return FondePrimarySide(
-                  launchBar: widget.launchBar,
-                  sidebar: sidebarPane,
-                  showLaunchBar: widget.showLaunchBar,
-                  showSidebar: widget.showPrimarySidebar,
-                  zoomScale: zoomScale,
-                  borderScale: borderScale,
-                  disableZoom: widget.disableZoom,
-                );
-              case 'main':
-                return Column(
-                  children: [
-                    // Toolbar (fixed height)
-                    widget.toolbar,
-
-                    // Main content
-                    Expanded(
-                      child: FondeMainContentArea(child: widget.content),
-                    ),
-
-                    // Status bar (optional, fixed at bottom)
-                    if (widget.statusBar != null) widget.statusBar!,
-                  ],
-                );
-              case 'secondary_sidebar':
-                return Column(
-                  children: [
-                    // Toolbar for the secondary sidebar
-                    const FondeSecondarySidebarToolbar(),
-
-                    // Content of the secondary sidebar
-                    Expanded(
-                      child: widget.secondarySidebar ?? const SizedBox.shrink(),
-                    ),
-                  ],
-                );
-              default:
-                return const SizedBox.shrink();
-            }
-          },
-        ),
+        dividerHandleBuffer: 6,
+      ),
+      child: MultiSplitView(
+        controller: controller,
+        onDividerDragUpdate: (dividerIndex) {
+          final areas = controller.areas;
+          if (dividerIndex == 0 && areas.isNotEmpty) {
+            _primaryWidthCtrl.setWidth(areas[0].size! / zoomScale);
+          } else if (dividerIndex == 1 && areas.length > 2) {
+            _secondaryWidthCtrl.setWidth(areas[2].size! / zoomScale);
+          }
+        },
+        builder: (context, area) {
+          switch (area.id) {
+            case 'primary_sidebar':
+              Widget? sidebarPane;
+              if (widget.primarySidebar != null) {
+                final sidebarHasToolbar =
+                    widget.primarySidebar is FondeSidebar &&
+                    (widget.primarySidebar! as FondeSidebar).toolbar != null;
+                sidebarPane =
+                    sidebarHasToolbar
+                        ? widget.primarySidebar!
+                        : FondeSidebarPane(child: widget.primarySidebar!);
+              }
+              return FondePrimarySide(
+                launchBar: widget.launchBar,
+                sidebar: sidebarPane,
+                showLaunchBar: widget.showLaunchBar,
+                showSidebar: widget.showPrimarySidebar,
+                zoomScale: zoomScale,
+                borderScale: borderScale,
+                disableZoom: widget.disableZoom,
+              );
+            case 'main':
+              return Column(
+                children: [
+                  widget.toolbar,
+                  Expanded(child: FondeMainContentArea(child: widget.content)),
+                  if (widget.statusBar != null) widget.statusBar!,
+                ],
+              );
+            case 'secondary_sidebar':
+              return Column(
+                children: [
+                  const FondeSecondarySidebarToolbar(),
+                  Expanded(
+                    child: widget.secondarySidebar ?? const SizedBox.shrink(),
+                  ),
+                ],
+              );
+            default:
+              return const SizedBox.shrink();
+          }
+        },
       ),
     );
   }
 
-  /// Build the main content area (for CollapsedSidebarLayout).
   Widget _buildMainContent(
     BuildContext context,
     double zoomScale,
     double secondaryWidth,
   ) {
-    final mainColumn = Column(
+    return Column(
       children: [
         Expanded(
           child: Row(
             children: [
-              // Main Content - fill the remaining space
               Expanded(
                 child: FondeMainContentArea(
                   child: ConstrainedBox(
@@ -277,8 +338,6 @@ class _FondeScaffoldState extends ConsumerState<FondeScaffold> {
                   ),
                 ),
               ),
-
-              // Secondary Sidebar - show only if it exists and is visible
               if (widget.secondarySidebar != null &&
                   widget.showSecondarySidebar)
                 SizedBox(
@@ -288,12 +347,8 @@ class _FondeScaffoldState extends ConsumerState<FondeScaffold> {
             ],
           ),
         ),
-
-        // Status bar (optional, fixed at bottom)
         if (widget.statusBar != null) widget.statusBar!,
       ],
     );
-
-    return mainColumn;
   }
 }

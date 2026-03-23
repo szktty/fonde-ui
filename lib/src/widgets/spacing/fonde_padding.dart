@@ -1,12 +1,11 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'fonde_spacing.dart';
 
 /// A padding widget that conforms to the 4px grid system.
 /// Used as a replacement for the standard Padding widget to prevent grid
 /// system violations.
-class FondePadding extends ConsumerWidget {
+class FondePadding extends StatelessWidget {
   /// The padding value.
   final EdgeInsetsGeometry padding;
 
@@ -125,7 +124,7 @@ class FondePadding extends ConsumerWidget {
        strictMode = false;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  Widget build(BuildContext context) {
     final zoomScale = disableZoom ? 1.0 : 1.0; // default zoom scale
 
     // Validate and adjust padding values

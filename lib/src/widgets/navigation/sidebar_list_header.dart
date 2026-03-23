@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../core/context_extensions.dart';
 import '../../internal.dart';
 
 /// A header element that represents a section.
-class FondeSidebarListHeader extends ConsumerWidget {
+class FondeSidebarListHeader extends StatelessWidget {
   /// The unique identifier for the header.
   final String id;
 
@@ -35,9 +35,8 @@ class FondeSidebarListHeader extends ConsumerWidget {
   });
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final accessibilityConfig = ref.watch(fondeAccessibilityConfigProvider);
-    final zoomScale = disableZoom ? 1.0 : accessibilityConfig.zoomScale;
+  Widget build(BuildContext context) {
+    final zoomScale = disableZoom ? 1.0 : context.fondeZoomScale;
 
     final theme = Theme.of(context);
     final effectiveTitleStyle =

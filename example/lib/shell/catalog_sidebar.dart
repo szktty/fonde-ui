@@ -1,5 +1,4 @@
 import 'package:flutter/widgets.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fonde_ui/fonde_ui.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 
@@ -132,7 +131,7 @@ const catalogCategories = [
 ];
 
 /// Catalog navigation list displayed in the sidebar
-class CatalogSidebar extends ConsumerWidget {
+class CatalogSidebar extends StatelessWidget {
   const CatalogSidebar({
     super.key,
     required this.selectedItemId,
@@ -147,7 +146,7 @@ class CatalogSidebar extends ConsumerWidget {
   final void Function(String groupId) onGroupToggled;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  Widget build(BuildContext context) {
     return FondeSidebarList(
       selectedItemId: selectedItemId,
       expandedGroupIds: expandedGroupIds,

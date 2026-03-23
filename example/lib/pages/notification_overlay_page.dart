@@ -1,20 +1,32 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fonde_ui/fonde_ui.dart';
 
 import '../widgets/catalog_page.dart';
 
-class NotificationOverlayPage extends ConsumerWidget {
+class NotificationOverlayPage extends StatefulWidget {
   const NotificationOverlayPage({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  State<NotificationOverlayPage> createState() =>
+      _NotificationOverlayPageState();
+}
+
+class _NotificationOverlayPageState extends State<NotificationOverlayPage> {
+  void _add(FondeNotification notification) {
+    FondeNotificationControllerScope.of(context)?.add(notification);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final controller = FondeNotificationControllerScope.of(context);
+    final notifications = controller?.notifications ?? const [];
+
     return CatalogPage(
       children: [
         CatalogSection(
           title: 'Notification Overlay',
           description:
-              'FondeNotificationOverlay stacks notifications managed via fondeNotificationProvider. '
+              'FondeNotificationOverlay stacks notifications managed via FondeNotificationController. '
               'Press buttons below to add notifications. They auto-dismiss after a few seconds.',
           children: [
             CatalogDemo(
@@ -26,66 +38,60 @@ class NotificationOverlayPage extends ConsumerWidget {
                   FondeButton.normal(
                     label: 'Info',
                     onPressed: () {
-                      ref
-                          .read(fondeNotificationProvider.notifier)
-                          .add(
-                            FondeNotification(
-                              title: 'Info',
-                              message: 'This is an informational notification.',
-                              type: FondeNotificationType.info,
-                            ),
-                          );
+                      _add(
+                        FondeNotification(
+                          title: 'Info',
+                          message: 'This is an informational notification.',
+                          type: FondeNotificationType.info,
+                        ),
+                      );
                     },
                   ),
                   FondeButton.normal(
                     label: 'Success',
                     onPressed: () {
-                      ref
-                          .read(fondeNotificationProvider.notifier)
-                          .add(
-                            FondeNotification(
-                              title: 'Saved',
-                              message: 'File saved successfully.',
-                              type: FondeNotificationType.success,
-                            ),
-                          );
+                      _add(
+                        FondeNotification(
+                          title: 'Saved',
+                          message: 'File saved successfully.',
+                          type: FondeNotificationType.success,
+                        ),
+                      );
                     },
                   ),
                   FondeButton.normal(
                     label: 'Warning',
                     onPressed: () {
-                      ref
-                          .read(fondeNotificationProvider.notifier)
-                          .add(
-                            FondeNotification(
-                              title: 'Warning',
-                              message:
-                                  'This action may have unintended side effects.',
-                              type: FondeNotificationType.warning,
-                            ),
-                          );
+                      _add(
+                        FondeNotification(
+                          title: 'Warning',
+                          message:
+                              'This action may have unintended side effects.',
+                          type: FondeNotificationType.warning,
+                        ),
+                      );
                     },
                   ),
                   FondeButton.destructive(
                     label: 'Error',
                     onPressed: () {
-                      ref
-                          .read(fondeNotificationProvider.notifier)
-                          .add(
-                            FondeNotification(
-                              title: 'Error',
-                              message:
-                                  'An error occurred while processing the request.',
-                              type: FondeNotificationType.error,
-                              duration: const Duration(seconds: 6),
-                            ),
-                          );
+                      _add(
+                        FondeNotification(
+                          title: 'Error',
+                          message:
+                              'An error occurred while processing the request.',
+                          type: FondeNotificationType.error,
+                          duration: const Duration(seconds: 6),
+                        ),
+                      );
                     },
                   ),
                   FondeButton.normal(
                     label: 'Dismiss all',
                     onPressed: () {
-                      ref.read(fondeNotificationProvider.notifier).dismissAll();
+                      FondeNotificationControllerScope.of(
+                        context,
+                      )?.dismissAll();
                     },
                   ),
                 ],
@@ -93,9 +99,8 @@ class NotificationOverlayPage extends ConsumerWidget {
             ),
             CatalogDemo(
               label: 'Active notifications',
-              child: Consumer(
-                builder: (context, ref, _) {
-                  final notifications = ref.watch(fondeNotificationProvider);
+              child: Builder(
+                builder: (context) {
                   if (notifications.isEmpty) {
                     return const FondeText(
                       'No active notifications.',

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../core/context_extensions.dart';
 import '../../internal.dart';
 import '../styling/fonde_border_radius.dart';
 import '../widgets/fonde_button.dart';
@@ -23,7 +23,7 @@ import 'fonde_eye_dropper.dart';
 ///   palette: [Colors.red, Colors.green, Colors.blue],
 /// )
 /// ```
-class FondeColorPicker extends ConsumerStatefulWidget {
+class FondeColorPicker extends StatefulWidget {
   const FondeColorPicker({
     super.key,
     this.initialColor = Colors.blue,
@@ -54,10 +54,10 @@ class FondeColorPicker extends ConsumerStatefulWidget {
   final bool disableZoom;
 
   @override
-  ConsumerState<FondeColorPicker> createState() => _FondeColorPickerState();
+  State<FondeColorPicker> createState() => _FondeColorPickerState();
 }
 
-class _FondeColorPickerState extends ConsumerState<FondeColorPicker> {
+class _FondeColorPickerState extends State<FondeColorPicker> {
   late HSVColor _hsv;
   late TextEditingController _hexController;
   late TextEditingController _opacityController;
@@ -129,9 +129,8 @@ class _FondeColorPickerState extends ConsumerState<FondeColorPicker> {
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = ref.watch(fondeEffectiveColorSchemeProvider);
-    final accessibilityConfig = ref.watch(fondeAccessibilityConfigProvider);
-    final zoomScale = widget.disableZoom ? 1.0 : accessibilityConfig.zoomScale;
+    final colorScheme = context.fondeColorScheme;
+    final zoomScale = widget.disableZoom ? 1.0 : context.fondeZoomScale;
 
     final w = widget.width * zoomScale;
     final svSize = w;

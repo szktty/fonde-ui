@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fonde_ui/fonde_ui.dart';
-import 'package:fonde_ui/fonde_ui_riverpod.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 import '../widgets/catalog_page.dart';
@@ -40,22 +38,21 @@ class NavigationPage extends StatelessWidget {
   }
 }
 
-class _BasicNavigationDemo extends ConsumerStatefulWidget {
+class _BasicNavigationDemo extends StatefulWidget {
   const _BasicNavigationDemo();
 
   @override
-  ConsumerState<_BasicNavigationDemo> createState() =>
-      _BasicNavigationDemoState();
+  State<_BasicNavigationDemo> createState() => _BasicNavigationDemoState();
 }
 
-class _BasicNavigationDemoState extends ConsumerState<_BasicNavigationDemo> {
+class _BasicNavigationDemoState extends State<_BasicNavigationDemo> {
   int _launchBarIndex = 0;
   String? _selectedItemId = 'inbox';
   List<String> _expandedGroupIds = ['mail'];
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = ref.watch(fondeEffectiveColorSchemeProvider);
+    final colorScheme = context.fondeColorScheme;
     return ClipRect(
       child: FondeScaffold(
         disableZoom: true,
@@ -169,20 +166,20 @@ class _BasicNavigationDemoState extends ConsumerState<_BasicNavigationDemo> {
   }
 }
 
-class _FloatingPanelDemo extends ConsumerStatefulWidget {
+class _FloatingPanelDemo extends StatefulWidget {
   const _FloatingPanelDemo();
 
   @override
-  ConsumerState<_FloatingPanelDemo> createState() => _FloatingPanelDemoState();
+  State<_FloatingPanelDemo> createState() => _FloatingPanelDemoState();
 }
 
-class _FloatingPanelDemoState extends ConsumerState<_FloatingPanelDemo> {
+class _FloatingPanelDemoState extends State<_FloatingPanelDemo> {
   String? _selectedItemId = 'inbox';
   List<String> _expandedGroupIds = ['mail'];
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = ref.watch(fondeEffectiveColorSchemeProvider);
+    final colorScheme = context.fondeColorScheme;
     return ClipRect(
       child: FondeScaffold(
         disableZoom: true,
@@ -268,19 +265,19 @@ class _FloatingPanelDemoState extends ConsumerState<_FloatingPanelDemo> {
   }
 }
 
-class _NoSidebarDemo extends ConsumerStatefulWidget {
+class _NoSidebarDemo extends StatefulWidget {
   const _NoSidebarDemo();
 
   @override
-  ConsumerState<_NoSidebarDemo> createState() => _NoSidebarDemoState();
+  State<_NoSidebarDemo> createState() => _NoSidebarDemoState();
 }
 
-class _NoSidebarDemoState extends ConsumerState<_NoSidebarDemo> {
+class _NoSidebarDemoState extends State<_NoSidebarDemo> {
   int _launchBarIndex = 0;
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = ref.watch(fondeEffectiveColorSchemeProvider);
+    final colorScheme = context.fondeColorScheme;
     return ClipRect(
       child: FondeScaffold(
         disableZoom: true,

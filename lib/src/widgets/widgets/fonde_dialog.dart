@@ -1,14 +1,12 @@
+import 'package:figma_squircle/figma_squircle.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../internal.dart';
-import 'fonde_rectangle_border.dart';
 import 'fonde_physical_model.dart';
 import 'fonde_divider.dart';
 import 'fonde_icon_button.dart';
 import '../spacing/fonde_padding.dart';
 import '../spacing/fonde_spacing.dart';
 import '../typography/fonde_text.dart';
-import '../icons/icon_theme_providers.dart';
 
 /// Enum representing dialog importance
 enum FondeDialogImportance {
@@ -27,7 +25,7 @@ enum FondeDialogImportance {
 /// Provides unified dialog style across the application.
 /// Theme colors are obtained via FondeThemeData capsule,
 /// not directly accessing Flutter standard ColorScheme or Theme.of.
-class FondeDialog extends ConsumerWidget {
+class FondeDialog extends StatelessWidget {
   /// Header title (large font size)
   final String? title;
 
@@ -138,13 +136,19 @@ class FondeDialog extends ConsumerWidget {
   }
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  Widget build(BuildContext context) {
     // Get theme colors using core_themes API
-    final appColorScheme = ref.watch(fondeEffectiveColorSchemeProvider);
-    final accessibilityConfig = ref.watch(fondeAccessibilityConfigProvider);
+    final appColorScheme = context.fondeColorScheme;
+    final accessibilityConfig = context.fondeAccessibility;
 
-    // Get shape from fondeRectangleBorderProvider
-    final shape = ref.watch(fondeRectangleBorderProvider);
+    // Build shape from context
+    final shape = SmoothRectangleBorder(
+      borderRadius: SmoothBorderRadius(
+        cornerRadius: 12.0,
+        cornerSmoothing: 0.6,
+      ),
+      side: BorderSide(color: appColorScheme.base.border, width: 1.5),
+    );
 
     // Determine dialog background color
     final effectiveBackgroundColor =
@@ -298,10 +302,10 @@ class FondeDialog extends ConsumerWidget {
         right: FondeSpacingValues.xxxl,
         top: FondeSpacingValues.lg, // Changed from xxxl(32px) to lg(16px)
         disableZoom: disableZoom,
-        child: Consumer(
-          builder: (context, ref, child) {
-            final appColorScheme = ref.watch(fondeEffectiveColorSchemeProvider);
-            final iconTheme = ref.watch(fondeDefaultIconThemeProvider);
+        child: Builder(
+          builder: (context) {
+            final appColorScheme = context.fondeColorScheme;
+            final iconTheme = context.fondeIconTheme;
             return Stack(
               children: [
                 // Main content
@@ -459,11 +463,9 @@ Future<T?> showFondeDialog<T>({
     builder:
         (dialogContext) => Theme(
           data: theme, // Explicitly pass parent context theme
-          child: Consumer(
-            builder: (context, ref, _) {
-              final accessibilityConfig = ref.watch(
-                fondeAccessibilityConfigProvider,
-              );
+          child: Builder(
+            builder: (context) {
+              final accessibilityConfig = context.fondeAccessibility;
               final zoomScale = accessibilityConfig.zoomScale;
 
               // Get window size using MediaQuery

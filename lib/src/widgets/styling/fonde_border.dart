@@ -1,6 +1,5 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 /// Constant class for border widths that conform to design guidelines.
 /// Provides automatic application of borderScale and accessibility support.
@@ -192,8 +191,8 @@ class FondeBorder {
   }
 }
 
-/// A widget that automatically applies borderScale using Riverpod.
-class FondeBorderContainer extends ConsumerWidget {
+/// A widget that automatically applies borderScale.
+class FondeBorderContainer extends StatelessWidget {
   /// The child widget.
   final Widget child;
 
@@ -227,7 +226,7 @@ class FondeBorderContainer extends ConsumerWidget {
   });
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  Widget build(BuildContext context) {
     final borderScale = disableZoom ? 1.0 : 1.0; // default border scale
     final zoomScale = disableZoom ? 1.0 : 1.0; // default zoom scale
 
