@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import '../../internal.dart';
 import 'fonde_rectangle_border.dart';
 import '../typography/fonde_text.dart';
@@ -239,9 +240,6 @@ class _AppDropdownMenuWidget<T> extends StatelessWidget {
       // Add horizontal padding (for dropdown button)
       itemWidth += _AppDropdownMenuConstants.horizontalPadding * 2 * zoomScale;
 
-      // Checkmark is not displayed on dropdown button,
-      // so don't include checkmark space
-
       // Add leading icon space
       if (entry.leadingIcon != null) {
         itemWidth += _AppDropdownMenuConstants.standardIconSize * zoomScale;
@@ -309,8 +307,6 @@ class _AppDropdownMenuWidget<T> extends StatelessWidget {
     // If width is not specified, calculate maximum width of all items
     double? effectiveWidth;
     if (showAsActionIcon) {
-      // For action icon button, button itself is square
-      // but menu width is calculated from maximum item width
       effectiveWidth = _calculateMaxItemWidth(
         dropdownMenuEntries: dropdownMenuEntries,
         textStyle: effectiveTextStyle,
@@ -321,7 +317,6 @@ class _AppDropdownMenuWidget<T> extends StatelessWidget {
     } else if (width != null && width!.isFinite) {
       effectiveWidth = width! * zoomScale;
     } else {
-      // Calculate maximum width of menu items
       effectiveWidth = _calculateMaxItemWidth(
         dropdownMenuEntries: dropdownMenuEntries,
         textStyle: effectiveTextStyle,
@@ -420,9 +415,27 @@ class _AppDropdownButtonState<T> extends State<_AppDropdownButton<T>> {
   final LayerLink _layerLink = LayerLink();
   bool _isOpen = false;
 
+  // FocusNode for the KeyboardListener inside OverlayEntry
+  final FocusNode _keyboardFocusNode = FocusNode();
+
+  // Notifier shared with the overlay for hover index and keyboard focus index
+  final ValueNotifier<int?> _hoveredIndex = ValueNotifier<int?>(null);
+  // GlobalKey for the menu panel container — used for hit testing via Y coordinate.
+  final GlobalKey _menuPanelKey = GlobalKey();
+
+  // Whether the current pointer sequence started on the button (press-drag-release)
+  bool _pointerDownActive = false;
+  // Timestamp when the menu was opened
+  DateTime? _menuOpenedAt;
+  // How long the pointer must be held after opening before a release can
+  // select an item. Matches the approximate macOS feel (~700ms).
+  static const _selectionDelay = Duration(milliseconds: 700);
+
   @override
   void dispose() {
     _removeOverlay();
+    _hoveredIndex.dispose();
+    _keyboardFocusNode.dispose();
     super.dispose();
   }
 
@@ -430,22 +443,120 @@ class _AppDropdownButtonState<T> extends State<_AppDropdownButton<T>> {
     _overlayEntry?.remove();
     _overlayEntry = null;
     _isOpen = false;
+    _hoveredIndex.value = null;
+    // Return focus to the primary focus scope so other widgets are unaffected.
+    _keyboardFocusNode.unfocus();
   }
 
-  void _showOverlay() {
-    if (_isOpen) {
-      _removeOverlay();
+  void _openOverlay() {
+    if (_isOpen) return;
+    _menuOpenedAt = DateTime.now();
+    _overlayEntry = _createOverlayEntry();
+    Overlay.of(context).insert(_overlayEntry!);
+    // Request focus after the overlay is inserted so keyboard events are received.
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (_isOpen) _keyboardFocusNode.requestFocus();
+    });
+    setState(() => _isOpen = true);
+  }
+
+  /// Find which item index (if any) contains [globalPosition].
+  /// Uses the menu panel's RenderBox and uniform item height to calculate
+  /// the index — more reliable than per-item GlobalKey hit testing.
+  int? _findItemIndexAt(Offset globalPosition) {
+    final renderBox =
+        _menuPanelKey.currentContext?.findRenderObject() as RenderBox?;
+    if (renderBox == null || !renderBox.attached) return null;
+    final local = renderBox.globalToLocal(globalPosition);
+    if (local.dx < 0 ||
+        local.dy < 0 ||
+        local.dx > renderBox.size.width ||
+        local.dy > renderBox.size.height) {
+      return null;
+    }
+    final itemHeight =
+        _AppDropdownMenuConstants.defaultHeight * widget.zoomScale;
+    final index = (local.dy / itemHeight).floor();
+    if (index < 0 || index >= widget.dropdownMenuEntries.length) return null;
+    return index;
+  }
+
+  void _handlePointerDown(PointerDownEvent event) {
+    if (!widget.enabled) return;
+    _pointerDownActive = true;
+    _openOverlay();
+  }
+
+  // Called from the button's Listener — drives hover during press-drag.
+  void _handlePointerMove(PointerMoveEvent event) {
+    if (!_isOpen || !_pointerDownActive) return;
+    final index = _findItemIndexAt(event.position);
+    _hoveredIndex.value = index;
+  }
+
+  // All pointer-up handling is done here (called from the overlay Listener).
+  void _handleOverlayPointerUp(PointerUpEvent event) {
+    if (!_isOpen) return;
+
+    final openedAt = _menuOpenedAt;
+    final elapsed =
+        openedAt != null
+            ? DateTime.now().difference(openedAt)
+            : _selectionDelay;
+
+    // If the pointer was released too quickly after the menu opened, it is
+    // the same tap that triggered the open. Keep the menu open.
+    if (elapsed < _selectionDelay && _pointerDownActive) {
+      _pointerDownActive = false;
       return;
     }
 
-    _overlayEntry = _createOverlayEntry();
-    Overlay.of(context).insert(_overlayEntry!);
-    _isOpen = true;
+    _pointerDownActive = false;
+
+    final index = _findItemIndexAt(event.position);
+    if (index != null) {
+      final entry = widget.dropdownMenuEntries[index];
+      widget.onSelected?.call(entry.value);
+    }
+    // Close whether or not an item was hit (click outside = dismiss).
+    _removeOverlay();
+    setState(() {});
   }
 
-  /// Get hover background color
-  Color _getHoverBackgroundColor() {
-    return widget.hoverBackgroundColor;
+  void _handleOverlayPointerMove(PointerMoveEvent event) {
+    if (!_isOpen) return;
+    final index = _findItemIndexAt(event.position);
+    _hoveredIndex.value = index;
+  }
+
+  void _handleKeyEvent(KeyEvent event) {
+    if (!_isOpen) return;
+    if (event is! KeyDownEvent && event is! KeyRepeatEvent) return;
+
+    final key = event.logicalKey;
+    final count = widget.dropdownMenuEntries.length;
+
+    if (key == LogicalKeyboardKey.escape) {
+      _removeOverlay();
+      setState(() {});
+    } else if (key == LogicalKeyboardKey.arrowDown) {
+      final current = _hoveredIndex.value;
+      _hoveredIndex.value =
+          current == null ? 0 : (current + 1).clamp(0, count - 1);
+    } else if (key == LogicalKeyboardKey.arrowUp) {
+      final current = _hoveredIndex.value;
+      _hoveredIndex.value =
+          current == null ? count - 1 : (current - 1).clamp(0, count - 1);
+    } else if (key == LogicalKeyboardKey.enter ||
+        key == LogicalKeyboardKey.numpadEnter) {
+      final index = _hoveredIndex.value;
+      if (index != null) {
+        final entry = widget.dropdownMenuEntries[index];
+        widget.onSelected?.call(entry.value);
+      }
+      _removeOverlay();
+      setState(() {});
+    }
   }
 
   OverlayEntry _createOverlayEntry() {
@@ -461,29 +572,22 @@ class _AppDropdownButtonState<T> extends State<_AppDropdownButton<T>> {
     double verticalOffset;
     switch (widget.position) {
       case FondeDropdownMenuPosition.overlay:
-        // Calculate so selected item aligns with dropdown button position
         verticalOffset =
             selectedIndex >= 0 ? -selectedIndex * size.height : 0.0;
         break;
       case FondeDropdownMenuPosition.below:
-        // Display below dropdown button
         verticalOffset = size.height;
         break;
       case FondeDropdownMenuPosition.above:
-        // Display above dropdown button
         verticalOffset = -(widget.dropdownMenuEntries.length * size.height);
         break;
     }
 
     // Calculate overlay menu width
     final overlayWidth =
-        widget.showAsActionIcon
-            ? (widget.width ??
-                200.0) // For action icon button, use calculated width
-            : size.width; // For normal case, use button's actual width
+        widget.showAsActionIcon ? (widget.width ?? 200.0) : size.width;
 
     // Calculate horizontal offset based on alignment
-    // Adjust offset based on whether checkmark is displayed
     final checkmarkOffset =
         widget.showCheckmark
             ? _AppDropdownMenuConstants.totalOffset * widget.zoomScale
@@ -505,16 +609,19 @@ class _AppDropdownButtonState<T> extends State<_AppDropdownButton<T>> {
     }
 
     return OverlayEntry(
-      builder:
-          (context) => GestureDetector(
-            // Close menu when tapping outside overlay menu
-            onTap: _removeOverlay,
+      builder: (context) {
+        return KeyboardListener(
+          focusNode: _keyboardFocusNode,
+          onKeyEvent: _handleKeyEvent,
+          child: Listener(
+            // Full-screen transparent layer captures pointer move and up
+            // events even when the pointer has left individual item widgets.
+            onPointerMove: _handleOverlayPointerMove,
+            onPointerUp: _handleOverlayPointerUp,
             behavior: HitTestBehavior.translucent,
             child: Stack(
               children: [
-                // Transparent area covering entire screen
-                Positioned.fill(child: Container(color: Colors.transparent)),
-                // Overlay menu body
+                // Menu panel
                 Positioned(
                   width: overlayWidth,
                   height:
@@ -526,35 +633,31 @@ class _AppDropdownButtonState<T> extends State<_AppDropdownButton<T>> {
                   child: CompositedTransformFollower(
                     link: _layerLink,
                     showWhenUnlinked: false,
-                    offset: Offset(
-                      horizontalOffset,
-                      verticalOffset - 0.5,
-                    ), // Adjusted from +1.0 → -0.5 (middle value)
-                    child: GestureDetector(
-                      // Don't propagate taps inside menu to parent GestureDetector
-                      onTap: () {},
-                      child: Material(
-                        color: Colors.transparent,
-                        child: _AppDropdownOverlay<T>(
-                          entries: widget.dropdownMenuEntries,
-                          onSelected: (value) {
-                            widget.onSelected?.call(value);
-                            _removeOverlay();
-                          },
-                          borderRadius: widget.borderRadius,
-                          backgroundColor: widget.overlayBackgroundColor,
-                          borderColor: widget.overlayBorderColor,
-                          textColor: widget.textColor,
-                          textStyle: widget.textStyle,
-                          buttonHeight: size.height,
-                          selectedValue: widget.selectedEntry?.value,
-                          overlayWidth: overlayWidth,
-                          alignment: widget.alignment,
-                          showCheckmark: widget.showCheckmark,
-                          hoverBackgroundColor: _getHoverBackgroundColor(),
-                          zoomScale: widget.zoomScale,
-                          borderScale: widget.borderScale,
-                        ),
+                    offset: Offset(horizontalOffset, verticalOffset - 0.5),
+                    child: Material(
+                      color: Colors.transparent,
+                      child: _AppDropdownOverlay<T>(
+                        panelKey: _menuPanelKey,
+                        entries: widget.dropdownMenuEntries,
+                        onSelected: (value) {
+                          widget.onSelected?.call(value);
+                          _removeOverlay();
+                          setState(() {});
+                        },
+                        borderRadius: widget.borderRadius,
+                        backgroundColor: widget.overlayBackgroundColor,
+                        borderColor: widget.overlayBorderColor,
+                        textColor: widget.textColor,
+                        textStyle: widget.textStyle,
+                        buttonHeight: size.height,
+                        selectedValue: widget.selectedEntry?.value,
+                        overlayWidth: overlayWidth,
+                        alignment: widget.alignment,
+                        showCheckmark: widget.showCheckmark,
+                        hoverBackgroundColor: widget.hoverBackgroundColor,
+                        zoomScale: widget.zoomScale,
+                        borderScale: widget.borderScale,
+                        hoveredIndex: _hoveredIndex,
                       ),
                     ),
                   ),
@@ -562,6 +665,8 @@ class _AppDropdownButtonState<T> extends State<_AppDropdownButton<T>> {
               ],
             ),
           ),
+        );
+      },
     );
   }
 
@@ -574,8 +679,10 @@ class _AppDropdownButtonState<T> extends State<_AppDropdownButton<T>> {
   Widget _buildButton(BuildContext context, FondeIconTheme iconTheme) {
     return CompositedTransformTarget(
       link: _layerLink,
-      child: GestureDetector(
-        onTap: widget.enabled ? _showOverlay : null,
+      child: Listener(
+        onPointerDown: _handlePointerDown,
+        onPointerMove: _handlePointerMove,
+        behavior: HitTestBehavior.opaque,
         child: Container(
           width:
               widget.showAsActionIcon
@@ -610,19 +717,11 @@ class _AppDropdownButtonState<T> extends State<_AppDropdownButton<T>> {
                   )
                   : Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    crossAxisAlignment:
-                        CrossAxisAlignment
-                            .start, // Changed from center to start
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      // Display leading icon of selected item
                       if (widget.selectedEntry?.leadingIcon != null) ...[
                         Padding(
-                          padding: EdgeInsets.only(
-                            top:
-                                2.0 *
-                                widget
-                                    .zoomScale, // Changed from 4.0 → 2.0 (adjust up)
-                          ),
+                          padding: EdgeInsets.only(top: 2.0 * widget.zoomScale),
                           child: widget.selectedEntry!.leadingIcon!,
                         ),
                         SizedBox(
@@ -649,12 +748,7 @@ class _AppDropdownButtonState<T> extends State<_AppDropdownButton<T>> {
                             widget.zoomScale,
                       ),
                       Padding(
-                        padding: EdgeInsets.only(
-                          top:
-                              2.0 *
-                              widget
-                                  .zoomScale, // Changed from 4.0 → 2.0 (adjust up)
-                        ),
+                        padding: EdgeInsets.only(top: 2.0 * widget.zoomScale),
                         child: Icon(
                           iconTheme.chevronDown,
                           color: widget.textColor,
@@ -673,6 +767,7 @@ class _AppDropdownButtonState<T> extends State<_AppDropdownButton<T>> {
 
 /// Overlay menu implementation
 class _AppDropdownOverlay<T> extends StatelessWidget {
+  final GlobalKey panelKey;
   final List<DropdownMenuEntry<T>> entries;
   final ValueChanged<T?> onSelected;
   final BorderRadius borderRadius;
@@ -688,9 +783,11 @@ class _AppDropdownOverlay<T> extends StatelessWidget {
   final Color hoverBackgroundColor;
   final double zoomScale;
   final double borderScale;
+  final ValueNotifier<int?> hoveredIndex;
 
   const _AppDropdownOverlay({
     super.key,
+    required this.panelKey,
     required this.entries,
     required this.onSelected,
     required this.borderRadius,
@@ -706,11 +803,13 @@ class _AppDropdownOverlay<T> extends StatelessWidget {
     required this.hoverBackgroundColor,
     required this.zoomScale,
     required this.borderScale,
+    required this.hoveredIndex,
   });
 
   @override
   Widget build(BuildContext context) {
     return Container(
+      key: panelKey,
       width: overlayWidth,
       decoration: BoxDecoration(
         color: backgroundColor,
@@ -724,10 +823,13 @@ class _AppDropdownOverlay<T> extends StatelessWidget {
           ),
         ],
       ),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children:
-            entries.map((entry) {
+      child: ValueListenableBuilder<int?>(
+        valueListenable: hoveredIndex,
+        builder: (context, hovered, _) {
+          return Column(
+            mainAxisSize: MainAxisSize.min,
+            children: List.generate(entries.length, (index) {
+              final entry = entries[index];
               return _AppDropdownMenuItem<T>(
                 entry: entry,
                 onSelected: onSelected,
@@ -735,25 +837,29 @@ class _AppDropdownOverlay<T> extends StatelessWidget {
                 textStyle: textStyle,
                 buttonHeight: buttonHeight,
                 isSelected: entry.value == selectedValue,
+                isHovered: hovered == index,
                 alignment: alignment,
                 showCheckmark: showCheckmark,
                 hoverBackgroundColor: hoverBackgroundColor,
                 zoomScale: zoomScale,
               );
-            }).toList(),
+            }),
+          );
+        },
       ),
     );
   }
 }
 
 /// Dropdown menu item implementation
-class _AppDropdownMenuItem<T> extends StatefulWidget {
+class _AppDropdownMenuItem<T> extends StatelessWidget {
   final DropdownMenuEntry<T> entry;
   final ValueChanged<T?> onSelected;
   final Color textColor;
   final TextStyle? textStyle;
   final double buttonHeight;
   final bool isSelected;
+  final bool isHovered;
   final FondeDropdownMenuAlignment alignment;
   final bool showCheckmark;
   final Color hoverBackgroundColor;
@@ -767,6 +873,7 @@ class _AppDropdownMenuItem<T> extends StatefulWidget {
     this.textStyle,
     required this.buttonHeight,
     required this.isSelected,
+    required this.isHovered,
     required this.alignment,
     required this.showCheckmark,
     required this.hoverBackgroundColor,
@@ -774,112 +881,64 @@ class _AppDropdownMenuItem<T> extends StatefulWidget {
   });
 
   @override
-  State<_AppDropdownMenuItem<T>> createState() =>
-      _AppDropdownMenuItemState<T>();
-}
-
-class _AppDropdownMenuItemState<T> extends State<_AppDropdownMenuItem<T>> {
-  bool _isHovered = false;
-
-  @override
   Widget build(BuildContext context) {
     final iconTheme = context.fondeIconTheme;
-    return _buildContent(context, iconTheme);
-  }
-
-  Widget _buildContent(BuildContext context, FondeIconTheme iconTheme) {
-    return MouseRegion(
-      onEnter: (_) => setState(() => _isHovered = true),
-      onExit: (_) => setState(() => _isHovered = false),
-      child: GestureDetector(
-        onTap: () => widget.onSelected(widget.entry.value),
-        behavior: HitTestBehavior.opaque, // Make space outside label tappable
-        child: Container(
-          height: _AppDropdownMenuConstants.defaultHeight * widget.zoomScale,
-          color: _isHovered ? widget.hoverBackgroundColor : Colors.transparent,
-          padding: EdgeInsets.symmetric(
-            horizontal:
-                _AppDropdownMenuConstants.horizontalPadding * widget.zoomScale,
-            vertical:
-                _AppDropdownMenuConstants.verticalPadding * widget.zoomScale,
+    return Container(
+      height: _AppDropdownMenuConstants.defaultHeight * zoomScale,
+      color: isHovered ? hoverBackgroundColor : Colors.transparent,
+      padding: EdgeInsets.symmetric(
+        horizontal: _AppDropdownMenuConstants.horizontalPadding * zoomScale,
+        vertical: _AppDropdownMenuConstants.verticalPadding * zoomScale,
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          if (showCheckmark &&
+              alignment != FondeDropdownMenuAlignment.left) ...[
+            SizedBox(
+              width: _AppDropdownMenuConstants.checkboxSpaceWidth * zoomScale,
+              child:
+                  isSelected
+                      ? Align(
+                        alignment: Alignment.topLeft,
+                        child: Padding(
+                          padding: EdgeInsets.only(top: 4.0 * zoomScale),
+                          child: Icon(
+                            iconTheme.check,
+                            color: textColor,
+                            size:
+                                _AppDropdownMenuConstants.checkIconSize *
+                                zoomScale,
+                          ),
+                        ),
+                      )
+                      : null,
+            ),
+            SizedBox(width: _AppDropdownMenuConstants.spacing * zoomScale),
+          ],
+          if (entry.leadingIcon != null) ...[
+            Padding(
+              padding: EdgeInsets.only(top: 2.0 * zoomScale),
+              child: entry.leadingIcon!,
+            ),
+            SizedBox(width: _AppDropdownMenuConstants.spacing * zoomScale),
+          ],
+          Flexible(
+            child:
+                entry.labelWidget ??
+                FondeText(
+                  entry.label,
+                  variant: FondeTextVariant.bodyText,
+                  color: textColor,
+                  overflow: TextOverflow.ellipsis,
+                  maxLines: 1,
+                ),
           ),
-          child: Row(
-            crossAxisAlignment:
-                CrossAxisAlignment.start, // Changed from center to start
-            children: [
-              // Display checkbox space only if checkmark is enabled and alignment is not left
-              if (widget.showCheckmark &&
-                  widget.alignment != FondeDropdownMenuAlignment.left) ...[
-                // Space for checkbox
-                SizedBox(
-                  width:
-                      _AppDropdownMenuConstants.checkboxSpaceWidth *
-                      widget.zoomScale,
-                  child:
-                      widget.isSelected
-                          ? Align(
-                            alignment:
-                                Alignment.topLeft, // Position checkmark at top
-                            child: Padding(
-                              padding: EdgeInsets.only(
-                                top:
-                                    4.0 *
-                                    widget
-                                        .zoomScale, // Changed from 2.0 → 4.0 (offset further down)
-                              ),
-                              child: Icon(
-                                iconTheme.check,
-                                color: widget.textColor,
-                                size:
-                                    _AppDropdownMenuConstants.checkIconSize *
-                                    widget.zoomScale,
-                              ),
-                            ),
-                          )
-                          : null,
-                ),
-                SizedBox(
-                  width: _AppDropdownMenuConstants.spacing * widget.zoomScale,
-                ),
-              ],
-              if (widget.entry.leadingIcon != null) ...[
-                Padding(
-                  padding: EdgeInsets.only(
-                    top:
-                        2.0 *
-                        widget
-                            .zoomScale, // Changed from 4.0 → 2.0 (adjust slightly up)
-                  ),
-                  child: widget.entry.leadingIcon!,
-                ),
-                SizedBox(
-                  width: _AppDropdownMenuConstants.spacing * widget.zoomScale,
-                ),
-              ],
-              // Overlay menu width is adjusted to maximum menu item width,
-              // so text truncation is not necessary, but use Flexible for safety
-              Flexible(
-                child:
-                    widget.entry.labelWidget ??
-                    FondeText(
-                      widget.entry.label,
-                      variant: FondeTextVariant.bodyText,
-                      color: widget.textColor,
-                      overflow:
-                          TextOverflow
-                              .ellipsis, // Changed from visible to ellipsis
-                      maxLines: 1, // Explicitly limit to 1 line
-                    ),
-              ),
-              if (widget.entry.trailingIcon != null) ...[
-                SizedBox(
-                  width: _AppDropdownMenuConstants.spacing * widget.zoomScale,
-                ),
-                widget.entry.trailingIcon!,
-              ],
-            ],
-          ),
-        ),
+          if (entry.trailingIcon != null) ...[
+            SizedBox(width: _AppDropdownMenuConstants.spacing * zoomScale),
+            entry.trailingIcon!,
+          ],
+        ],
       ),
     );
   }
