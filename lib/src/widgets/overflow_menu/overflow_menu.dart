@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../internal.dart';
-import '../icons/icon_theme_providers.dart';
 import '../widgets/fonde_popup_menu.dart';
 import '../widgets/fonde_icon_button.dart';
 
@@ -9,7 +7,7 @@ import '../widgets/fonde_icon_button.dart';
 ///
 /// Displays items that cannot be shown when screen size becomes small as a
 /// dropdown menu triggered by a "more" icon button.
-class FondeOverflowMenu extends ConsumerWidget {
+class FondeOverflowMenu extends StatelessWidget {
   /// List of items to display in menu.
   final List<FondeOverflowMenuEntry> items;
 
@@ -39,9 +37,9 @@ class FondeOverflowMenu extends ConsumerWidget {
   });
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final iconTheme = ref.watch(fondeDefaultIconThemeProvider);
-    final colorScheme = ref.watch(fondeEffectiveColorSchemeProvider);
+  Widget build(BuildContext context) {
+    final iconTheme = context.fondeIconTheme;
+    final colorScheme = context.fondeColorScheme;
 
     final popupEntries =
         items.map<FondePopupMenuEntry<String>>((entry) {

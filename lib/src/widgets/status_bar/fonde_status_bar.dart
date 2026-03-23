@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../internal.dart';
 
 /// A status bar widget displayed at the bottom of the screen.
@@ -7,7 +6,7 @@ import '../../internal.dart';
 /// Typically added to [FondeScaffold] via the [statusBar] parameter.
 /// Supports left, center, and right sections for displaying status text,
 /// progress indicators, or action buttons.
-class FondeStatusBar extends ConsumerWidget {
+class FondeStatusBar extends StatelessWidget {
   const FondeStatusBar({
     super.key,
     this.leading,
@@ -45,10 +44,9 @@ class FondeStatusBar extends ConsumerWidget {
   final bool disableZoom;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final appColorScheme = ref.watch(fondeEffectiveColorSchemeProvider);
-    final accessibilityConfig = ref.watch(fondeAccessibilityConfigProvider);
-    final zoomScale = disableZoom ? 1.0 : accessibilityConfig.zoomScale;
+  Widget build(BuildContext context) {
+    final appColorScheme = context.fondeColorScheme;
+    final zoomScale = disableZoom ? 1.0 : context.fondeZoomScale;
 
     final effectiveBackground =
         backgroundColor ?? appColorScheme.uiAreas.toolbar.background;
@@ -77,7 +75,7 @@ class FondeStatusBar extends ConsumerWidget {
 /// A single item in the status bar (icon + optional label).
 ///
 /// Useful for building status indicators like encoding, line number, etc.
-class FondeStatusBarItem extends ConsumerWidget {
+class FondeStatusBarItem extends StatelessWidget {
   const FondeStatusBarItem({
     super.key,
     this.icon,
@@ -97,10 +95,9 @@ class FondeStatusBarItem extends ConsumerWidget {
   final bool disableZoom;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final appColorScheme = ref.watch(fondeEffectiveColorSchemeProvider);
-    final accessibilityConfig = ref.watch(fondeAccessibilityConfigProvider);
-    final zoomScale = disableZoom ? 1.0 : accessibilityConfig.zoomScale;
+  Widget build(BuildContext context) {
+    final appColorScheme = context.fondeColorScheme;
+    final zoomScale = disableZoom ? 1.0 : context.fondeZoomScale;
 
     final foreground = appColorScheme.uiAreas.toolbar.foreground;
 
@@ -144,12 +141,12 @@ class FondeStatusBarItem extends ConsumerWidget {
 }
 
 /// A vertical divider for use inside [FondeStatusBar].
-class FondeStatusBarDivider extends ConsumerWidget {
+class FondeStatusBarDivider extends StatelessWidget {
   const FondeStatusBarDivider({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final appColorScheme = ref.watch(fondeEffectiveColorSchemeProvider);
+  Widget build(BuildContext context) {
+    final appColorScheme = context.fondeColorScheme;
     return SizedBox(
       width: 1.0,
       child: ColoredBox(color: appColorScheme.base.divider),

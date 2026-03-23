@@ -1,18 +1,16 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fonde_ui/fonde_ui.dart';
-import 'package:fonde_ui/fonde_ui_riverpod.dart';
 
 import 'catalog_samples.dart';
 
 const kCardSampleHeight = 140.0;
 
-class CatalogWelcomePage extends ConsumerWidget {
+class CatalogWelcomePage extends StatelessWidget {
   const CatalogWelcomePage();
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final colorScheme = ref.watch(fondeEffectiveColorSchemeProvider);
+  Widget build(BuildContext context) {
+    final colorScheme = context.fondeColorScheme;
     return SingleChildScrollView(
       padding: const EdgeInsets.symmetric(
         horizontal: FondeSpacingValues.xxxl,
@@ -113,7 +111,7 @@ class CatalogWelcomePage extends ConsumerWidget {
   }
 }
 
-class CatalogCard extends ConsumerWidget {
+class CatalogCard extends StatelessWidget {
   const CatalogCard({
     required this.width,
     required this.category,
@@ -127,8 +125,8 @@ class CatalogCard extends ConsumerWidget {
   final Widget sample;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final colorScheme = ref.watch(fondeEffectiveColorSchemeProvider);
+  Widget build(BuildContext context) {
+    final colorScheme = context.fondeColorScheme;
     return Container(
       width: width,
       decoration: BoxDecoration(

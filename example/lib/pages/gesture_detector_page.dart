@@ -1,7 +1,5 @@
 import 'package:flutter/widgets.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fonde_ui/fonde_ui.dart';
-import 'package:fonde_ui/fonde_ui_riverpod.dart';
 
 import '../widgets/catalog_page.dart';
 
@@ -35,7 +33,7 @@ class GestureDetectorPage extends StatelessWidget {
   }
 }
 
-class _TapDemoBox extends ConsumerWidget {
+class _TapDemoBox extends StatelessWidget {
   const _TapDemoBox({required this.label, this.onTap, this.onDoubleTap});
 
   final String label;
@@ -43,8 +41,8 @@ class _TapDemoBox extends ConsumerWidget {
   final VoidCallback? onDoubleTap;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final colorScheme = ref.watch(fondeEffectiveColorSchemeProvider);
+  Widget build(BuildContext context) {
+    final colorScheme = context.fondeColorScheme;
     return FondeGestureDetector(
       onTap: onTap,
       onDoubleTap: onDoubleTap,

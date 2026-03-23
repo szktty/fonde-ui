@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../internal.dart';
+import '../../core/context_extensions.dart';
 
 import '../page_indicator/fonde_page_indicator.dart';
 import '../widgets/fonde_button.dart';
@@ -9,7 +9,7 @@ import '../widgets/fonde_button.dart';
 ///
 /// Intended to be used alongside [FondeExternalPagination].
 /// This component consists only of dot indicators.
-class FondePagination extends ConsumerWidget {
+class FondePagination extends StatelessWidget {
   const FondePagination({
     super.key,
     required this.totalPages,
@@ -35,7 +35,7 @@ class FondePagination extends ConsumerWidget {
   final double dotSpacing;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  Widget build(BuildContext context) {
     if (totalPages <= 1) {
       return const SizedBox.shrink();
     }
@@ -54,7 +54,7 @@ class FondePagination extends ConsumerWidget {
 ///
 /// A single arrow button placed at the edge of the screen.
 /// The entire area is tappable, improving accessibility and usability.
-class FondeExternalPagination extends ConsumerWidget {
+class FondeExternalPagination extends StatelessWidget {
   const FondeExternalPagination({
     super.key,
     required this.totalPages,
@@ -96,14 +96,14 @@ class FondeExternalPagination extends ConsumerWidget {
   final bool showIcon;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  Widget build(BuildContext context) {
     if (totalPages <= 1) {
       return SizedBox(width: width, height: height);
     }
 
     // Get theme color using core_themes API
-    final appColorScheme = ref.watch(fondeEffectiveColorSchemeProvider);
-    final accessibilityConfig = ref.watch(fondeAccessibilityConfigProvider);
+    final appColorScheme = context.fondeColorScheme;
+    final zoomScale = context.fondeZoomScale;
 
     final bool canNavigate;
     final int targetPage;
@@ -126,7 +126,6 @@ class FondeExternalPagination extends ConsumerWidget {
     }
 
     // Scaling based on accessibility settings
-    final zoomScale = accessibilityConfig.zoomScale;
     final effectiveIconSize = iconSize * zoomScale;
 
     return SizedBox(
@@ -161,7 +160,7 @@ class FondeExternalPagination extends ConsumerWidget {
 ///
 /// A dot indicator integrated with a [PageController].
 /// Use when combined with external navigation.
-class FondePageControllerPagination extends ConsumerWidget {
+class FondePageControllerPagination extends StatelessWidget {
   const FondePageControllerPagination({
     super.key,
     required this.totalPages,
@@ -195,7 +194,7 @@ class FondePageControllerPagination extends ConsumerWidget {
   final Curve animationCurve;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  Widget build(BuildContext context) {
     return FondePagination(
       totalPages: totalPages,
       currentPage: currentPage,
@@ -217,7 +216,7 @@ class FondePageControllerPagination extends ConsumerWidget {
 }
 
 /// PageController integrated version for external navigation.
-class FondeExternalPageControllerPagination extends ConsumerWidget {
+class FondeExternalPageControllerPagination extends StatelessWidget {
   const FondeExternalPageControllerPagination({
     super.key,
     required this.totalPages,
@@ -267,7 +266,7 @@ class FondeExternalPageControllerPagination extends ConsumerWidget {
   final bool showIcon;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  Widget build(BuildContext context) {
     return FondeExternalPagination(
       totalPages: totalPages,
       currentPage: currentPage,

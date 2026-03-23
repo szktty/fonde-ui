@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../core/context_extensions.dart';
 import '../../internal.dart';
 
 /// A physical model widget providing unified shadow specifications for App applications
 ///
 /// Provides application-specific shadow styles instead of Material Design's elevation.
 /// Can be used as a unified alternative to PhysicalModel, Material, and BoxShadow.
-class FondePhysicalModel extends ConsumerWidget {
+class FondePhysicalModel extends StatelessWidget {
   const FondePhysicalModel({
     super.key,
     required this.child,
@@ -45,9 +45,9 @@ class FondePhysicalModel extends ConsumerWidget {
   final bool disableZoom;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final appColorScheme = ref.watch(fondeEffectiveColorSchemeProvider);
-    final accessibilityConfig = ref.watch(fondeAccessibilityConfigProvider);
+  Widget build(BuildContext context) {
+    final appColorScheme = context.fondeColorScheme;
+    final accessibilityConfig = context.fondeAccessibility;
 
     final effectiveColor =
         color ?? appColorScheme.interactive.popover.background;
@@ -147,9 +147,9 @@ class FondePhysicalModelVariants {
     BorderRadius? borderRadius,
     Duration? animationDuration,
   }) {
-    return Consumer(
-      builder: (context, ref, _) {
-        final accessibilityConfig = ref.watch(fondeAccessibilityConfigProvider);
+    return Builder(
+      builder: (context) {
+        final accessibilityConfig = context.fondeAccessibility;
         return FondePhysicalModel(
           key: key,
           elevation: 2.0,
@@ -176,9 +176,9 @@ class FondePhysicalModelVariants {
     Duration? animationDuration,
     bool disableZoom = false,
   }) {
-    return Consumer(
-      builder: (context, ref, _) {
-        final accessibilityConfig = ref.watch(fondeAccessibilityConfigProvider);
+    return Builder(
+      builder: (context) {
+        final accessibilityConfig = context.fondeAccessibility;
         return FondePhysicalModel(
           key: key,
           elevation: 8.0,
@@ -206,9 +206,9 @@ class FondePhysicalModelVariants {
     bool isDragging = false,
     Duration? animationDuration,
   }) {
-    return Consumer(
-      builder: (context, ref, _) {
-        final accessibilityConfig = ref.watch(fondeAccessibilityConfigProvider);
+    return Builder(
+      builder: (context) {
+        final accessibilityConfig = context.fondeAccessibility;
         return FondePhysicalModel(
           key: key,
           elevation: isDragging ? 16.0 : 8.0, // set higher for debugging
@@ -238,9 +238,9 @@ class FondePhysicalModelVariants {
     BorderRadius? borderRadius,
     Duration? animationDuration,
   }) {
-    return Consumer(
-      builder: (context, ref, _) {
-        final accessibilityConfig = ref.watch(fondeAccessibilityConfigProvider);
+    return Builder(
+      builder: (context) {
+        final accessibilityConfig = context.fondeAccessibility;
         return FondePhysicalModel(
           key: key,
           elevation: 16.0,

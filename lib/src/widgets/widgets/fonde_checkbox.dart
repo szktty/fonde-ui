@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../core/context_extensions.dart';
 import '../../internal.dart';
 import 'package:figma_squircle/figma_squircle.dart';
-import '../icons/icon_theme_providers.dart';
 import 'fonde_rectangle_border.dart';
 
 /// Shape of [FondeCheckbox].
@@ -35,7 +34,7 @@ enum FondeCheckboxFillStyle {
 /// Features smooth corners (rectangle) or circle shape,
 /// and uses [FondeIconTheme.check] / [FondeIconTheme.checkIndeterminate]
 /// for the check icons.
-class FondeCheckbox extends ConsumerStatefulWidget {
+class FondeCheckbox extends StatefulWidget {
   /// Value of the checkbox.
   final bool? value;
 
@@ -81,10 +80,10 @@ class FondeCheckbox extends ConsumerStatefulWidget {
   });
 
   @override
-  ConsumerState<FondeCheckbox> createState() => _FondeCheckboxState();
+  State<FondeCheckbox> createState() => _FondeCheckboxState();
 }
 
-class _FondeCheckboxState extends ConsumerState<FondeCheckbox> {
+class _FondeCheckboxState extends State<FondeCheckbox> {
   bool _isPressed = false;
 
   void _handleTap() {
@@ -104,9 +103,9 @@ class _FondeCheckboxState extends ConsumerState<FondeCheckbox> {
 
   @override
   Widget build(BuildContext context) {
-    final appColorScheme = ref.watch(effectiveColorSchemeWithThemeProvider);
-    final accessibilityConfig = ref.watch(fondeAccessibilityConfigProvider);
-    final iconTheme = ref.watch(fondeDefaultIconThemeProvider);
+    final appColorScheme = context.fondeColorScheme;
+    final accessibilityConfig = context.fondeAccessibility;
+    final iconTheme = context.fondeIconTheme;
 
     final zoomScale = widget.disableZoom ? 1.0 : accessibilityConfig.zoomScale;
     final borderScale =

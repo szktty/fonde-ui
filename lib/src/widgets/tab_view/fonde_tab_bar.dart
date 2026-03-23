@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../internal.dart';
+import '../../core/context_extensions.dart';
 
 /// App-style tab bar.
 /// Wraps Flutter's TabBar to provide app-specific accessibility and styling.
-class FondeTabBar extends ConsumerWidget {
+class FondeTabBar extends StatelessWidget {
   /// List of tabs.
   final List<FondeTab> tabs;
 
@@ -42,10 +42,9 @@ class FondeTabBar extends ConsumerWidget {
   });
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final appColorScheme = ref.watch(fondeEffectiveColorSchemeProvider);
-    final accessibilityConfig = ref.watch(fondeAccessibilityConfigProvider);
-    final zoomScale = disableZoom ? 1.0 : accessibilityConfig.zoomScale;
+  Widget build(BuildContext context) {
+    final appColorScheme = context.fondeColorScheme;
+    final zoomScale = disableZoom ? 1.0 : context.fondeZoomScale;
 
     final effectiveBackgroundColor =
         backgroundColor ?? appColorScheme.base.background;
@@ -65,7 +64,7 @@ class FondeTabBar extends ConsumerWidget {
         child: TabBar(
           isScrollable: true,
           tabAlignment: alignment,
-          tabs: _buildTabs(ref, zoomScale, appColorScheme),
+          tabs: _buildTabs(zoomScale, appColorScheme),
           onTap: (index) => onTabSelected(tabs[index].id),
           indicatorColor: appColorScheme.theme.primaryColor,
           labelColor: appColorScheme.base.foreground,
@@ -81,11 +80,7 @@ class FondeTabBar extends ConsumerWidget {
   }
 
   /// Build the list of tabs.
-  List<Widget> _buildTabs(
-    WidgetRef ref,
-    double zoomScale,
-    FondeColorScheme appColorScheme,
-  ) {
+  List<Widget> _buildTabs(double zoomScale, FondeColorScheme appColorScheme) {
     return tabs.map((tab) {
       final isSelected = tab.id == selectedTabId;
 

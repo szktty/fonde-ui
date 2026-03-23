@@ -1,5 +1,4 @@
 import 'package:flutter/widgets.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fonde_ui/fonde_ui.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 
@@ -40,14 +39,14 @@ class LaunchBarPage extends StatelessWidget {
   }
 }
 
-class _BasicDemo extends ConsumerStatefulWidget {
+class _BasicDemo extends StatefulWidget {
   const _BasicDemo();
 
   @override
-  ConsumerState<_BasicDemo> createState() => _BasicDemoState();
+  State<_BasicDemo> createState() => _BasicDemoState();
 }
 
-class _BasicDemoState extends ConsumerState<_BasicDemo> {
+class _BasicDemoState extends State<_BasicDemo> {
   int _selected = 0;
 
   @override
@@ -79,14 +78,14 @@ class _BasicDemoState extends ConsumerState<_BasicDemo> {
   }
 }
 
-class _BadgeDemo extends ConsumerStatefulWidget {
+class _BadgeDemo extends StatefulWidget {
   const _BadgeDemo();
 
   @override
-  ConsumerState<_BadgeDemo> createState() => _BadgeDemoState();
+  State<_BadgeDemo> createState() => _BadgeDemoState();
 }
 
-class _BadgeDemoState extends ConsumerState<_BadgeDemo> {
+class _BadgeDemoState extends State<_BadgeDemo> {
   int _selected = 0;
 
   @override
@@ -120,14 +119,14 @@ class _BadgeDemoState extends ConsumerState<_BadgeDemo> {
   }
 }
 
-class _BottomItemsDemo extends ConsumerStatefulWidget {
+class _BottomItemsDemo extends StatefulWidget {
   const _BottomItemsDemo();
 
   @override
-  ConsumerState<_BottomItemsDemo> createState() => _BottomItemsDemoState();
+  State<_BottomItemsDemo> createState() => _BottomItemsDemoState();
 }
 
-class _BottomItemsDemoState extends ConsumerState<_BottomItemsDemo> {
+class _BottomItemsDemoState extends State<_BottomItemsDemo> {
   int _selected = 0;
 
   @override

@@ -1,7 +1,5 @@
 import 'package:flutter/widgets.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fonde_ui/fonde_ui.dart';
-import 'package:fonde_ui/fonde_ui_riverpod.dart';
 
 import '../widgets/catalog_page.dart';
 
@@ -187,7 +185,7 @@ class TypographyPage extends StatelessWidget {
   }
 }
 
-class _TextRow extends ConsumerWidget {
+class _TextRow extends StatelessWidget {
   const _TextRow(this.variant, this.variantName, this.description);
 
   final FondeTextVariant variant;
@@ -195,8 +193,8 @@ class _TextRow extends ConsumerWidget {
   final String description;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final colorScheme = ref.watch(fondeEffectiveColorSchemeProvider);
+  Widget build(BuildContext context) {
+    final colorScheme = context.fondeColorScheme;
     return FondePadding(
       padding: const EdgeInsets.only(bottom: FondeSpacingValues.md),
       child: Row(

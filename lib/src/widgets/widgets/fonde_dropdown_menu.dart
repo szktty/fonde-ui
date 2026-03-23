@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../internal.dart';
 import 'fonde_rectangle_border.dart';
-import '../icons/icon_theme_providers.dart';
 import '../typography/fonde_text.dart';
 
 /// Vertical position of FondeDropdownMenu
@@ -57,7 +55,7 @@ class _AppDropdownMenuConstants {
 /// when selected using a custom overlay menu.
 /// Achieves Figma-style rounded rectangle design using FondeRectangleBorder,
 /// and obtains theme colors via core_themes capsule.
-class FondeDropdownMenu<T> extends ConsumerWidget {
+class FondeDropdownMenu<T> extends StatelessWidget {
   /// Initial selection value
   final T? initialSelection;
 
@@ -149,7 +147,7 @@ class FondeDropdownMenu<T> extends ConsumerWidget {
   });
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  Widget build(BuildContext context) {
     return _AppDropdownMenuWidget<T>(
       initialSelection: initialSelection,
       onSelected: onSelected,
@@ -177,7 +175,7 @@ class FondeDropdownMenu<T> extends ConsumerWidget {
 }
 
 /// Internal implementation widget for FondeDropdownMenu
-class _AppDropdownMenuWidget<T> extends ConsumerWidget {
+class _AppDropdownMenuWidget<T> extends StatelessWidget {
   final T? initialSelection;
   final ValueChanged<T?>? onSelected;
   final List<DropdownMenuEntry<T>> dropdownMenuEntries;
@@ -280,11 +278,11 @@ class _AppDropdownMenuWidget<T> extends ConsumerWidget {
   }
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  Widget build(BuildContext context) {
     // Get theme colors using core_themes API
-    final appColorScheme = ref.watch(fondeColorSchemeProvider);
+    final appColorScheme = context.fondeColorScheme;
     final themeData = Theme.of(context);
-    final accessibilityConfig = ref.watch(fondeAccessibilityConfigProvider);
+    final accessibilityConfig = context.fondeAccessibility;
 
     // Create FondeBorderRadius
     final zoomScale = disableZoom ? 1.0 : accessibilityConfig.zoomScale;
@@ -569,12 +567,8 @@ class _AppDropdownButtonState<T> extends State<_AppDropdownButton<T>> {
 
   @override
   Widget build(BuildContext context) {
-    return Consumer(
-      builder: (context, ref, _) {
-        final iconTheme = ref.watch(fondeDefaultIconThemeProvider);
-        return _buildButton(context, iconTheme);
-      },
-    );
+    final iconTheme = context.fondeIconTheme;
+    return _buildButton(context, iconTheme);
   }
 
   Widget _buildButton(BuildContext context, FondeIconTheme iconTheme) {
@@ -789,12 +783,8 @@ class _AppDropdownMenuItemState<T> extends State<_AppDropdownMenuItem<T>> {
 
   @override
   Widget build(BuildContext context) {
-    return Consumer(
-      builder: (context, ref, _) {
-        final iconTheme = ref.watch(fondeDefaultIconThemeProvider);
-        return _buildContent(context, iconTheme);
-      },
-    );
+    final iconTheme = context.fondeIconTheme;
+    return _buildContent(context, iconTheme);
   }
 
   Widget _buildContent(BuildContext context, FondeIconTheme iconTheme) {

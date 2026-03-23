@@ -1,7 +1,6 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../internal.dart';
 import '../typography/fonde_text.dart';
 import '../styling/fonde_border_radius.dart';
@@ -39,44 +38,87 @@ class FondeNotification {
   final VoidCallback? onDismiss;
 }
 
-/// State notifier that manages the notification queue.
-class FondeNotificationNotifier extends Notifier<List<FondeNotification>> {
-  @override
-  List<FondeNotification> build() => [];
+/// Controller that manages the notification queue.
+class FondeNotificationController extends ChangeNotifier {
+  final List<FondeNotification> _notifications = [];
+  final Map<String, Timer> _timers = {};
+
+  List<FondeNotification> get notifications =>
+      List.unmodifiable(_notifications);
 
   /// Adds a notification to the stack.
   void add(FondeNotification notification) {
-    state = [...state, notification];
+    _notifications.add(notification);
+    notifyListeners();
     if (notification.duration > Duration.zero) {
-      Timer(notification.duration, () => dismiss(notification.id));
+      _timers[notification.id] = Timer(
+        notification.duration,
+        () => dismiss(notification.id),
+      );
     }
   }
 
   /// Removes a notification by id.
   void dismiss(String id) {
-    final notification = state.where((n) => n.id == id).firstOrNull;
-    state = state.where((n) => n.id != id).toList();
-    notification?.onDismiss?.call();
+    _timers.remove(id)?.cancel();
+    final index = _notifications.indexWhere((n) => n.id == id);
+    if (index == -1) return;
+    final notification = _notifications.removeAt(index);
+    notifyListeners();
+    notification.onDismiss?.call();
   }
 
   /// Removes all notifications.
   void dismissAll() {
-    for (final n in state) {
+    for (final timer in _timers.values) {
+      timer.cancel();
+    }
+    _timers.clear();
+    final all = List<FondeNotification>.from(_notifications);
+    _notifications.clear();
+    notifyListeners();
+    for (final n in all) {
       n.onDismiss?.call();
     }
-    state = [];
+  }
+
+  @override
+  void dispose() {
+    for (final timer in _timers.values) {
+      timer.cancel();
+    }
+    _timers.clear();
+    super.dispose();
   }
 }
 
-/// Provider for the notification stack.
-final fondeNotificationProvider =
-    NotifierProvider<FondeNotificationNotifier, List<FondeNotification>>(
-      FondeNotificationNotifier.new,
-    );
+/// Scope that provides [FondeNotificationController] to the widget tree.
+class FondeNotificationControllerScope extends InheritedWidget {
+  const FondeNotificationControllerScope({
+    super.key,
+    required this.controller,
+    required super.child,
+  });
+
+  final FondeNotificationController controller;
+
+  static FondeNotificationController? of(BuildContext context) {
+    return context
+        .dependOnInheritedWidgetOfExactType<FondeNotificationControllerScope>()
+        ?.controller;
+  }
+
+  @override
+  bool updateShouldNotify(FondeNotificationControllerScope oldWidget) {
+    return controller != oldWidget.controller;
+  }
+}
 
 /// Wraps a widget tree with a notification overlay anchored to a screen edge.
 ///
-/// Notifications are managed via [fondeNotificationProvider].
+/// Notifications are managed via [FondeNotificationController].
+/// Wrap your app (or a subtree) with this widget and use
+/// [FondeNotificationControllerScope.of] to access the controller.
 ///
 /// Example:
 /// ```dart
@@ -86,11 +128,11 @@ final fondeNotificationProvider =
 /// )
 ///
 /// // To show a notification from anywhere:
-/// ref.read(fondeNotificationProvider.notifier).add(
+/// FondeNotificationControllerScope.of(context)?.add(
 ///   FondeNotification(message: 'File saved', type: FondeNotificationType.success),
 /// );
 /// ```
-class FondeNotificationOverlay extends ConsumerWidget {
+class FondeNotificationOverlay extends StatefulWidget {
   const FondeNotificationOverlay({
     super.key,
     required this.child,
@@ -122,67 +164,96 @@ class FondeNotificationOverlay extends ConsumerWidget {
   final bool disableZoom;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final notifications = ref.watch(fondeNotificationProvider);
-    final visible = notifications.take(maxVisible).toList();
+  State<FondeNotificationOverlay> createState() =>
+      _FondeNotificationOverlayState();
+}
 
-    return Stack(
-      children: [
-        child,
-        if (visible.isNotEmpty)
-          Positioned.fill(
-            child: IgnorePointer(
-              ignoring: false,
-              child: Align(
-                alignment: alignment,
-                child: Padding(
-                  padding: margin,
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    crossAxisAlignment: _crossAxisAlignment,
-                    children:
-                        visible.map((n) {
-                          return Padding(
-                            padding: EdgeInsets.only(bottom: spacing),
-                            child: _FondeNotificationCard(
-                              notification: n,
-                              width: notificationWidth,
-                              disableZoom: disableZoom,
-                            ),
-                          );
-                        }).toList(),
+class _FondeNotificationOverlayState extends State<FondeNotificationOverlay> {
+  final FondeNotificationController _controller = FondeNotificationController();
+
+  @override
+  void initState() {
+    super.initState();
+    _controller.addListener(_onChanged);
+  }
+
+  @override
+  void dispose() {
+    _controller.removeListener(_onChanged);
+    _controller.dispose();
+    super.dispose();
+  }
+
+  void _onChanged() => setState(() {});
+
+  @override
+  Widget build(BuildContext context) {
+    final notifications = _controller.notifications;
+    final visible = notifications.take(widget.maxVisible).toList();
+
+    CrossAxisAlignment crossAxisAlignment() {
+      if (widget.alignment.x < 0) return CrossAxisAlignment.start;
+      if (widget.alignment.x > 0) return CrossAxisAlignment.end;
+      return CrossAxisAlignment.center;
+    }
+
+    return FondeNotificationControllerScope(
+      controller: _controller,
+      child: Stack(
+        children: [
+          widget.child,
+          if (visible.isNotEmpty)
+            Positioned.fill(
+              child: IgnorePointer(
+                ignoring: false,
+                child: Align(
+                  alignment: widget.alignment,
+                  child: Padding(
+                    padding: widget.margin,
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      crossAxisAlignment: crossAxisAlignment(),
+                      children:
+                          visible.map((n) {
+                            return Padding(
+                              padding: EdgeInsets.only(bottom: widget.spacing),
+                              child: _FondeNotificationCard(
+                                notification: n,
+                                width: widget.notificationWidth,
+                                disableZoom: widget.disableZoom,
+                                onDismiss: () => _controller.dismiss(n.id),
+                              ),
+                            );
+                          }).toList(),
+                    ),
                   ),
                 ),
               ),
             ),
-          ),
-      ],
+        ],
+      ),
     );
-  }
-
-  CrossAxisAlignment get _crossAxisAlignment {
-    if (alignment.x < 0) return CrossAxisAlignment.start;
-    if (alignment.x > 0) return CrossAxisAlignment.end;
-    return CrossAxisAlignment.center;
   }
 }
 
 /// A single notification card widget.
-class _FondeNotificationCard extends ConsumerWidget {
+class _FondeNotificationCard extends StatelessWidget {
   const _FondeNotificationCard({
     required this.notification,
     required this.width,
     required this.disableZoom,
+    required this.onDismiss,
   });
 
   final FondeNotification notification;
   final double width;
   final bool disableZoom;
+  final VoidCallback onDismiss;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final colorScheme = ref.watch(fondeEffectiveColorSchemeProvider);
-    final accessibilityConfig = ref.watch(fondeAccessibilityConfigProvider);
+  Widget build(BuildContext context) {
+    final colorScheme = context.fondeColorScheme;
+    final accessibilityConfig = context.fondeAccessibility;
     final zoomScale = disableZoom ? 1.0 : accessibilityConfig.zoomScale;
 
     final background = colorScheme.uiAreas.dialog.background;
@@ -272,11 +343,7 @@ class _FondeNotificationCard extends ConsumerWidget {
                     size: 14.0 * zoomScale,
                     color: foreground.withValues(alpha: 0.5),
                   ),
-                  onPressed: () {
-                    ref
-                        .read(fondeNotificationProvider.notifier)
-                        .dismiss(notification.id);
-                  },
+                  onPressed: onDismiss,
                   padding: EdgeInsets.zero,
                   constraints: BoxConstraints(
                     minWidth: 24.0 * zoomScale,

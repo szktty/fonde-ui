@@ -1,6 +1,5 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 /// Constants for spacing values conforming to the 4px grid system.
 class FondeSpacingValues {
@@ -66,7 +65,7 @@ class FondeSpacingValues {
 /// A spacing widget that enforces the 4px grid system.
 /// Used as a replacement for SizedBox, it displays a warning or error for values
 /// that do not conform to the grid system.
-class FondeSpacing extends ConsumerWidget {
+class FondeSpacing extends StatelessWidget {
   /// Horizontal spacing.
   final double? width;
 
@@ -158,7 +157,7 @@ class FondeSpacing extends ConsumerWidget {
       strictMode = false;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  Widget build(BuildContext context) {
     final zoomScale = disableZoom ? 1.0 : 1.0; // default zoom scale
 
     // Validate and adjust spacing values

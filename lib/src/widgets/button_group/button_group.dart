@@ -1,14 +1,14 @@
+import 'package:figma_squircle/figma_squircle.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../core/context_extensions.dart';
 import '../../internal.dart';
-import '../widgets/fonde_rectangle_border.dart';
 import '../widgets/fonde_gesture_detector.dart';
 
 /// A component that groups and displays buttons.
 ///
 /// This component logically groups and displays related action buttons.
 /// Suitable for use in toolbars, etc.
-class FondeButtonGroup extends ConsumerWidget {
+class FondeButtonGroup extends StatelessWidget {
   /// List of buttons.
   final List<Widget> children;
 
@@ -45,11 +45,10 @@ class FondeButtonGroup extends ConsumerWidget {
   });
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final appColorScheme = ref.watch(fondeColorSchemeProvider);
-    final accessibilityConfig = ref.watch(fondeAccessibilityConfigProvider);
-    final zoomScale = disableZoom ? 1.0 : accessibilityConfig.zoomScale;
-    final borderScale = disableZoom ? 1.0 : accessibilityConfig.borderScale;
+  Widget build(BuildContext context) {
+    final appColorScheme = context.fondeColorScheme;
+    final zoomScale = disableZoom ? 1.0 : context.fondeZoomScale;
+    final borderScale = disableZoom ? 1.0 : context.fondeBorderScale;
 
     return Container(
       padding: EdgeInsets.all(padding.top * zoomScale),
@@ -100,7 +99,7 @@ class FondeButtonGroup extends ConsumerWidget {
 /// An item for use within a [FondeButtonGroup].
 ///
 /// Supports icon-only, label-only, or icon+label combinations.
-class FondeButtonGroupItem extends ConsumerStatefulWidget {
+class FondeButtonGroupItem extends StatefulWidget {
   /// The icon to display (optional).
   final IconData? icon;
 
@@ -130,18 +129,23 @@ class FondeButtonGroupItem extends ConsumerStatefulWidget {
   }) : assert(icon != null || label != null, 'icon or label must be provided');
 
   @override
-  ConsumerState<FondeButtonGroupItem> createState() =>
-      _FondeButtonGroupItemState();
+  State<FondeButtonGroupItem> createState() => _FondeButtonGroupItemState();
 }
 
-class _FondeButtonGroupItemState extends ConsumerState<FondeButtonGroupItem> {
+class _FondeButtonGroupItemState extends State<FondeButtonGroupItem> {
   bool _isPressed = false;
   bool _isHovered = false;
 
   @override
   Widget build(BuildContext context) {
-    final appColorScheme = ref.watch(fondeColorSchemeProvider);
-    final rectangleBorder = ref.watch(fondeRectangleBorderProvider);
+    final appColorScheme = context.fondeColorScheme;
+    final rectangleBorder = SmoothRectangleBorder(
+      borderRadius: SmoothBorderRadius(
+        cornerRadius: 12.0,
+        cornerSmoothing: 0.6,
+      ),
+      side: BorderSide(color: appColorScheme.base.border, width: 1.5),
+    );
 
     final contentColor =
         widget.isSelected

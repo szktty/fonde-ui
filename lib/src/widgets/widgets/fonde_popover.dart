@@ -1,8 +1,7 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../internal.dart';
 import 'package:popover/popover.dart';
+import '../../internal.dart';
 
 import '../widgets/fonde_icon.dart';
 import 'fonde_rectangle_border.dart';
@@ -59,11 +58,11 @@ enum FondePopoverAnimation {
 /// Wraps popover package to provide unified popover style across the app.
 /// Theme colors are obtained via FondeColorScheme provider,
 /// not directly accessing Flutter standard ColorScheme or Theme.of.
-class FondePopover extends ConsumerWidget {
+class FondePopover extends StatelessWidget {
   const FondePopover({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  Widget build(BuildContext context) {
     // This widget is not used directly, only static methods are provided
     return const SizedBox.shrink();
   }
@@ -834,10 +833,9 @@ class FondePopoverConfig {
   final Duration defaultTransitionDuration;
 }
 
-/// Provider for FondePopover configuration
-final appPopoverConfigProvider = Provider<FondePopoverConfig>((ref) {
-  final accessibilityConfig = ref.watch(fondeAccessibilityConfigProvider);
-  final zoomScale = accessibilityConfig.zoomScale;
+/// Returns a [FondePopoverConfig] with values scaled by the current zoom scale.
+FondePopoverConfig appPopoverConfigFromContext(BuildContext context) {
+  final zoomScale = context.fondeZoomScale;
 
   // Apply zoom scaling to default values
   return FondePopoverConfig(
@@ -849,4 +847,4 @@ final appPopoverConfigProvider = Provider<FondePopoverConfig>((ref) {
     defaultElevation: 8 * zoomScale,
     defaultTransitionDuration: const Duration(milliseconds: 200),
   );
-});
+}

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../core/context_extensions.dart';
 import '../../internal.dart';
 import '../spacing/fonde_spacing.dart';
 import 'fonde_rectangle_border.dart';
@@ -25,7 +25,7 @@ enum _AppButtonRole {
 /// Basic button component with design similar to FondeDropdownMenu.
 /// Achieves Figma-style rounded rectangle design using FondeRectangleBorder,
 /// and obtains theme colors via core_themes capsule.
-class FondeButton extends ConsumerWidget {
+class FondeButton extends StatelessWidget {
   /// Button label
   final String label;
 
@@ -175,14 +175,14 @@ class FondeButton extends ConsumerWidget {
        _role = _AppButtonRole.destructive;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    // Get theme colors using core_themes API
-    final appColorScheme = ref.watch(effectiveColorSchemeWithThemeProvider);
-    final themeData = ref.watch(fondeEffectiveThemeDataProvider);
-    final accessibilityConfig = ref.watch(fondeAccessibilityConfigProvider);
+  Widget build(BuildContext context) {
+    // Get theme colors using context extensions
+    final appColorScheme = context.fondeColorScheme;
+    final themeData = Theme.of(context);
+    final accessibilityConfig = context.fondeAccessibility;
 
     // Get color scope (with fallback)
-    final colorScope = ref.watch(fondeDefaultColorScopeProvider);
+    final colorScope = context.fondeColorScope;
 
     // Use unified rectangular border with FondeRectangleBorder
     final zoomScale = disableZoom ? 1.0 : accessibilityConfig.zoomScale;

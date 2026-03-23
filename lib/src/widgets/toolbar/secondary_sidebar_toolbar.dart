@@ -1,28 +1,22 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../core/context_extensions.dart';
+import '../../core/controllers.dart';
 import '../../internal.dart';
-
-import '../../riverpod/widgets/sidebar_state_providers.dart';
 import '../widgets/fonde_icon_button.dart';
-import '../icons/icon_theme_providers.dart';
 
 /// Title bar for the secondary sidebar.
-///
-/// A toolbar displayed at the top of the secondary sidebar.
-/// Includes a collapse button on the right edge.
-class FondeSecondarySidebarToolbar extends ConsumerWidget {
+class FondeSecondarySidebarToolbar extends StatelessWidget {
   const FondeSecondarySidebarToolbar({this.actions = const [], super.key});
 
-  /// List of action buttons to display on the left.
   final List<Widget> actions;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final appColorScheme = ref.watch(fondeEffectiveColorSchemeProvider);
-    final iconTheme = ref.watch(fondeDefaultIconThemeProvider);
+  Widget build(BuildContext context) {
+    final appColorScheme = context.fondeColorScheme;
+    final iconTheme = context.fondeIconTheme;
 
     return Container(
-      height: 50, // Same height as the main area title bar
+      height: 50,
       decoration: BoxDecoration(
         color: appColorScheme.uiAreas.toolbar.background,
         border: Border(
@@ -34,41 +28,28 @@ class FondeSecondarySidebarToolbar extends ConsumerWidget {
       ),
       child: Row(
         children: [
-          // Left action button
           ...actions.map(
             (action) => Padding(
               padding: const EdgeInsets.only(left: 8.0),
               child: action,
             ),
           ),
-
-          // Center space
           const Expanded(child: SizedBox()),
-
-          // Right collapse button
           Padding(
             padding: const EdgeInsets.only(right: 16.0),
-            child: _buildCollapseButton(ref, iconTheme),
+            child: FondeIconButton(
+              icon: iconTheme.panelRightClose,
+              iconSize: 20,
+              onPressed: () {
+                FondeSidebarControllerScope.secondaryOf(context)?.hide();
+              },
+              tooltip: 'Close Details Panel',
+              padding: EdgeInsets.zero,
+              hoverColor: Colors.transparent,
+            ),
           ),
         ],
       ),
-    );
-  }
-
-  /// Build the collapse button.
-  Widget _buildCollapseButton(WidgetRef ref, FondeIconTheme iconTheme) {
-    return FondeIconButton(
-      icon: iconTheme.panelRightClose,
-      iconSize: 20,
-      onPressed: () {
-        // Hide the secondary sidebar
-        // Note: This component is inside the presentation_components package, so
-        // screenBasedSecondarySidebarStateProvider of apps/desktop cannot be used.
-        ref.read(fondeSecondarySidebarStateProvider.notifier).hide();
-      },
-      tooltip: 'Close Details Panel',
-      padding: EdgeInsets.zero,
-      hoverColor: Colors.transparent,
     );
   }
 }

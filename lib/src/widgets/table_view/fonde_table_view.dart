@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../core/context_extensions.dart';
 import '../../internal.dart';
 import 'package:pluto_grid/pluto_grid.dart';
 
@@ -229,19 +229,16 @@ class _FondeTableViewState<T> extends State<FondeTableView<T>> {
     FondeColorScheme cs,
     double zoomScale,
     BuildContext context,
-    WidgetRef ref,
   ) {
     final headerStyle = FondeTextStyleBuilder.buildTextStyleWithColor(
       variant: FondeTextVariant.uiCaption,
       context: context,
-      ref: ref,
       color: cs.base.foreground,
       fontWeight: FontWeight.w500,
     );
     final cellStyle = FondeTextStyleBuilder.buildTextStyleWithColor(
       variant: FondeTextVariant.uiCaption,
       context: context,
-      ref: ref,
       color: cs.base.foreground,
       fontWeight: FontWeight.w400,
     );
@@ -288,36 +285,31 @@ class _FondeTableViewState<T> extends State<FondeTableView<T>> {
 
   @override
   Widget build(BuildContext context) {
-    return Consumer(
-      builder: (context, ref, _) {
-        final cs = ref.watch(fondeEffectiveColorSchemeProvider);
-        final accessibility = ref.watch(fondeAccessibilityConfigProvider);
-        final zoomScale = accessibility.zoomScale;
+    final cs = context.fondeColorScheme;
+    final zoomScale = context.fondeZoomScale;
 
-        return Container(
-          decoration: BoxDecoration(
-            color: cs.base.background,
-            border: Border.all(
-              color: cs.base.border,
-              width: 1.0 * accessibility.borderScale,
-            ),
-          ),
-          child: Listener(
-            behavior: HitTestBehavior.translucent,
-            onPointerDown: _handlePointerDown,
-            child: PlutoGrid(
-              columns: _plutoColumns,
-              rows: _plutoRows,
-              mode:
-                  widget.allowMultiSelect
-                      ? PlutoGridMode.multiSelect
-                      : PlutoGridMode.select,
-              configuration: _buildConfiguration(cs, zoomScale, context, ref),
-              onLoaded: _handleLoaded,
-            ),
-          ),
-        );
-      },
+    return Container(
+      decoration: BoxDecoration(
+        color: cs.base.background,
+        border: Border.all(
+          color: cs.base.border,
+          width: 1.0 * context.fondeBorderScale,
+        ),
+      ),
+      child: Listener(
+        behavior: HitTestBehavior.translucent,
+        onPointerDown: _handlePointerDown,
+        child: PlutoGrid(
+          columns: _plutoColumns,
+          rows: _plutoRows,
+          mode:
+              widget.allowMultiSelect
+                  ? PlutoGridMode.multiSelect
+                  : PlutoGridMode.select,
+          configuration: _buildConfiguration(cs, zoomScale, context),
+          onLoaded: _handleLoaded,
+        ),
+      ),
     );
   }
 }

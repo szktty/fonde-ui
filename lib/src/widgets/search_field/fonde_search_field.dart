@@ -1,13 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:searchfield/searchfield.dart' as sf;
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../internal.dart';
 
-import '../icons/icon_theme_providers.dart';
 import '../widgets/fonde_icon_button.dart';
 
 /// A platform-adaptive search field widget with suggestions support.
-class FondeSearchField extends ConsumerWidget {
+class FondeSearchField extends StatelessWidget {
   const FondeSearchField({
     this.onClear,
     this.suggestions,
@@ -49,14 +47,14 @@ class FondeSearchField extends ConsumerWidget {
   final VoidCallback? onClear;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    return _buildMaterial(context, ref);
+  Widget build(BuildContext context) {
+    return _buildMaterial(context);
   }
 
-  Widget _buildMaterial(BuildContext context, WidgetRef ref) {
-    final appColorScheme = ref.watch(fondeEffectiveColorSchemeProvider);
-    final accessibilityConfig = ref.watch(fondeAccessibilityConfigProvider);
-    final iconTheme = ref.watch(fondeDefaultIconThemeProvider);
+  Widget _buildMaterial(BuildContext context) {
+    final appColorScheme = context.fondeColorScheme;
+    final accessibilityConfig = context.fondeAccessibility;
+    final iconTheme = context.fondeIconTheme;
     final zoomScale = accessibilityConfig.zoomScale;
     final borderScale = accessibilityConfig.borderScale;
     final controller = TextEditingController(text: value);

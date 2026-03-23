@@ -1,7 +1,5 @@
 import 'package:flutter/widgets.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fonde_ui/fonde_ui.dart';
-import 'package:fonde_ui/fonde_ui_riverpod.dart';
 
 /// Common container for catalog pages
 class CatalogPage extends StatelessWidget {
@@ -24,7 +22,7 @@ class CatalogPage extends StatelessWidget {
 }
 
 /// Section divider
-class CatalogSection extends ConsumerWidget {
+class CatalogSection extends StatelessWidget {
   const CatalogSection({
     super.key,
     required this.title,
@@ -37,8 +35,8 @@ class CatalogSection extends ConsumerWidget {
   final List<Widget> children;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final colorScheme = ref.watch(fondeEffectiveColorSchemeProvider);
+  Widget build(BuildContext context) {
+    final colorScheme = context.fondeColorScheme;
 
     return FondePadding(
       padding: const EdgeInsets.only(bottom: FondeSpacingValues.xxxl + 8),
@@ -69,7 +67,7 @@ class CatalogSection extends ConsumerWidget {
 }
 
 /// A single demo item (label + component)
-class CatalogDemo extends ConsumerWidget {
+class CatalogDemo extends StatelessWidget {
   const CatalogDemo({
     super.key,
     required this.label,
@@ -82,8 +80,8 @@ class CatalogDemo extends ConsumerWidget {
   final Widget child;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final colorScheme = ref.watch(fondeEffectiveColorSchemeProvider);
+  Widget build(BuildContext context) {
+    final colorScheme = context.fondeColorScheme;
 
     return FondePadding(
       padding: const EdgeInsets.only(bottom: FondeSpacingValues.xxl),

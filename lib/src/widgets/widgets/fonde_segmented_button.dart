@@ -1,11 +1,10 @@
+import 'package:figma_squircle/figma_squircle.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../internal.dart';
 import '../styling/fonde_border.dart';
-import 'fonde_rectangle_border.dart';
 
 /// A themed segmented button that automatically applies colors from FondeColorConfig.
-class FondeSegmentedButton<T extends Object> extends ConsumerWidget {
+class FondeSegmentedButton<T extends Object> extends StatelessWidget {
   /// The set of segments currently selected.
   final Set<T> selected;
 
@@ -29,25 +28,11 @@ class FondeSegmentedButton<T extends Object> extends ConsumerWidget {
   });
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final appColorScheme = ref.watch(fondeEffectiveColorSchemeProvider);
-    // Optimization: Monitor only necessary properties to prevent unnecessary Widget rebuilds
-    final zoomScale =
-        disableZoom
-            ? 1.0
-            : ref.watch(
-              fondeAccessibilityConfigProvider.select(
-                (config) => config.zoomScale,
-              ),
-            );
-    final borderScale =
-        disableZoom
-            ? 1.0
-            : ref.watch(
-              fondeAccessibilityConfigProvider.select(
-                (config) => config.borderScale,
-              ),
-            );
+  Widget build(BuildContext context) {
+    final appColorScheme = context.fondeColorScheme;
+    final accessibilityConfig = context.fondeAccessibility;
+    final zoomScale = disableZoom ? 1.0 : accessibilityConfig.zoomScale;
+    final borderScale = disableZoom ? 1.0 : accessibilityConfig.borderScale;
 
     return SegmentedButton<T>(
       segments: segments,
@@ -70,9 +55,15 @@ class FondeSegmentedButton<T extends Object> extends ConsumerWidget {
           color: appColorScheme.base.border,
           width: FondeBorderWidth.medium * borderScale,
         ),
-        // Conforms to design guidelines: Get shape via FondeRectangleBorderProvider
+        // Conforms to design guidelines: Build shape from context
         // Prevent animation: Use consistent shape object
-        shape: ref.watch(fondeRectangleBorderProvider),
+        shape: SmoothRectangleBorder(
+          borderRadius: SmoothBorderRadius(
+            cornerRadius: 12.0,
+            cornerSmoothing: 0.6,
+          ),
+          side: BorderSide(color: appColorScheme.base.border, width: 1.5),
+        ),
         // TextStyle conforming to FondeTextVariant (zoom support is automatic)
         textStyle: Theme.of(context).textTheme.labelMedium?.copyWith(
           fontSize:

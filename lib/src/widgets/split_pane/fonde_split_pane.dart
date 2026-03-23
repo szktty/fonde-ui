@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:multi_split_view/multi_split_view.dart';
 import '../../internal.dart';
 
@@ -20,7 +19,7 @@ import '../../internal.dart';
 ///   initialSizes: [0.6, 0.4],
 /// )
 /// ```
-class FondeSplitPane extends ConsumerStatefulWidget {
+class FondeSplitPane extends StatefulWidget {
   const FondeSplitPane({
     super.key,
     required this.children,
@@ -66,10 +65,10 @@ class FondeSplitPane extends ConsumerStatefulWidget {
   final bool disableZoom;
 
   @override
-  ConsumerState<FondeSplitPane> createState() => _FondeSplitPaneState();
+  State<FondeSplitPane> createState() => _FondeSplitPaneState();
 }
 
-class _FondeSplitPaneState extends ConsumerState<FondeSplitPane> {
+class _FondeSplitPaneState extends State<FondeSplitPane> {
   late MultiSplitViewController _controller;
 
   @override
@@ -100,8 +99,8 @@ class _FondeSplitPaneState extends ConsumerState<FondeSplitPane> {
 
   @override
   Widget build(BuildContext context) {
-    final appColorScheme = ref.watch(fondeEffectiveColorSchemeProvider);
-    final accessibilityConfig = ref.watch(fondeAccessibilityConfigProvider);
+    final appColorScheme = context.fondeColorScheme;
+    final accessibilityConfig = context.fondeAccessibility;
     final borderScale =
         widget.disableZoom ? 1.0 : accessibilityConfig.borderScale;
 

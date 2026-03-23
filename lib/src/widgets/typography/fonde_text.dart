@@ -1,6 +1,6 @@
 import '../../internal.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../core/context_extensions.dart';
 
 /// The available text variants for FondeText.
 ///
@@ -68,7 +68,7 @@ enum FondeTextVariant {
 }
 
 /// A text widget that automatically applies typography styles based on the app theme.
-class FondeText extends ConsumerWidget {
+class FondeText extends StatelessWidget {
   final String text;
   final FondeTextVariant variant;
   final Color? color;
@@ -97,11 +97,9 @@ class FondeText extends ConsumerWidget {
   });
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  Widget build(BuildContext context) {
     // Get accessibility settings
-    final accessibilityConfig = ref.watch(fondeAccessibilityConfigProvider);
-
-    final zoomScale = disableZoom ? 1.0 : accessibilityConfig.zoomScale;
+    final zoomScale = disableZoom ? 1.0 : context.fondeZoomScale;
 
     // Get text style from ThemeData
     final flutterTheme = Theme.of(context);
@@ -112,7 +110,7 @@ class FondeText extends ConsumerWidget {
         flutterTheme.textTheme,
         flutterTheme.colorScheme,
         zoomScale,
-        ref,
+        context,
       ),
       textAlign: textAlign,
       maxLines: maxLines,
@@ -124,7 +122,7 @@ class FondeText extends ConsumerWidget {
     TextTheme textTheme,
     ColorScheme colorScheme,
     double zoomScale,
-    WidgetRef ref,
+    BuildContext context,
   ) {
     // Get typography settings from active theme
     final baseStyle = switch (variant) {
@@ -213,7 +211,7 @@ class FondeText extends ConsumerWidget {
     // Try to get color scope
     Color textColor;
     try {
-      final colorScope = ref.read(fondeColorScopeProvider);
+      final colorScope = context.fondeColorScope;
       textColor = color ?? colorScope.text;
     } catch (e) {
       // Fallback if color scope is not available

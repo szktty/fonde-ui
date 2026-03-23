@@ -1,33 +1,24 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../core/context_extensions.dart';
+import '../../core/controllers.dart';
 import '../../internal.dart';
-import '../../riverpod/widgets/sidebar_state_providers.dart';
 import '../widgets/fonde_icon_button.dart';
-import '../icons/icon_theme_providers.dart';
 
 /// Title bar for the primary sidebar.
-///
-/// A title bar placed at the top of the primary sidebar area, including a
-/// sidebar collapse button.
-class FondePrimarySidebarToolbar extends ConsumerWidget {
+class FondePrimarySidebarToolbar extends StatelessWidget {
   const FondePrimarySidebarToolbar({
     this.backgroundColor,
     this.borderColor,
     super.key,
   });
 
-  /// Override the toolbar background color.
-  /// When null, defaults to [FondeToolbarColors.background].
   final Color? backgroundColor;
-
-  /// Override the bottom border color.
-  /// When null, defaults to [FondeToolbarColors.border].
   final Color? borderColor;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final appColorScheme = ref.watch(fondeEffectiveColorSchemeProvider);
-    final iconTheme = ref.watch(fondeDefaultIconThemeProvider);
+  Widget build(BuildContext context) {
+    final appColorScheme = context.fondeColorScheme;
+    final iconTheme = context.fondeIconTheme;
 
     final effectiveBackground =
         backgroundColor ?? appColorScheme.uiAreas.toolbar.background;
@@ -48,7 +39,16 @@ class FondePrimarySidebarToolbar extends ConsumerWidget {
                 ),
                 child: Row(
                   children: [
-                    _buildPrimarySidebarToggle(ref, iconTheme),
+                    FondeIconButton(
+                      icon: iconTheme.panelLeftClose,
+                      iconSize: 20,
+                      onPressed: () {
+                        FondeSidebarControllerScope.primaryOf(context)?.hide();
+                      },
+                      tooltip: 'Close Sidebar',
+                      padding: EdgeInsets.zero,
+                      hoverColor: Colors.transparent,
+                    ),
                     const Expanded(child: SizedBox()),
                   ],
                 ),
@@ -59,21 +59,6 @@ class FondePrimarySidebarToolbar extends ConsumerWidget {
           ],
         ),
       ),
-    );
-  }
-
-  /// Build the primary sidebar collapse button.
-  Widget _buildPrimarySidebarToggle(WidgetRef ref, FondeIconTheme iconTheme) {
-    return FondeIconButton(
-      icon: iconTheme.panelLeftClose, // Collapse icon
-      iconSize: 20,
-      onPressed: () {
-        // Hide the sidebar
-        ref.read(fondePrimarySidebarStateProvider.notifier).hide();
-      },
-      tooltip: 'Close Sidebar',
-      padding: EdgeInsets.zero,
-      hoverColor: Colors.transparent,
     );
   }
 }

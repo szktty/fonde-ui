@@ -1,15 +1,13 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../internal.dart';
 import 'package:figma_squircle/figma_squircle.dart';
 import 'package:textfield_tags/textfield_tags.dart';
-import '../icons/icon_theme_providers.dart';
 
 /// Label tag editing field
 ///
 /// Provides a tag input field for editing entity labels and more.
 /// Implemented using the textfield_tags package.
-class FondeTagsField extends ConsumerWidget {
+class FondeTagsField extends StatelessWidget {
   /// Constructor
   const FondeTagsField({
     super.key,
@@ -64,11 +62,11 @@ class FondeTagsField extends ConsumerWidget {
   final bool disableZoom;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  Widget build(BuildContext context) {
     // Use the new color scheme provider that responds to theme mode changes
-    final appColorScheme = ref.watch(fondeColorSchemeProvider);
-    final accessibilityConfig = ref.watch(fondeAccessibilityConfigProvider);
-    final iconTheme = ref.watch(fondeDefaultIconThemeProvider);
+    final appColorScheme = context.fondeColorScheme;
+    final accessibilityConfig = context.fondeAccessibility;
+    final iconTheme = context.fondeIconTheme;
     final zoomScale = disableZoom ? 1.0 : accessibilityConfig.zoomScale;
     final borderScale = disableZoom ? 1.0 : accessibilityConfig.borderScale;
 

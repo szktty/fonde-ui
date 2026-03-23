@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../internal.dart';
 
 /// Desktop-appropriate drag feedback style.
@@ -31,7 +30,7 @@ enum FondeDragFeedbackStyle {
 ///   child: MyListItem(),
 /// )
 /// ```
-class FondeDraggable<T extends Object> extends ConsumerStatefulWidget {
+class FondeDraggable<T extends Object> extends StatefulWidget {
   const FondeDraggable({
     super.key,
     required this.data,
@@ -86,11 +85,10 @@ class FondeDraggable<T extends Object> extends ConsumerStatefulWidget {
   final bool disableZoom;
 
   @override
-  ConsumerState<FondeDraggable<T>> createState() => _FondeDraggableState<T>();
+  State<FondeDraggable<T>> createState() => _FondeDraggableState<T>();
 }
 
-class _FondeDraggableState<T extends Object>
-    extends ConsumerState<FondeDraggable<T>> {
+class _FondeDraggableState<T extends Object> extends State<FondeDraggable<T>> {
   bool _isDragging = false;
 
   Widget _buildFeedback(BuildContext context) {
@@ -98,7 +96,7 @@ class _FondeDraggableState<T extends Object>
       case FondeDragFeedbackStyle.ghost:
         return Opacity(opacity: 0.7, child: widget.child);
       case FondeDragFeedbackStyle.badge:
-        return _DragBadge(ref: ref, disableZoom: widget.disableZoom);
+        return _DragBadge(disableZoom: widget.disableZoom);
       case FondeDragFeedbackStyle.custom:
         assert(
           widget.feedbackBuilder != null,
@@ -150,19 +148,15 @@ class _FondeDraggableState<T extends Object>
 }
 
 /// Small drag badge shown during badge-style feedback.
-class _DragBadge extends ConsumerWidget {
-  const _DragBadge({required this.ref, required this.disableZoom});
+class _DragBadge extends StatelessWidget {
+  const _DragBadge({required this.disableZoom});
 
-  // ignore: unused_field
-  final WidgetRef ref;
   final bool disableZoom;
 
   @override
-  Widget build(BuildContext context, WidgetRef watchRef) {
-    final colorScheme = watchRef.watch(fondeEffectiveColorSchemeProvider);
-    final accessibilityConfig = watchRef.watch(
-      fondeAccessibilityConfigProvider,
-    );
+  Widget build(BuildContext context) {
+    final colorScheme = context.fondeColorScheme;
+    final accessibilityConfig = context.fondeAccessibility;
     final zoomScale = disableZoom ? 1.0 : accessibilityConfig.zoomScale;
 
     return Container(
@@ -193,7 +187,7 @@ class _DragBadge extends ConsumerWidget {
 /// Wraps Flutter's [DragTarget] with visual drop-zone highlighting.
 ///
 /// Type parameter [T] is the data type accepted by this target.
-class FondeDragTarget<T extends Object> extends ConsumerStatefulWidget {
+class FondeDragTarget<T extends Object> extends StatefulWidget {
   const FondeDragTarget({
     super.key,
     required this.builder,
@@ -220,11 +214,11 @@ class FondeDragTarget<T extends Object> extends ConsumerStatefulWidget {
   final HitTestBehavior hitTestBehavior;
 
   @override
-  ConsumerState<FondeDragTarget<T>> createState() => _FondeDragTargetState<T>();
+  State<FondeDragTarget<T>> createState() => _FondeDragTargetState<T>();
 }
 
 class _FondeDragTargetState<T extends Object>
-    extends ConsumerState<FondeDragTarget<T>> {
+    extends State<FondeDragTarget<T>> {
   bool _isOver = false;
 
   @override

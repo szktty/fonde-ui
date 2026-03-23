@@ -1,9 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../internal.dart';
 
 import '../typography/fonde_text.dart';
-import '../icons/icon_theme_providers.dart';
 import '../styling/fonde_border_radius.dart';
 import 'fonde_rectangle_border.dart';
 import 'fonde_icon.dart';
@@ -201,7 +199,7 @@ class FondeSnackBar {
 }
 
 /// Widget that displays the snack bar content.
-class _AppSnackBarContent extends ConsumerWidget {
+class _AppSnackBarContent extends StatelessWidget {
   final String message;
   final FondeSnackBarType type;
   final IconData? icon;
@@ -213,10 +211,10 @@ class _AppSnackBarContent extends ConsumerWidget {
   });
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final colorScheme = ref.watch(fondeEffectiveColorSchemeProvider);
-    final accessibilityConfig = ref.watch(fondeAccessibilityConfigProvider);
-    final iconTheme = ref.watch(fondeDefaultIconThemeProvider);
+  Widget build(BuildContext context) {
+    final colorScheme = context.fondeColorScheme;
+    final accessibilityConfig = context.fondeAccessibility;
+    final iconTheme = context.fondeIconTheme;
 
     final zoomScale = accessibilityConfig.zoomScale;
 

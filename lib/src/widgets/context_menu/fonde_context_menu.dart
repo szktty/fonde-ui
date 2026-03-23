@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../internal.dart';
-import '../icons/icon_theme_providers.dart';
 
 /// A context menu item.
 class FondeContextMenuItem {
@@ -41,7 +39,7 @@ class FondeContextMenuDivider extends FondeContextMenuItem {
 /// usable with any trigger (button, right-click, long-press, etc.).
 ///
 /// For a ready-made icon button trigger, use [FondeContextMenuButton].
-class FondeContextMenu extends ConsumerStatefulWidget {
+class FondeContextMenu extends StatefulWidget {
   /// List of menu items
   final List<FondeContextMenuItem> items;
 
@@ -63,13 +61,13 @@ class FondeContextMenu extends ConsumerStatefulWidget {
   });
 
   @override
-  ConsumerState<FondeContextMenu> createState() => _FondeContextMenuState();
+  State<FondeContextMenu> createState() => _FondeContextMenuState();
 }
 
-class _FondeContextMenuState extends ConsumerState<FondeContextMenu> {
+class _FondeContextMenuState extends State<FondeContextMenu> {
   @override
   Widget build(BuildContext context) {
-    final appColorScheme = ref.watch(fondeEffectiveColorSchemeProvider);
+    final appColorScheme = context.fondeColorScheme;
 
     return MenuAnchor(
       builder: widget.builder,
@@ -101,7 +99,7 @@ class _FondeContextMenuState extends ConsumerState<FondeContextMenu> {
 ///
 /// A convenience wrapper around [FondeContextMenu] that uses an [IconButton]
 /// (defaulting to the "more vertical" icon) to open the menu.
-class FondeContextMenuButton extends ConsumerWidget {
+class FondeContextMenuButton extends StatelessWidget {
   /// List of menu items
   final List<FondeContextMenuItem> items;
 
@@ -128,9 +126,9 @@ class FondeContextMenuButton extends ConsumerWidget {
   });
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final appColorScheme = ref.watch(fondeEffectiveColorSchemeProvider);
-    final iconTheme = ref.watch(fondeDefaultIconThemeProvider);
+  Widget build(BuildContext context) {
+    final appColorScheme = context.fondeColorScheme;
+    final iconTheme = context.fondeIconTheme;
 
     return FondeContextMenu(
       items: items,

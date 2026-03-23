@@ -1,31 +1,18 @@
-/// Riverpod integration for fonde_ui.
+/// Riverpod integration for fonde_ui — DEPRECATED.
 ///
-/// Import this library in addition to [fonde_ui.dart] to access
-/// Riverpod-based state providers for themes, navigation, layout, and more.
+/// This library is no longer maintained. Riverpod has been removed from fonde_ui.
+/// All state management is now available directly via BuildContext extensions
+/// and controller objects exported from [fonde_ui.dart].
+///
+/// Migration guide:
+/// - Replace `ref.watch(fondeEffectiveColorSchemeProvider)` with `context.fondeColorScheme`
+/// - Replace `ref.watch(fondeAccessibilityConfigProvider)` with `context.fondeAccessibility`
+/// - Replace `ref.read(fondeActiveThemeProvider.notifier).setTheme(x)` with
+///   `context.fondeThemeController?.setTheme(x)`
+/// - Replace `ref.read(fondeAccessibilityConfigProvider.notifier).updateConfig(x)` with
+///   `context.fondeAccessibilityController?.updateConfig(x)`
+/// - Replace sidebar providers with [FondeSidebarControllerScope]
+/// - Replace navigation providers with [FondeNavigationControllerScope]
+/// - Replace toolbar providers with [FondeToolbarControllerScope]
+/// - Replace search providers with [FondeSearchControllerScope]
 library;
-
-// ─── Core: Theme ──────────────────────────────────────────────────────────────
-export 'src/riverpod/core/theme_providers.dart';
-export 'src/riverpod/core/theme_color_providers.dart'
-    hide FondeThemeColorNotifier;
-
-// ─── Core: Accessibility ──────────────────────────────────────────────────────
-export 'src/riverpod/core/accessibility_utils.dart';
-
-// ─── Widgets: Navigation ──────────────────────────────────────────────────────
-export 'src/riverpod/widgets/navigation_providers.dart';
-export 'src/riverpod/widgets/search_providers.dart';
-
-// ─── Widgets: Toolbar ─────────────────────────────────────────────────────────
-export 'src/riverpod/widgets/toolbar_providers.dart';
-export 'src/riverpod/widgets/toolbar_state.dart';
-
-// ─── Widgets: Layout ──────────────────────────────────────────────────────────
-export 'src/riverpod/widgets/sidebar_state_providers.dart';
-export 'src/riverpod/widgets/sidebar_width_provider.dart';
-
-// ─── Widgets: Icons ───────────────────────────────────────────────────────────
-export 'src/riverpod/widgets/icon_theme_providers.dart';
-
-// ─── Widgets: Typography ──────────────────────────────────────────────────────
-export 'src/riverpod/widgets/text_style_builder_ext.dart';

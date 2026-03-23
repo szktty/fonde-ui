@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../core/context_extensions.dart';
 import '../../internal.dart';
 import 'sidebar.dart';
 import 'sidebar_list_item.dart';
@@ -9,7 +9,7 @@ import 'sidebar_list_group.dart';
 ///
 /// This widget functions as a container for navigation items, and manages a
 /// scrollable area.
-class FondeSidebarList extends ConsumerWidget {
+class FondeSidebarList extends StatelessWidget {
   /// A list of navigation items.
   final List<Widget> children;
 
@@ -75,11 +75,10 @@ class FondeSidebarList extends ConsumerWidget {
   });
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final accessibilityConfig = ref.watch(fondeAccessibilityConfigProvider);
-    final zoomScale = disableZoom ? 1.0 : accessibilityConfig.zoomScale;
+  Widget build(BuildContext context) {
+    final zoomScale = disableZoom ? 1.0 : context.fondeZoomScale;
 
-    final colorScheme = ref.watch(fondeEffectiveColorSchemeProvider);
+    final colorScheme = context.fondeColorScheme;
     final isFloatingPanel = FondeFloatingPanelScope.of(context);
     final resolvedBackground =
         backgroundColor ??

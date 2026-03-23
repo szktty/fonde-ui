@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../internal.dart';
+import '../../core/context_extensions.dart';
 import '../styling/fonde_border_radius.dart';
 
 /// Decorator for managing selection state.
@@ -18,7 +18,7 @@ import '../styling/fonde_border_radius.dart';
 ///   ),
 /// )
 /// ```
-class FondeSelectionDecorator extends ConsumerWidget {
+class FondeSelectionDecorator extends StatelessWidget {
   /// The child widget.
   final Widget child;
 
@@ -52,16 +52,15 @@ class FondeSelectionDecorator extends ConsumerWidget {
   });
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  Widget build(BuildContext context) {
     if (!isSelected) {
       return child;
     }
 
-    final colorScheme = ref.watch(fondeEffectiveColorSchemeProvider);
-    final accessibilityConfig = ref.watch(fondeAccessibilityConfigProvider);
+    final colorScheme = context.fondeColorScheme;
 
     // Zoom support
-    final zoomScale = disableZoom ? 1.0 : accessibilityConfig.zoomScale;
+    final zoomScale = disableZoom ? 1.0 : context.fondeZoomScale;
 
     // Determine the style for the selected state
     final effectiveSelectedBackgroundColor =

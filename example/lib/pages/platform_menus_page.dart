@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:fonde_ui/fonde_ui.dart';
-import 'package:fonde_ui/fonde_ui_riverpod.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../widgets/catalog_page.dart';
 
@@ -28,12 +26,12 @@ class PlatformMenusPage extends StatelessWidget {
   }
 }
 
-class _MenuBarNotice extends ConsumerWidget {
+class _MenuBarNotice extends StatelessWidget {
   const _MenuBarNotice();
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final colorScheme = ref.watch(fondeEffectiveColorSchemeProvider);
+  Widget build(BuildContext context) {
+    final colorScheme = context.fondeColorScheme;
     return Container(
       decoration: BoxDecoration(
         color: colorScheme.uiAreas.sideBar.background,
@@ -66,7 +64,7 @@ class _MenuBarNotice extends ConsumerWidget {
   }
 }
 
-class _CodeSample extends ConsumerWidget {
+class _CodeSample extends StatelessWidget {
   const _CodeSample();
 
   static const _code = r'''
@@ -137,8 +135,8 @@ PlatformMenuBar(
 );''';
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final colorScheme = ref.watch(fondeEffectiveColorSchemeProvider);
+  Widget build(BuildContext context) {
+    final colorScheme = context.fondeColorScheme;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [

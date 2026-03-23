@@ -1,18 +1,19 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:flutter_riverpod/misc.dart' show Override;
 
 import '../widgets/color_picker/fonde_eye_dropper.dart';
+import '../widgets/icons/lucide_icon_theme.dart';
+import 'color_scope_widget.dart';
+import 'context_extensions.dart';
+import 'fonde_theme_scope.dart';
 import 'models/fonde_localization_config.dart';
 import 'models/fonde_theme_data.dart';
 import 'presets.dart';
-import 'providers/theme_providers.dart';
 
 /// The root widget for a fonde_ui application.
 ///
-/// [FondeApp] wraps [ProviderScope] and [MaterialApp] to provide the minimum
-/// boilerplate required to use fonde_ui. Place it at the top of your widget
-/// tree instead of calling [MaterialApp] directly.
+/// [FondeApp] wraps [MaterialApp] and provides the minimum boilerplate
+/// required to use fonde_ui. Place it at the top of your widget tree
+/// instead of calling [MaterialApp] directly.
 ///
 /// ```dart
 /// void main() {
@@ -26,30 +27,32 @@ import 'providers/theme_providers.dart';
 /// }
 /// ```
 ///
-/// ## Provider overrides
+/// ## Controllers
 ///
-/// Use [overrides] to inject custom Riverpod providers (e.g. for dependency
-/// injection or testing). This list is forwarded directly to the internal
-/// [ProviderScope].
-///
-/// > **Warning:** Do not override fonde_ui's internal providers (those not
-/// > exported as part of the public API). Doing so may cause undefined
-/// > behaviour.
+/// The active theme, accent color, accessibility settings and icon theme are
+/// managed by controllers that [FondeApp] creates internally. You can supply
+/// your own controller instances via the constructor parameters if you need to
+/// drive them from outside the widget tree (e.g. for persistence or testing).
 ///
 /// ```dart
+/// final themeController = FondeThemeController(
+///   initialTheme: FondeThemePresets.dark,
+/// );
+///
 /// FondeApp(
-///   overrides: [
-///     mySettingsProvider.overrideWith(() => MySettingsNotifier()),
-///   ],
+///   themeController: themeController,
 ///   home: MyShell(),
 /// )
 /// ```
 ///
-/// ## Theme
+/// Read controllers from any descendant widget via the [BuildContext]
+/// extensions:
 ///
-/// Set [initialTheme] to control the starting theme. The theme can be changed
-/// at runtime via `FondeActiveThemeNotifier` (Riverpod) or through
-/// [FondeApp.setTheme].
+/// ```dart
+/// context.fondeThemeController.setTheme(FondeThemePresets.light);
+/// context.fondeThemeColorController.setThemeColor(FondeThemeColorType.indigo);
+/// context.fondeAccessibilityController.updateConfig(...);
+/// ```
 ///
 /// ## Navigation
 ///
@@ -59,12 +62,15 @@ import 'providers/theme_providers.dart';
 /// as `routes`, `navigatorKey`, and `onGenerateRoute` are intentionally not
 /// exposed. If you need deep Navigator integration, compose [MaterialApp]
 /// yourself and use [FondeScaffold] as its `home`.
-class FondeApp extends StatelessWidget {
+class FondeApp extends StatefulWidget {
   const FondeApp({
     super.key,
     this.title = '',
     this.initialTheme,
-    this.overrides = const [],
+    this.themeController,
+    this.themeColorController,
+    this.accessibilityController,
+    this.iconThemeController,
     this.enableLocalization,
     this.enableEyeDropper = false,
     required this.home,
@@ -74,13 +80,24 @@ class FondeApp extends StatelessWidget {
   final String title;
 
   /// The initial theme. Defaults to [FondeThemePresets.system].
+  ///
+  /// Ignored when [themeController] is supplied.
   final FondeThemeData? initialTheme;
 
-  /// Riverpod provider overrides forwarded to the internal [ProviderScope].
+  /// Optional external theme controller.
   ///
-  /// Use this for dependency injection or testing. Do **not** override
-  /// fonde_ui's internal providers.
-  final List<Override> overrides;
+  /// When `null`, [FondeApp] creates and owns an internal controller seeded
+  /// with [initialTheme].
+  final FondeThemeController? themeController;
+
+  /// Optional external accent-color controller.
+  final FondeThemeColorController? themeColorController;
+
+  /// Optional external accessibility controller.
+  final FondeAccessibilityController? accessibilityController;
+
+  /// Optional external icon-theme controller.
+  final FondeIconThemeController? iconThemeController;
 
   /// Whether fonde_ui components automatically adapt their built-in text
   /// labels to the device locale.
@@ -108,64 +125,174 @@ class FondeApp extends StatelessWidget {
   final Widget home;
 
   @override
-  Widget build(BuildContext context) {
-    if (enableLocalization != null) {
-      FondeLocalizationConfig.enableLocalization = enableLocalization!;
-    }
-    final effectiveInitialTheme = initialTheme ?? FondeThemePresets.system;
+  State<FondeApp> createState() => _FondeAppState();
+}
 
-    return ProviderScope(
-      overrides: [
-        // Seed the active theme with the caller-supplied initial value.
-        fondeActiveThemeProvider.overrideWith(
-          () => _InitialThemeNotifier(effectiveInitialTheme),
-        ),
-        ...overrides,
-      ],
+class _FondeAppState extends State<FondeApp> {
+  late FondeThemeController _themeController;
+  late FondeThemeColorController _colorController;
+  late FondeAccessibilityController _accessibilityController;
+  late FondeIconThemeController _iconThemeController;
+
+  bool _ownsThemeController = false;
+  bool _ownsColorController = false;
+  bool _ownsAccessibilityController = false;
+  bool _ownsIconThemeController = false;
+
+  @override
+  void initState() {
+    super.initState();
+
+    if (widget.enableLocalization != null) {
+      FondeLocalizationConfig.enableLocalization = widget.enableLocalization!;
+    }
+
+    if (widget.themeController != null) {
+      _themeController = widget.themeController!;
+    } else {
+      _themeController = FondeThemeController(
+        initialTheme: widget.initialTheme ?? FondeThemePresets.system,
+      );
+      _ownsThemeController = true;
+    }
+
+    if (widget.themeColorController != null) {
+      _colorController = widget.themeColorController!;
+    } else {
+      _colorController = FondeThemeColorController();
+      _ownsColorController = true;
+    }
+
+    if (widget.accessibilityController != null) {
+      _accessibilityController = widget.accessibilityController!;
+    } else {
+      _accessibilityController = FondeAccessibilityController();
+      _ownsAccessibilityController = true;
+    }
+
+    if (widget.iconThemeController != null) {
+      _iconThemeController = widget.iconThemeController!;
+    } else {
+      _iconThemeController = FondeIconThemeController();
+      _ownsIconThemeController = true;
+    }
+  }
+
+  @override
+  void didUpdateWidget(FondeApp oldWidget) {
+    super.didUpdateWidget(oldWidget);
+
+    if (widget.themeController != oldWidget.themeController) {
+      if (_ownsThemeController) _themeController.dispose();
+      if (widget.themeController != null) {
+        _themeController = widget.themeController!;
+        _ownsThemeController = false;
+      } else {
+        _themeController = FondeThemeController(
+          initialTheme: widget.initialTheme ?? FondeThemePresets.system,
+        );
+        _ownsThemeController = true;
+      }
+    }
+
+    if (widget.themeColorController != oldWidget.themeColorController) {
+      if (_ownsColorController) _colorController.dispose();
+      if (widget.themeColorController != null) {
+        _colorController = widget.themeColorController!;
+        _ownsColorController = false;
+      } else {
+        _colorController = FondeThemeColorController();
+        _ownsColorController = true;
+      }
+    }
+
+    if (widget.accessibilityController != oldWidget.accessibilityController) {
+      if (_ownsAccessibilityController) _accessibilityController.dispose();
+      if (widget.accessibilityController != null) {
+        _accessibilityController = widget.accessibilityController!;
+        _ownsAccessibilityController = false;
+      } else {
+        _accessibilityController = FondeAccessibilityController();
+        _ownsAccessibilityController = true;
+      }
+    }
+
+    if (widget.iconThemeController != oldWidget.iconThemeController) {
+      if (_ownsIconThemeController) _iconThemeController.dispose();
+      if (widget.iconThemeController != null) {
+        _iconThemeController = widget.iconThemeController!;
+        _ownsIconThemeController = false;
+      } else {
+        _iconThemeController = FondeIconThemeController();
+        _ownsIconThemeController = true;
+      }
+    }
+  }
+
+  @override
+  void dispose() {
+    if (_ownsThemeController) _themeController.dispose();
+    if (_ownsColorController) _colorController.dispose();
+    if (_ownsAccessibilityController) _accessibilityController.dispose();
+    if (_ownsIconThemeController) _iconThemeController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return FondeThemeManager(
+      themeController: _themeController,
+      colorController: _colorController,
+      accessibilityController: _accessibilityController,
+      iconThemeController: _iconThemeController,
+      defaultIconTheme: fondeDefaultIconTheme,
       child: _FondeAppBody(
-        title: title,
-        home: home,
-        enableEyeDropper: enableEyeDropper,
+        title: widget.title,
+        home: widget.home,
+        enableEyeDropper: widget.enableEyeDropper,
+        themeController: _themeController,
       ),
     );
   }
 }
 
-/// [FondeActiveTheme] subclass that uses a caller-supplied initial theme.
-class _InitialThemeNotifier extends FondeActiveTheme {
-  _InitialThemeNotifier(this._initialTheme);
-
-  final FondeThemeData _initialTheme;
-
-  @override
-  FondeThemeData build() => _initialTheme;
-}
-
-class _FondeAppBody extends ConsumerWidget {
+class _FondeAppBody extends StatelessWidget {
   const _FondeAppBody({
     required this.title,
     required this.home,
     required this.enableEyeDropper,
+    required this.themeController,
   });
 
   final String title;
   final Widget home;
   final bool enableEyeDropper;
+  final FondeThemeController themeController;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final themeData = ref.watch(fondeEffectiveThemeDataProvider);
+  Widget build(BuildContext context) {
+    final colorScheme = context.fondeColorScheme;
 
-    Widget content = home;
+    Widget content = FondeColorScopeWidget(
+      scope: FondeColorScopeBuilder.defaultScope(colorScheme),
+      child: home,
+    );
+
     if (enableEyeDropper) {
       content = FondeEyeDropper(child: content);
     }
 
-    return MaterialApp(
-      title: title,
-      theme: themeData,
-      debugShowCheckedModeBanner: false,
-      home: content,
+    return ListenableBuilder(
+      listenable: themeController,
+      builder: (context, _) {
+        final themeData = themeController.theme;
+        return MaterialApp(
+          title: title,
+          theme: themeData.toThemeData(),
+          debugShowCheckedModeBanner: false,
+          home: content,
+        );
+      },
     );
   }
 }

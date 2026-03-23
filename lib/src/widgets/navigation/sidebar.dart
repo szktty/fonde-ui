@@ -1,6 +1,6 @@
 import 'package:figma_squircle/figma_squircle.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../core/context_extensions.dart';
 import '../../internal.dart';
 import '../toolbar/primary_sidebar_toolbar.dart';
 
@@ -40,7 +40,7 @@ enum FondeSidebarStyle {
 /// toolbar ([FondePrimarySidebarToolbar] by default) and the [child] together
 /// inside a single floating rounded-rectangle panel. The outer area uses the
 /// main background color (Level 1) so the panel appears to float.
-class FondeSidebar extends ConsumerWidget {
+class FondeSidebar extends StatelessWidget {
   /// The main content to display within the sidebar (e.g. [FondeSidebarList]).
   final Widget child;
 
@@ -77,12 +77,11 @@ class FondeSidebar extends ConsumerWidget {
   });
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final accessibilityConfig = ref.watch(fondeAccessibilityConfigProvider);
-    final zoomScale = disableZoom ? 1.0 : accessibilityConfig.zoomScale;
-    final borderScale = disableZoom ? 1.0 : accessibilityConfig.borderScale;
+  Widget build(BuildContext context) {
+    final zoomScale = disableZoom ? 1.0 : context.fondeZoomScale;
+    final borderScale = disableZoom ? 1.0 : context.fondeBorderScale;
 
-    final appColorScheme = ref.watch(fondeEffectiveColorSchemeProvider);
+    final appColorScheme = context.fondeColorScheme;
 
     if (style == FondeSidebarStyle.floatingPanel) {
       final outerBackground =

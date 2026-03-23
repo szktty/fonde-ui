@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../internal.dart';
 import 'fonde_rectangle_border.dart';
-import '../icons/icon_theme_providers.dart';
 
 /// Action item for FondeSplitButton
 class FondeSplitButtonAction {
@@ -30,7 +28,7 @@ class FondeSplitButtonAction {
 ///
 /// A component that combines a primary action button and a dropdown menu
 /// where additional actions can be selected.
-class FondeSplitButton extends ConsumerWidget {
+class FondeSplitButton extends StatelessWidget {
   /// Label for the primary action
   final String primaryLabel;
 
@@ -101,11 +99,11 @@ class FondeSplitButton extends ConsumerWidget {
   });
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  Widget build(BuildContext context) {
     // Get theme colors using core_themes API
-    final appColorScheme = ref.watch(fondeColorSchemeProvider);
-    final themeData = ref.watch(fondeEffectiveThemeDataProvider);
-    final accessibilityConfig = ref.watch(fondeAccessibilityConfigProvider);
+    final appColorScheme = context.fondeColorScheme;
+    final themeData = Theme.of(context);
+    final accessibilityConfig = context.fondeAccessibility;
 
     // Create FondeBorderRadius
     final zoomScale = disableZoom ? 1.0 : accessibilityConfig.zoomScale;
@@ -282,12 +280,8 @@ class _AppSplitButtonWidgetState extends State<_AppSplitButtonWidget> {
 
   @override
   Widget build(BuildContext context) {
-    return Consumer(
-      builder: (context, ref, _) {
-        final iconTheme = ref.watch(fondeDefaultIconThemeProvider);
-        return _buildButton(context, iconTheme);
-      },
-    );
+    final iconTheme = context.fondeIconTheme;
+    return _buildButton(context, iconTheme);
   }
 
   Widget _buildButton(BuildContext context, FondeIconTheme iconTheme) {
