@@ -9,7 +9,7 @@
 - FIX
   - Bug fixes
 
-## 0.5.0-dev
+## 0.5.0
 
 **Release date**: 2026-03-23
 
