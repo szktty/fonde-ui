@@ -13,14 +13,8 @@ import 'test_app.dart';
 
 extension PumpHelpers on WidgetTester {
   /// Builds [child] inside [buildTestApp] and pumps one frame.
-  Future<void> pumpTestApp(
-    Widget child, {
-    List<Override> overrides = const [],
-    FondeThemeData? theme,
-  }) async {
-    await pumpWidget(
-      buildTestApp(child: child, overrides: overrides, theme: theme),
-    );
+  Future<void> pumpTestApp(Widget child, {FondeThemeData? theme}) async {
+    await pumpWidget(buildTestApp(child: child, theme: theme));
     await pump();
   }
 }

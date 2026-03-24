@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import '../../internal.dart';
-import '../../core/context_extensions.dart';
 
 /// App-style tab bar.
 /// Wraps Flutter's TabBar to provide app-specific accessibility and styling.

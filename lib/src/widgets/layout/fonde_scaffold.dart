@@ -1,8 +1,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:multi_split_view/multi_split_view.dart';
-import '../../core/context_extensions.dart';
-import '../../core/controllers.dart';
 import '../../internal.dart';
 
 import '../toolbar/secondary_sidebar_toolbar.dart';
