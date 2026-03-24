@@ -447,6 +447,8 @@ class _AppDropdownButtonState<T> extends State<_AppDropdownButton<T>> {
 
   // Selection effect state: opacity of the overlay (1.0 = visible, 0.0 = hidden)
   final ValueNotifier<double> _overlayOpacity = ValueNotifier<double>(1.0);
+  // True while the selection effect is running — hover updates are suppressed.
+  bool _selectionEffectRunning = false;
 
   @override
   void dispose() {
@@ -467,6 +469,7 @@ class _AppDropdownButtonState<T> extends State<_AppDropdownButton<T>> {
     _overlayEntry?.remove();
     _overlayEntry = null;
     _isOpen = false;
+    _selectionEffectRunning = false;
     _hoveredIndex.value = null;
     _overlayOpacity.value = 1.0;
     _keyboardFocusNode.unfocus();
@@ -475,6 +478,7 @@ class _AppDropdownButtonState<T> extends State<_AppDropdownButton<T>> {
   // Runs the macOS-style selection effect then calls [onDone].
   // 1. Hide highlight (50ms) → 2. Show highlight (100ms) → 3. Fade out (150ms)
   Future<void> _runSelectionEffect(int selectedIndex) async {
+    _selectionEffectRunning = true;
     // Step 1: hide highlight
     _hoveredIndex.value = null;
     await Future.delayed(const Duration(milliseconds: 50));
@@ -491,6 +495,7 @@ class _AppDropdownButtonState<T> extends State<_AppDropdownButton<T>> {
       await Future.delayed(stepDuration);
       if (!_isOpen) return;
     }
+    _selectionEffectRunning = false;
   }
 
   // Select an item with optional effect, then close.
@@ -528,8 +533,10 @@ class _AppDropdownButtonState<T> extends State<_AppDropdownButton<T>> {
   void _onGlobalPointerEvent(PointerEvent event) {
     if (!_isOpen) return;
     if (event is PointerMoveEvent || event is PointerHoverEvent) {
-      final index = _findItemIndexAt(event.position);
-      _hoveredIndex.value = index;
+      if (!_selectionEffectRunning) {
+        final index = _findItemIndexAt(event.position);
+        _hoveredIndex.value = index;
+      }
     } else if (event is PointerUpEvent) {
       _handleOverlayPointerUp(event);
     }
@@ -614,6 +621,7 @@ class _AppDropdownButtonState<T> extends State<_AppDropdownButton<T>> {
 
   void _handleKeyEvent(KeyEvent event) {
     if (!_isOpen) return;
+    if (_selectionEffectRunning) return;
     if (event is! KeyDownEvent && event is! KeyRepeatEvent) return;
 
     final key = event.logicalKey;
