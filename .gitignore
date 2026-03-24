@@ -148,3 +148,7 @@ app.*.symbols
 .serena/
 
 private/
+
+# Source movie files
+*.mov
+*.mp4

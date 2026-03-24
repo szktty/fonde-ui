@@ -24,15 +24,19 @@ class _DropdownMenuPageState extends State<DropdownMenuPage> {
           children: [
             CatalogDemo(
               label: 'Basic',
-              child: FondeDropdownMenu<String>(
-                initialSelection: _dropdownValue,
-                hintText: 'Select an option',
-                onSelected: (v) => setState(() => _dropdownValue = v),
-                dropdownMenuEntries: const [
-                  DropdownMenuEntry(value: 'apple', label: 'Apple'),
-                  DropdownMenuEntry(value: 'banana', label: 'Banana'),
-                  DropdownMenuEntry(value: 'cherry', label: 'Cherry'),
-                ],
+              child: Align(
+                alignment: Alignment.centerLeft,
+                child: FondeDropdownMenu<String>(
+                  initialSelection: _dropdownValue,
+                  width: 200,
+                  hintText: 'Select an option',
+                  onSelected: (v) => setState(() => _dropdownValue = v),
+                  dropdownMenuEntries: const [
+                    DropdownMenuEntry(value: 'apple', label: 'Apple'),
+                    DropdownMenuEntry(value: 'banana', label: 'Banana'),
+                    DropdownMenuEntry(value: 'cherry', label: 'Cherry'),
+                  ],
+                ),
               ),
             ),
           ],

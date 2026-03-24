@@ -9,6 +9,17 @@
 - FIX
   - Bug fixes
 
+## 0.7.0-dev
+
+- [UPDATE] `FondeDropdownColors`: add button-specific color properties (`buttonBackground`, `buttonHoverBackground`, `buttonBorder`, `buttonText`) and item hover colors (`itemHoverBackground`, `itemHoverText`)
+- [FIX] `FondeDropdownMenu`: overhaul interaction to match macOS native behavior
+  - Open on pointer down (tap-down)
+  - press-drag-release selection
+  - Hover highlight with accent color; button hover highlight when closed
+  - Keyboard navigation (↑↓ / Enter / Esc)
+  - macOS-style selection flash effect and fade-out on close
+- [FIX] `FondeSidebarList`: apply sidebar color scope so selected item text is no longer invisible
+
 ## 0.6.1
 
 **Release date**: 2026-03-24

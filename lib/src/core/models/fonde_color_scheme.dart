@@ -339,6 +339,16 @@ class FondeColorScheme {
 
     // Define dropdown colors
     final dropdownColors = FondeDropdownColors(
+      buttonBackground: baseColors.background,
+      buttonHoverBackground:
+          isDark
+              ? _AppColorConstants.darkButtonHoverBackground
+              : _AppColorConstants.lightButtonHoverBackground,
+      buttonBorder:
+          isDark
+              ? _AppColorConstants.darkButtonBorder
+              : _AppColorConstants.lightButtonBorder,
+      buttonText: baseColors.foreground,
       background:
           isDark
               ? _AppColorConstants.darkDropdownBackground
@@ -347,13 +357,8 @@ class FondeColorScheme {
           isDark
               ? _AppColorConstants.darkInputBorder
               : _AppColorConstants.lightInputBorder,
-      itemBackground: createStatefulColors(
-        Colors.transparent,
-        hover:
-            isDark
-                ? _AppColorConstants.darkDropdownItemHoverBackground
-                : _AppColorConstants.lightDropdownItemHoverBackground,
-      ),
+      itemHoverBackground: themeColorScheme.primaryColor,
+      itemHoverText: Colors.white,
       itemText: baseColors.foreground,
     );
 
