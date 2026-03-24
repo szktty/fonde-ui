@@ -428,7 +428,10 @@ class _AppDropdownButtonState<T> extends State<_AppDropdownButton<T>> {
   int? _openingPointerId;
   // Timestamp when the opening tap went down.
   DateTime? _openingPointerDownAt;
-  // Releases of the opening tap within this duration are ignored (menu stays open).
+  // Position where the opening tap went down.
+  Offset? _openingPointerDownPosition;
+  // Releases of the opening tap within this duration are ignored (menu stays open),
+  // unless the pointer has moved to a different item (press-drag-release).
   static const _longPressThreshold = Duration(milliseconds: 500);
   bool _globalRouteRegistered = false;
 
@@ -509,7 +512,14 @@ class _AppDropdownButtonState<T> extends State<_AppDropdownButton<T>> {
     if (!widget.enabled) return;
     if (!_isOpen) {
       _openingPointerDownAt = DateTime.now();
+      _openingPointerDownPosition = event.position;
       _openOverlay(event.pointer);
+      // Highlight the item under the pointer immediately on press.
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (_isOpen) {
+          _hoveredIndex.value = _findItemIndexAt(event.position);
+        }
+      });
     }
     // If already open, do nothing on down — let pointerUp handle it.
   }
@@ -523,19 +533,26 @@ class _AppDropdownButtonState<T> extends State<_AppDropdownButton<T>> {
   void _handleOverlayPointerUp(PointerUpEvent event) {
     if (!_isOpen) return;
 
-    // Release of the opening tap: ignore if held shorter than the threshold,
-    // select if held long enough (long-press-release = select).
+    // Release of the opening tap.
     if (event.pointer == _openingPointerId) {
       _openingPointerId = null;
       final downAt = _openingPointerDownAt;
+      final downPos = _openingPointerDownPosition;
       _openingPointerDownAt = null;
+      _openingPointerDownPosition = null;
       final held =
           downAt != null ? DateTime.now().difference(downAt) : Duration.zero;
+      // Short tap: check movement distance.
       if (held < _longPressThreshold) {
-        // Short tap that opened the menu — keep it open.
-        return;
+        final dist =
+            downPos != null ? (event.position - downPos).distance : 0.0;
+        if (dist < 4.0) {
+          // Barely moved — treat as the opening tap, keep menu open.
+          return;
+        }
+        // Moved enough (press-drag-release) → fall through to select.
       }
-      // Long press — fall through to select.
+      // Long press or drag to different item → fall through to select.
     }
 
     // Any other release (second tap, long-press release): select then close.
