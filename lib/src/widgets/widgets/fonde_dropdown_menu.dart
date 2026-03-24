@@ -450,6 +450,9 @@ class _AppDropdownButtonState<T> extends State<_AppDropdownButton<T>> {
   // True while the selection effect is running — hover updates are suppressed.
   bool _selectionEffectRunning = false;
 
+  // Button hover state (closed state only).
+  bool _buttonHovered = false;
+
   @override
   void dispose() {
     _removeOverlay();
@@ -473,6 +476,21 @@ class _AppDropdownButtonState<T> extends State<_AppDropdownButton<T>> {
     _hoveredIndex.value = null;
     _overlayOpacity.value = 1.0;
     _keyboardFocusNode.unfocus();
+  }
+
+  // Fade out the overlay and close without selecting (Esc / outside tap).
+  Future<void> _closeWithFade() async {
+    if (!_isOpen) return;
+    _selectionEffectRunning = true;
+    const steps = 8;
+    const stepDuration = Duration(milliseconds: 12); // ~100ms total
+    for (int i = steps - 1; i >= 0; i--) {
+      _overlayOpacity.value = i / steps;
+      await Future.delayed(stepDuration);
+      if (!_isOpen) return;
+    }
+    _removeOverlay();
+    setState(() {});
   }
 
   // Runs the macOS-style selection effect then calls [onDone].
@@ -612,7 +630,11 @@ class _AppDropdownButtonState<T> extends State<_AppDropdownButton<T>> {
 
     // Any other release (second tap, long-press release): select then close.
     final index = _findItemIndexAt(event.position);
-    _selectAndClose(index);
+    if (index == null) {
+      _closeWithFade();
+    } else {
+      _selectAndClose(index);
+    }
   }
 
   void _handleOverlayPointerMove(PointerMoveEvent event) {
@@ -628,8 +650,7 @@ class _AppDropdownButtonState<T> extends State<_AppDropdownButton<T>> {
     final count = widget.dropdownMenuEntries.length;
 
     if (key == LogicalKeyboardKey.escape) {
-      _removeOverlay();
-      setState(() {});
+      _closeWithFade();
     } else if (key == LogicalKeyboardKey.arrowDown) {
       final current = _hoveredIndex.value;
       _hoveredIndex.value =
@@ -768,88 +789,101 @@ class _AppDropdownButtonState<T> extends State<_AppDropdownButton<T>> {
   }
 
   Widget _buildButton(BuildContext context, FondeIconTheme iconTheme) {
-    return CompositedTransformTarget(
-      link: _layerLink,
-      child: Listener(
-        onPointerDown: _handlePointerDown,
-        onPointerMove: _handlePointerMove,
-        behavior: HitTestBehavior.opaque,
-        child: Container(
-          width:
-              widget.showAsActionIcon
-                  ? (_AppDropdownMenuConstants.defaultHeight * widget.zoomScale)
-                  : widget.width,
-          height:
-              widget.height ??
-              _AppDropdownMenuConstants.defaultHeight * widget.zoomScale,
-          decoration: BoxDecoration(
-            color: widget.backgroundColor,
-            borderRadius: widget.borderRadius,
-            border: Border.all(
-              color: widget.borderColor,
-              width: 1.5 * widget.borderScale,
+    return MouseRegion(
+      onEnter: (_) => setState(() => _buttonHovered = true),
+      onExit: (_) => setState(() => _buttonHovered = false),
+      child: CompositedTransformTarget(
+        link: _layerLink,
+        child: Listener(
+          onPointerDown: _handlePointerDown,
+          onPointerMove: _handlePointerMove,
+          behavior: HitTestBehavior.opaque,
+          child: Container(
+            width:
+                widget.showAsActionIcon
+                    ? (_AppDropdownMenuConstants.defaultHeight *
+                        widget.zoomScale)
+                    : widget.width,
+            height:
+                widget.height ??
+                _AppDropdownMenuConstants.defaultHeight * widget.zoomScale,
+            decoration: BoxDecoration(
+              color:
+                  _buttonHovered && !_isOpen
+                      ? widget.hoverBackgroundColor
+                      : widget.backgroundColor,
+              borderRadius: widget.borderRadius,
+              border: Border.all(
+                color: widget.borderColor,
+                width: 1.5 * widget.borderScale,
+              ),
             ),
-          ),
-          padding: EdgeInsets.symmetric(
-            horizontal:
-                _AppDropdownMenuConstants.horizontalPadding * widget.zoomScale,
-            vertical:
-                _AppDropdownMenuConstants.verticalPadding * widget.zoomScale,
-          ),
-          child:
-              widget.showAsActionIcon
-                  ? Align(
-                    alignment: Alignment.center,
-                    child: Icon(
-                      widget.actionIcon ?? iconTheme.moreVert,
-                      color: widget.textColor,
-                      size: 20 * widget.zoomScale,
-                    ),
-                  )
-                  : Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      if (widget.selectedEntry?.leadingIcon != null) ...[
-                        Padding(
-                          padding: EdgeInsets.only(top: 2.0 * widget.zoomScale),
-                          child: widget.selectedEntry!.leadingIcon!,
+            padding: EdgeInsets.symmetric(
+              horizontal:
+                  _AppDropdownMenuConstants.horizontalPadding *
+                  widget.zoomScale,
+              vertical:
+                  _AppDropdownMenuConstants.verticalPadding * widget.zoomScale,
+            ),
+            child:
+                widget.showAsActionIcon
+                    ? Align(
+                      alignment: Alignment.center,
+                      child: Icon(
+                        widget.actionIcon ?? iconTheme.moreVert,
+                        color: widget.textColor,
+                        size: 20 * widget.zoomScale,
+                      ),
+                    )
+                    : Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        if (widget.selectedEntry?.leadingIcon != null) ...[
+                          Padding(
+                            padding: EdgeInsets.only(
+                              top: 2.0 * widget.zoomScale,
+                            ),
+                            child: widget.selectedEntry!.leadingIcon!,
+                          ),
+                          SizedBox(
+                            width:
+                                _AppDropdownMenuConstants.spacing *
+                                widget.zoomScale,
+                          ),
+                        ],
+                        Expanded(
+                          child: FondeText(
+                            widget.selectedEntry?.label ??
+                                widget.hintText ??
+                                '',
+                            variant: FondeTextVariant.bodyText,
+                            color:
+                                widget.selectedEntry != null
+                                    ? widget.textColor
+                                    : widget.textColor.withValues(alpha: 0.6),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
                         ),
                         SizedBox(
                           width:
                               _AppDropdownMenuConstants.spacing *
                               widget.zoomScale,
                         ),
+                        Padding(
+                          padding: EdgeInsets.only(top: 2.0 * widget.zoomScale),
+                          child: Icon(
+                            iconTheme.chevronDown,
+                            color: widget.textColor,
+                            size:
+                                _AppDropdownMenuConstants.chevronIconSize *
+                                widget.zoomScale,
+                          ),
+                        ),
                       ],
-                      Expanded(
-                        child: FondeText(
-                          widget.selectedEntry?.label ?? widget.hintText ?? '',
-                          variant: FondeTextVariant.bodyText,
-                          color:
-                              widget.selectedEntry != null
-                                  ? widget.textColor
-                                  : widget.textColor.withValues(alpha: 0.6),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                      ),
-                      SizedBox(
-                        width:
-                            _AppDropdownMenuConstants.spacing *
-                            widget.zoomScale,
-                      ),
-                      Padding(
-                        padding: EdgeInsets.only(top: 2.0 * widget.zoomScale),
-                        child: Icon(
-                          iconTheme.chevronDown,
-                          color: widget.textColor,
-                          size:
-                              _AppDropdownMenuConstants.chevronIconSize *
-                              widget.zoomScale,
-                        ),
-                      ),
-                    ],
-                  ),
+                    ),
+          ),
         ),
       ),
     );
