@@ -334,6 +334,7 @@ class _AppDropdownMenuWidget<T> extends StatelessWidget {
       );
     }
 
+    final dropdown = appColorScheme.interactive.dropdown;
     return _AppDropdownButton<T>(
       selectedEntry: selectedEntry,
       dropdownMenuEntries: dropdownMenuEntries,
@@ -344,17 +345,17 @@ class _AppDropdownMenuWidget<T> extends StatelessWidget {
       hintText: hintText,
       enabled: enabled,
       borderRadius: smoothBorderRadius,
-      backgroundColor: backgroundColor ?? appColorScheme.base.background,
-      borderColor: borderColor ?? appColorScheme.base.border,
-      overlayBackgroundColor:
-          overlayBackgroundColor ?? appColorScheme.base.background,
-      overlayBorderColor: overlayBorderColor ?? appColorScheme.base.border,
-      textColor: textColor ?? appColorScheme.base.foreground,
+      backgroundColor: backgroundColor ?? dropdown.buttonBackground,
+      borderColor: borderColor ?? dropdown.buttonBorder,
+      overlayBackgroundColor: overlayBackgroundColor ?? dropdown.background,
+      overlayBorderColor: overlayBorderColor ?? dropdown.border,
+      textColor: textColor ?? dropdown.buttonText,
       position: position,
       alignment: alignment,
       showCheckmark: showCheckmark,
-      hoverBackgroundColor:
-          appColorScheme.interactive.list.itemBackground.hover,
+      hoverBackgroundColor: dropdown.itemHoverBackground,
+      buttonHoverBackgroundColor: dropdown.buttonHoverBackground,
+      itemHoverTextColor: dropdown.itemHoverText,
       zoomScale: zoomScale,
       borderScale: borderScale,
       showAsActionIcon: showAsActionIcon,
@@ -384,6 +385,8 @@ class _AppDropdownButton<T> extends StatefulWidget {
   final FondeDropdownMenuAlignment alignment;
   final bool showCheckmark;
   final Color hoverBackgroundColor;
+  final Color buttonHoverBackgroundColor;
+  final Color itemHoverTextColor;
   final double zoomScale;
   final double borderScale;
   final bool showAsActionIcon;
@@ -410,6 +413,8 @@ class _AppDropdownButton<T> extends StatefulWidget {
     required this.alignment,
     required this.showCheckmark,
     required this.hoverBackgroundColor,
+    required this.buttonHoverBackgroundColor,
+    required this.itemHoverTextColor,
     required this.zoomScale,
     required this.borderScale,
     this.showAsActionIcon = false,
@@ -766,6 +771,7 @@ class _AppDropdownButtonState<T> extends State<_AppDropdownButton<T>> {
                           alignment: widget.alignment,
                           showCheckmark: widget.showCheckmark,
                           hoverBackgroundColor: widget.hoverBackgroundColor,
+                          hoverTextColor: widget.itemHoverTextColor,
                           zoomScale: widget.zoomScale,
                           borderScale: widget.borderScale,
                           hoveredIndex: _hoveredIndex,
@@ -810,7 +816,7 @@ class _AppDropdownButtonState<T> extends State<_AppDropdownButton<T>> {
             decoration: BoxDecoration(
               color:
                   _buttonHovered && !_isOpen
-                      ? widget.hoverBackgroundColor
+                      ? widget.buttonHoverBackgroundColor
                       : widget.backgroundColor,
               borderRadius: widget.borderRadius,
               border: Border.all(
@@ -906,6 +912,7 @@ class _AppDropdownOverlay<T> extends StatelessWidget {
   final FondeDropdownMenuAlignment alignment;
   final bool showCheckmark;
   final Color hoverBackgroundColor;
+  final Color hoverTextColor;
   final double zoomScale;
   final double borderScale;
   final ValueNotifier<int?> hoveredIndex;
@@ -926,6 +933,7 @@ class _AppDropdownOverlay<T> extends StatelessWidget {
     required this.alignment,
     required this.showCheckmark,
     required this.hoverBackgroundColor,
+    required this.hoverTextColor,
     required this.zoomScale,
     required this.borderScale,
     required this.hoveredIndex,
@@ -959,6 +967,7 @@ class _AppDropdownOverlay<T> extends StatelessWidget {
                 entry: entry,
                 onSelected: onSelected,
                 textColor: textColor,
+                hoverTextColor: hoverTextColor,
                 textStyle: textStyle,
                 buttonHeight: buttonHeight,
                 isSelected: entry.value == selectedValue,
@@ -981,6 +990,7 @@ class _AppDropdownMenuItem<T> extends StatelessWidget {
   final DropdownMenuEntry<T> entry;
   final ValueChanged<T?> onSelected;
   final Color textColor;
+  final Color hoverTextColor;
   final TextStyle? textStyle;
   final double buttonHeight;
   final bool isSelected;
@@ -995,6 +1005,7 @@ class _AppDropdownMenuItem<T> extends StatelessWidget {
     required this.entry,
     required this.onSelected,
     required this.textColor,
+    required this.hoverTextColor,
     this.textStyle,
     required this.buttonHeight,
     required this.isSelected,
@@ -1008,6 +1019,7 @@ class _AppDropdownMenuItem<T> extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final iconTheme = context.fondeIconTheme;
+    final effectiveTextColor = isHovered ? hoverTextColor : textColor;
     // IgnorePointer lets move/up events pass through to the overlay Listener.
     return IgnorePointer(
       child: Container(
@@ -1032,7 +1044,7 @@ class _AppDropdownMenuItem<T> extends StatelessWidget {
                             padding: EdgeInsets.only(top: 4.0 * zoomScale),
                             child: Icon(
                               iconTheme.check,
-                              color: textColor,
+                              color: effectiveTextColor,
                               size:
                                   _AppDropdownMenuConstants.checkIconSize *
                                   zoomScale,
@@ -1056,7 +1068,7 @@ class _AppDropdownMenuItem<T> extends StatelessWidget {
                   FondeText(
                     entry.label,
                     variant: FondeTextVariant.bodyText,
-                    color: textColor,
+                    color: effectiveTextColor,
                     overflow: TextOverflow.ellipsis,
                     maxLines: 1,
                   ),
