@@ -74,6 +74,9 @@ Fonde UI's goal is to provide **operational and visual comfort** in desktop apps
 - Context Menu
 - Overflow Menu
 - Dropdown Menu — macOS-style press-drag-release, keyboard navigation. No submenu support yet.
+
+  ![Dropdown Menu](doc/movies/dropdown_menu_behavior.gif)
+
 - Popup Menu
 
 ### Input
