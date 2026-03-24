@@ -1,6 +1,6 @@
 name: fonde_ui
-description: Desktop-first Flutter UI component library. Shell layout, precise interaction, and accessibility by default.
-version: 0.5.0-dev
+description: Desktop-first Flutter UI utility components with native-like interaction and zoom scaling support.
+version: 0.6.0-dev
 
 repository: https://github.com/szktty/fonde-ui
 
