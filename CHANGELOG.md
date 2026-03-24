@@ -9,6 +9,13 @@
 - FIX
   - Bug fixes
 
+## 0.6.1
+
+**Release date**: 2026-03-24
+
+- [FIX] Remove undefined hidden names from `fonde_ui.dart` export
+- [FIX] Remove obsolete Riverpod-based tests and rewrite test helpers with `FondeApp`
+
 ## 0.6.0
 
 **Release date**: 2026-03-24
