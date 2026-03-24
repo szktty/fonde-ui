@@ -9,7 +9,9 @@
 - FIX
   - Bug fixes
 
-## 0.6.0-dev
+## 0.6.0
+
+**Release date**: 2026-03-24
 
 - [CHANGE] Remove `flutter_riverpod` dependency — all state management is now plain Flutter (`ChangeNotifier`, `InheritedWidget`)
   - `fonde_ui_riverpod.dart` is deprecated and no longer exports any symbols

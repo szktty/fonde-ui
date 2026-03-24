@@ -7,7 +7,7 @@ Developed for [RinneGraph](https://github.com/szktty/rinne-graph). Currently pro
 ## Package info
 
 - name: fonde_ui
-- version: 0.5.0-dev
+- version: 0.6.0
 - Dart SDK: ^3.7.0
 - Flutter: >=3.41.2
 
