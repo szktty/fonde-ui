@@ -4,6 +4,9 @@
 # Documentation source (not needed by consumers)
 doc/
 
+# Internal development notes
+private/
+
 # Example app
 example/
 
