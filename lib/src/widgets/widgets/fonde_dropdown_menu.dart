@@ -122,6 +122,9 @@ class FondeDropdownMenu<T> extends StatelessWidget {
   /// Icon data for action icon (used when showAsActionIcon is true)
   final IconData? actionIcon;
 
+  /// Whether to show the macOS-style selection effect (flash + fade out)
+  final bool selectionEffect;
+
   /// Constructor
   const FondeDropdownMenu({
     super.key,
@@ -146,6 +149,7 @@ class FondeDropdownMenu<T> extends StatelessWidget {
     this.disableZoom = false,
     this.showAsActionIcon = false,
     this.actionIcon,
+    this.selectionEffect = true,
   });
 
   @override
@@ -172,6 +176,7 @@ class FondeDropdownMenu<T> extends StatelessWidget {
       disableZoom: disableZoom,
       showAsActionIcon: showAsActionIcon,
       actionIcon: actionIcon,
+      selectionEffect: selectionEffect,
     );
   }
 }
@@ -199,6 +204,7 @@ class _AppDropdownMenuWidget<T> extends StatelessWidget {
   final bool disableZoom;
   final bool showAsActionIcon;
   final IconData? actionIcon;
+  final bool selectionEffect;
 
   const _AppDropdownMenuWidget({
     super.key,
@@ -223,6 +229,7 @@ class _AppDropdownMenuWidget<T> extends StatelessWidget {
     this.disableZoom = false,
     this.showAsActionIcon = false,
     this.actionIcon,
+    this.selectionEffect = true,
   });
 
   /// Calculate maximum item width for dropdown button
@@ -352,6 +359,7 @@ class _AppDropdownMenuWidget<T> extends StatelessWidget {
       borderScale: borderScale,
       showAsActionIcon: showAsActionIcon,
       actionIcon: actionIcon,
+      selectionEffect: selectionEffect,
     );
   }
 }
@@ -380,6 +388,7 @@ class _AppDropdownButton<T> extends StatefulWidget {
   final double borderScale;
   final bool showAsActionIcon;
   final IconData? actionIcon;
+  final bool selectionEffect;
 
   const _AppDropdownButton({
     super.key,
@@ -405,6 +414,7 @@ class _AppDropdownButton<T> extends StatefulWidget {
     required this.borderScale,
     this.showAsActionIcon = false,
     this.actionIcon,
+    this.selectionEffect = true,
   });
 
   @override
@@ -435,10 +445,14 @@ class _AppDropdownButtonState<T> extends State<_AppDropdownButton<T>> {
   static const _longPressThreshold = Duration(milliseconds: 500);
   bool _globalRouteRegistered = false;
 
+  // Selection effect state: opacity of the overlay (1.0 = visible, 0.0 = hidden)
+  final ValueNotifier<double> _overlayOpacity = ValueNotifier<double>(1.0);
+
   @override
   void dispose() {
     _removeOverlay();
     _hoveredIndex.dispose();
+    _overlayOpacity.dispose();
     _keyboardFocusNode.dispose();
     super.dispose();
   }
@@ -454,7 +468,41 @@ class _AppDropdownButtonState<T> extends State<_AppDropdownButton<T>> {
     _overlayEntry = null;
     _isOpen = false;
     _hoveredIndex.value = null;
+    _overlayOpacity.value = 1.0;
     _keyboardFocusNode.unfocus();
+  }
+
+  // Runs the macOS-style selection effect then calls [onDone].
+  // 1. Hide highlight (50ms) → 2. Show highlight (100ms) → 3. Fade out (150ms)
+  Future<void> _runSelectionEffect(int selectedIndex) async {
+    // Step 1: hide highlight
+    _hoveredIndex.value = null;
+    await Future.delayed(const Duration(milliseconds: 50));
+    if (!_isOpen) return;
+    // Step 2: restore highlight
+    _hoveredIndex.value = selectedIndex;
+    await Future.delayed(const Duration(milliseconds: 100));
+    if (!_isOpen) return;
+    // Step 3: fade out overlay
+    const steps = 10;
+    const stepDuration = Duration(milliseconds: 15); // ~150ms total
+    for (int i = steps - 1; i >= 0; i--) {
+      _overlayOpacity.value = i / steps;
+      await Future.delayed(stepDuration);
+      if (!_isOpen) return;
+    }
+  }
+
+  // Select an item with optional effect, then close.
+  Future<void> _selectAndClose(int? index) async {
+    final entry = index != null ? widget.dropdownMenuEntries[index] : null;
+    if (widget.selectionEffect && index != null) {
+      await _runSelectionEffect(index);
+      if (!_isOpen) return; // closed by other means during effect
+    }
+    if (entry != null) widget.onSelected?.call(entry.value);
+    _removeOverlay();
+    setState(() {});
   }
 
   void _openOverlay(int pointerId) {
@@ -557,12 +605,7 @@ class _AppDropdownButtonState<T> extends State<_AppDropdownButton<T>> {
 
     // Any other release (second tap, long-press release): select then close.
     final index = _findItemIndexAt(event.position);
-    if (index != null) {
-      final entry = widget.dropdownMenuEntries[index];
-      widget.onSelected?.call(entry.value);
-    }
-    _removeOverlay();
-    setState(() {});
+    _selectAndClose(index);
   }
 
   void _handleOverlayPointerMove(PointerMoveEvent event) {
@@ -590,12 +633,7 @@ class _AppDropdownButtonState<T> extends State<_AppDropdownButton<T>> {
     } else if (key == LogicalKeyboardKey.enter ||
         key == LogicalKeyboardKey.numpadEnter) {
       final index = _hoveredIndex.value;
-      if (index != null) {
-        final entry = widget.dropdownMenuEntries[index];
-        widget.onSelected?.call(entry.value);
-      }
-      _removeOverlay();
-      setState(() {});
+      _selectAndClose(index);
     }
   }
 
@@ -650,58 +688,64 @@ class _AppDropdownButtonState<T> extends State<_AppDropdownButton<T>> {
 
     return OverlayEntry(
       builder: (context) {
-        return KeyboardListener(
-          focusNode: _keyboardFocusNode,
-          onKeyEvent: _handleKeyEvent,
-          child: Listener(
-            // Move and up are handled via the global pointer route.
-            // This Listener is kept as structural scaffolding for the overlay.
-            onPointerMove: _handleOverlayPointerMove,
-            behavior: HitTestBehavior.translucent,
-            child: Stack(
-              children: [
-                // Menu panel
-                Positioned(
-                  width: overlayWidth,
-                  height:
-                      widget.dropdownMenuEntries.length *
-                          (_AppDropdownMenuConstants.defaultHeight *
-                              widget.zoomScale) +
-                      _AppDropdownMenuConstants.verticalPadding *
-                          widget.zoomScale,
-                  child: CompositedTransformFollower(
-                    link: _layerLink,
-                    showWhenUnlinked: false,
-                    offset: Offset(horizontalOffset, verticalOffset - 0.5),
-                    child: Material(
-                      color: Colors.transparent,
-                      child: _AppDropdownOverlay<T>(
-                        panelKey: _menuPanelKey,
-                        entries: widget.dropdownMenuEntries,
-                        onSelected: (value) {
-                          widget.onSelected?.call(value);
-                          _removeOverlay();
-                          setState(() {});
-                        },
-                        borderRadius: widget.borderRadius,
-                        backgroundColor: widget.overlayBackgroundColor,
-                        borderColor: widget.overlayBorderColor,
-                        textColor: widget.textColor,
-                        textStyle: widget.textStyle,
-                        buttonHeight: size.height,
-                        selectedValue: widget.selectedEntry?.value,
-                        overlayWidth: overlayWidth,
-                        alignment: widget.alignment,
-                        showCheckmark: widget.showCheckmark,
-                        hoverBackgroundColor: widget.hoverBackgroundColor,
-                        zoomScale: widget.zoomScale,
-                        borderScale: widget.borderScale,
-                        hoveredIndex: _hoveredIndex,
+        return ValueListenableBuilder<double>(
+          valueListenable: _overlayOpacity,
+          builder:
+              (context, opacity, child) =>
+                  Opacity(opacity: opacity, child: child),
+          child: KeyboardListener(
+            focusNode: _keyboardFocusNode,
+            onKeyEvent: _handleKeyEvent,
+            child: Listener(
+              // Move and up are handled via the global pointer route.
+              // This Listener is kept as structural scaffolding for the overlay.
+              onPointerMove: _handleOverlayPointerMove,
+              behavior: HitTestBehavior.translucent,
+              child: Stack(
+                children: [
+                  // Menu panel
+                  Positioned(
+                    width: overlayWidth,
+                    height:
+                        widget.dropdownMenuEntries.length *
+                            (_AppDropdownMenuConstants.defaultHeight *
+                                widget.zoomScale) +
+                        _AppDropdownMenuConstants.verticalPadding *
+                            widget.zoomScale,
+                    child: CompositedTransformFollower(
+                      link: _layerLink,
+                      showWhenUnlinked: false,
+                      offset: Offset(horizontalOffset, verticalOffset - 0.5),
+                      child: Material(
+                        color: Colors.transparent,
+                        child: _AppDropdownOverlay<T>(
+                          panelKey: _menuPanelKey,
+                          entries: widget.dropdownMenuEntries,
+                          onSelected: (value) {
+                            widget.onSelected?.call(value);
+                            _removeOverlay();
+                            setState(() {});
+                          },
+                          borderRadius: widget.borderRadius,
+                          backgroundColor: widget.overlayBackgroundColor,
+                          borderColor: widget.overlayBorderColor,
+                          textColor: widget.textColor,
+                          textStyle: widget.textStyle,
+                          buttonHeight: size.height,
+                          selectedValue: widget.selectedEntry?.value,
+                          overlayWidth: overlayWidth,
+                          alignment: widget.alignment,
+                          showCheckmark: widget.showCheckmark,
+                          hoverBackgroundColor: widget.hoverBackgroundColor,
+                          zoomScale: widget.zoomScale,
+                          borderScale: widget.borderScale,
+                          hoveredIndex: _hoveredIndex,
+                        ),
                       ),
                     ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
           ),
         );
