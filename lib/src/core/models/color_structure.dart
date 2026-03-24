@@ -945,35 +945,66 @@ class FondeListColors {
 
 /// Class defining dropdown colors
 class FondeDropdownColors {
+  /// Dropdown button background color
+  final Color buttonBackground;
+
+  /// Dropdown button background color on hover
+  final Color buttonHoverBackground;
+
+  /// Dropdown button border color
+  final Color buttonBorder;
+
+  /// Dropdown button text/icon color
+  final Color buttonText;
+
   /// Dropdown menu background color
   final Color background;
 
   /// Dropdown menu border color
   final Color border;
 
-  /// Menu item background color (state-based)
-  final FondeStatefulColors itemBackground;
+  /// Menu item background color on hover (typically accent color)
+  final Color itemHoverBackground;
 
-  /// Menu item text color
+  /// Menu item text color on hover
+  final Color itemHoverText;
+
+  /// Menu item text color (normal)
   final Color itemText;
 
   const FondeDropdownColors({
+    required this.buttonBackground,
+    required this.buttonHoverBackground,
+    required this.buttonBorder,
+    required this.buttonText,
     required this.background,
     required this.border,
-    required this.itemBackground,
+    required this.itemHoverBackground,
+    required this.itemHoverText,
     required this.itemText,
   });
 
   FondeDropdownColors copyWith({
+    Color? buttonBackground,
+    Color? buttonHoverBackground,
+    Color? buttonBorder,
+    Color? buttonText,
     Color? background,
     Color? border,
-    FondeStatefulColors? itemBackground,
+    Color? itemHoverBackground,
+    Color? itemHoverText,
     Color? itemText,
   }) {
     return FondeDropdownColors(
+      buttonBackground: buttonBackground ?? this.buttonBackground,
+      buttonHoverBackground:
+          buttonHoverBackground ?? this.buttonHoverBackground,
+      buttonBorder: buttonBorder ?? this.buttonBorder,
+      buttonText: buttonText ?? this.buttonText,
       background: background ?? this.background,
       border: border ?? this.border,
-      itemBackground: itemBackground ?? this.itemBackground,
+      itemHoverBackground: itemHoverBackground ?? this.itemHoverBackground,
+      itemHoverText: itemHoverText ?? this.itemHoverText,
       itemText: itemText ?? this.itemText,
     );
   }
@@ -982,15 +1013,30 @@ class FondeDropdownColors {
   bool operator ==(Object other) {
     if (identical(this, other)) return true;
     return other is FondeDropdownColors &&
+        other.buttonBackground == buttonBackground &&
+        other.buttonHoverBackground == buttonHoverBackground &&
+        other.buttonBorder == buttonBorder &&
+        other.buttonText == buttonText &&
         other.background == background &&
         other.border == border &&
-        other.itemBackground == itemBackground &&
+        other.itemHoverBackground == itemHoverBackground &&
+        other.itemHoverText == itemHoverText &&
         other.itemText == itemText;
   }
 
   @override
   int get hashCode {
-    return Object.hash(background, border, itemBackground, itemText);
+    return Object.hash(
+      buttonBackground,
+      buttonHoverBackground,
+      buttonBorder,
+      buttonText,
+      background,
+      border,
+      itemHoverBackground,
+      itemHoverText,
+      itemText,
+    );
   }
 }
 

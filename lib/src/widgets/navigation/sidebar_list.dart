@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../core/color_scope_widget.dart';
 import '../../core/context_extensions.dart';
 import '../../internal.dart';
 import 'sidebar.dart';
@@ -86,13 +87,16 @@ class FondeSidebarList extends StatelessWidget {
             ? Colors.transparent
             : colorScheme.uiAreas.sideBar.background);
 
-    return Container(
-      color: resolvedBackground,
-      child: ListView(
-        padding: padding * zoomScale,
-        physics: physics,
-        shrinkWrap: shrinkWrap,
-        children: _processChildren(children, zoomScale),
+    return FondeColorScopeWidget(
+      scope: FondeColorScopeBuilder.sideBarScope(colorScheme),
+      child: Container(
+        color: resolvedBackground,
+        child: ListView(
+          padding: padding * zoomScale,
+          physics: physics,
+          shrinkWrap: shrinkWrap,
+          children: _processChildren(children, zoomScale),
+        ),
       ),
     );
   }

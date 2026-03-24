@@ -2,6 +2,7 @@ import 'package:figma_squircle/figma_squircle.dart';
 import 'package:flutter/material.dart';
 import '../../core/context_extensions.dart';
 import '../../internal.dart';
+import '../typography/fonde_text.dart';
 import '../widgets/fonde_gesture_detector.dart';
 
 /// The visual style of navigation items.
@@ -110,9 +111,6 @@ class _FondeSidebarListItemState extends State<FondeSidebarListItem> {
     // Get the color scope (use the sidebar scope or the default)
     final colorScope = context.fondeColorScope;
 
-    // Get the text theme
-    final themeData = Theme.of(context);
-
     final Color? effectiveBackgroundColor;
     final Color effectiveContentColor;
 
@@ -137,10 +135,6 @@ class _FondeSidebarListItemState extends State<FondeSidebarListItem> {
             widget.isSelected ? colorScope.accent : colorScope.text;
     }
 
-    final effectiveTitleStyle =
-        widget.titleStyle ??
-        themeData.textTheme.bodyLarge?.copyWith(color: effectiveContentColor);
-
     Widget content = Padding(
       padding: widget.padding * zoomScale,
       child: Row(
@@ -154,10 +148,13 @@ class _FondeSidebarListItemState extends State<FondeSidebarListItem> {
               ),
             ),
           Expanded(
-            child: Text(
+            child: FondeText(
               widget.title,
-              style: effectiveTitleStyle,
+              variant: FondeTextVariant.bodyText,
+              color: effectiveContentColor,
               overflow: TextOverflow.ellipsis,
+              maxLines: 1,
+              disableZoom: widget.disableZoom,
             ),
           ),
           if (widget.trailing != null) widget.trailing!,
