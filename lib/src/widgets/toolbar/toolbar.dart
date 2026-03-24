@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
-import '../../core/context_extensions.dart';
-import '../../core/controllers.dart';
 import '../../internal.dart';
 import '../overflow_menu/overflow_menu.dart';
 
@@ -14,8 +12,6 @@ class _Toolbar extends StatelessWidget {
     this.axis = Axis.horizontal,
     this.spacing = 8.0,
     this.padding = const EdgeInsets.all(8.0),
-    this.decoration,
-    this.clipBehavior = Clip.none,
     this.disableZoom = false,
   });
 
@@ -23,8 +19,6 @@ class _Toolbar extends StatelessWidget {
   final Axis axis;
   final double spacing;
   final EdgeInsetsGeometry padding;
-  final BoxDecoration? decoration;
-  final Clip clipBehavior;
   final bool disableZoom;
 
   @override
@@ -34,18 +28,15 @@ class _Toolbar extends StatelessWidget {
     final borderScale = disableZoom ? 1.0 : context.fondeBorderScale;
 
     return Container(
-      decoration:
-          decoration ??
-          BoxDecoration(
-            color: theme.colorScheme.surface,
-            border: Border(
-              bottom: BorderSide(
-                color: theme.colorScheme.outlineVariant,
-                width: borderScale,
-              ),
-            ),
+      decoration: BoxDecoration(
+        color: theme.colorScheme.surface,
+        border: Border(
+          bottom: BorderSide(
+            color: theme.colorScheme.outlineVariant,
+            width: borderScale,
           ),
-      clipBehavior: clipBehavior,
+        ),
+      ),
       child: Padding(
         padding: EdgeInsets.fromLTRB(
           (padding as EdgeInsets).left * zoomScale,

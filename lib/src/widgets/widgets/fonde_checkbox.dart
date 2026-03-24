@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import '../../core/context_extensions.dart';
 import '../../internal.dart';
 import 'package:figma_squircle/figma_squircle.dart';
 import 'fonde_rectangle_border.dart';

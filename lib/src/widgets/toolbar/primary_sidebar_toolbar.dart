@@ -1,6 +1,4 @@
 import 'package:flutter/material.dart';
-import '../../core/context_extensions.dart';
-import '../../core/controllers.dart';
 import '../../internal.dart';
 import '../widgets/fonde_icon_button.dart';
 

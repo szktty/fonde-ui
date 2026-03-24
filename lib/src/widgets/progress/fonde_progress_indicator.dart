@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import '../../internal.dart';
-import '../../core/context_extensions.dart';
 
 /// Linear progress indicator with accessibility support.
 ///

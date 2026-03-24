@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
-import '../../core/context_extensions.dart';
 import '../../internal.dart';
-import '../icons/icon_theme_providers.dart';
 import '../typography/fonde_text.dart';
 import 'fonde_outline_item.dart';
 

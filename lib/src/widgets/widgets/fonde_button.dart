@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import '../../core/context_extensions.dart';
 import '../../internal.dart';
 import '../spacing/fonde_spacing.dart';
 import 'fonde_rectangle_border.dart';

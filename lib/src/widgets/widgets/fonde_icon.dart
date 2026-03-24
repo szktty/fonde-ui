@@ -2,7 +2,6 @@ import '../../internal.dart';
 import 'package:flutter/material.dart';
 
 import '../accessibility/fonde_accessible_widget.dart';
-import '../../core/context_extensions.dart';
 
 /// Icon size presets.
 enum FondeIconSize {

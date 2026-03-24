@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'models/fonde_color_scheme.dart';
 
 /// Standard color definitions provided by the color scope.
 ///

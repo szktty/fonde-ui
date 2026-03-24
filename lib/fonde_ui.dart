@@ -129,14 +129,7 @@ export 'src/widgets/icons/lucide_icon_theme.dart';
 export 'src/widgets/widgets/fonde_icon.dart';
 
 // ─── Visual ───────────────────────────────────────────────────────────────────
-export 'src/widgets/widgets/fonde_container.dart'
-    hide
-        fondeContainerPadding,
-        fondeContainerPaddingProvider,
-        FondeContainerPaddingProvider,
-        fondeContainerLeadingWidth,
-        fondeContainerLeadingWidthProvider,
-        FondeContainerLeadingWidthProvider;
+export 'src/widgets/widgets/fonde_container.dart';
 export 'src/widgets/widgets/fonde_divider.dart';
 export 'src/widgets/widgets/fonde_physical_model.dart';
 export 'src/widgets/widgets/fonde_rectangle_border.dart';
