@@ -19,6 +19,7 @@
   - Keyboard navigation (↑↓ / Enter / Esc)
   - macOS-style selection flash effect and fade-out on close
 - [FIX] `FondeSidebarList`: apply sidebar color scope so selected item text is no longer invisible
+- [FIX] `FondeTextField`: fix text vertical alignment to stay centered at any zoom scale
 
 ## 0.6.1
 
