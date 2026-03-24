@@ -425,10 +425,11 @@ class _AppDropdownButtonState<T> extends State<_AppDropdownButton<T>> {
   final GlobalKey _menuPanelKey = GlobalKey();
 
   // The pointer ID of the tap that opened the menu.
-  // When the overlay sees a pointerUp with this same ID, it is the release
-  // of the opening tap — keep the menu open instead of selecting.
-  // Set to null after that first release, so subsequent taps select normally.
   int? _openingPointerId;
+  // Timestamp when the opening tap went down.
+  DateTime? _openingPointerDownAt;
+  // Releases of the opening tap within this duration are ignored (menu stays open).
+  static const _longPressThreshold = Duration(milliseconds: 500);
   bool _globalRouteRegistered = false;
 
   @override
@@ -478,6 +479,8 @@ class _AppDropdownButtonState<T> extends State<_AppDropdownButton<T>> {
     if (event is PointerMoveEvent || event is PointerHoverEvent) {
       final index = _findItemIndexAt(event.position);
       _hoveredIndex.value = index;
+    } else if (event is PointerUpEvent) {
+      _handleOverlayPointerUp(event);
     }
   }
 
@@ -505,6 +508,7 @@ class _AppDropdownButtonState<T> extends State<_AppDropdownButton<T>> {
   void _handlePointerDown(PointerDownEvent event) {
     if (!widget.enabled) return;
     if (!_isOpen) {
+      _openingPointerDownAt = DateTime.now();
       _openOverlay(event.pointer);
     }
     // If already open, do nothing on down — let pointerUp handle it.
@@ -515,17 +519,26 @@ class _AppDropdownButtonState<T> extends State<_AppDropdownButton<T>> {
     // Handled by _onGlobalPointerEvent; nothing needed here.
   }
 
-  // All pointer-up handling is done here (called from the overlay Listener).
+  // All pointer-up handling is done here (via global pointer route).
   void _handleOverlayPointerUp(PointerUpEvent event) {
     if (!_isOpen) return;
 
-    // The tap that opened the menu — keep it open, then clear the ID.
+    // Release of the opening tap: ignore if held shorter than the threshold,
+    // select if held long enough (long-press-release = select).
     if (event.pointer == _openingPointerId) {
       _openingPointerId = null;
-      return;
+      final downAt = _openingPointerDownAt;
+      _openingPointerDownAt = null;
+      final held =
+          downAt != null ? DateTime.now().difference(downAt) : Duration.zero;
+      if (held < _longPressThreshold) {
+        // Short tap that opened the menu — keep it open.
+        return;
+      }
+      // Long press — fall through to select.
     }
 
-    // Any subsequent release: select item under pointer (if any) then close.
+    // Any other release (second tap, long-press release): select then close.
     final index = _findItemIndexAt(event.position);
     if (index != null) {
       final entry = widget.dropdownMenuEntries[index];
@@ -624,10 +637,9 @@ class _AppDropdownButtonState<T> extends State<_AppDropdownButton<T>> {
           focusNode: _keyboardFocusNode,
           onKeyEvent: _handleKeyEvent,
           child: Listener(
-            // Full-screen transparent layer captures pointer move and up
-            // events even when the pointer has left individual item widgets.
+            // Move and up are handled via the global pointer route.
+            // This Listener is kept as structural scaffolding for the overlay.
             onPointerMove: _handleOverlayPointerMove,
-            onPointerUp: _handleOverlayPointerUp,
             behavior: HitTestBehavior.translucent,
             child: Stack(
               children: [
