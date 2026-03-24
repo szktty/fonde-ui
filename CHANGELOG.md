@@ -9,7 +9,7 @@
 - FIX
   - Bug fixes
 
-## 0.6.2-dev
+## 0.7.0-dev
 
 - [UPDATE] `FondeDropdownColors`: add button-specific color properties (`buttonBackground`, `buttonHoverBackground`, `buttonBorder`, `buttonText`) and item hover colors (`itemHoverBackground`, `itemHoverText`)
 - [FIX] `FondeDropdownMenu`: overhaul interaction to match macOS native behavior
