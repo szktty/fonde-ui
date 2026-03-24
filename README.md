@@ -73,7 +73,7 @@ Fonde UI's goal is to provide **operational and visual comfort** in desktop apps
 
 - Context Menu
 - Overflow Menu
-- Dropdown Menu
+- Dropdown Menu — macOS-style press-drag-release, keyboard navigation. No submenu support yet.
 - Popup Menu
 
 ### Input
@@ -85,7 +85,6 @@ Fonde UI's goal is to provide **operational and visual comfort** in desktop apps
 - Checkbox — rectangle/circle shape; filled/outline/iconOnly fill style
 - Radio Button
 - Switch — toggle switch; compact and wide styles
-- Dropdown Menu
 - Expansion Tile
 - Date Picker — monthly calendar, single and range selection
 - Slider
