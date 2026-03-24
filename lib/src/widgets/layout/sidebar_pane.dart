@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../core/context_extensions.dart';
 import '../../internal.dart';
 import '../navigation/sidebar.dart';
 import '../toolbar/primary_sidebar_toolbar.dart';
@@ -7,7 +7,7 @@ import '../toolbar/primary_sidebar_toolbar.dart';
 /// A pane that combines a toolbar and sidebar content.
 ///
 /// Used as the [sidebar] of [FondePrimarySide].
-class FondeSidebarPane extends ConsumerWidget {
+class FondeSidebarPane extends StatelessWidget {
   const FondeSidebarPane({
     required this.child,
     this.toolbar,
@@ -28,12 +28,12 @@ class FondeSidebarPane extends ConsumerWidget {
   final FondeSidebarStyle sidebarStyle;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  Widget build(BuildContext context) {
     Widget effectiveToolbar;
     if (toolbar != null) {
       effectiveToolbar = toolbar!;
     } else if (sidebarStyle == FondeSidebarStyle.floatingPanel) {
-      final appColorScheme = ref.watch(fondeEffectiveColorSchemeProvider);
+      final appColorScheme = context.fondeColorScheme;
       final panelBackground = appColorScheme.uiAreas.sideBar.background;
       effectiveToolbar = FondePrimarySidebarToolbar(
         backgroundColor: panelBackground,

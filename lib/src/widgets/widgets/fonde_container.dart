@@ -1,9 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:riverpod_annotation/riverpod_annotation.dart';
+import '../../core/context_extensions.dart';
 import '../../internal.dart';
-
-part 'fonde_container.g.dart';
 
 /// A container widget with app-specific padding.
 ///
@@ -18,7 +15,7 @@ part 'fonde_container.g.dart';
 ///   child: Text('Content'),
 /// )
 /// ```
-class FondeContainer extends ConsumerWidget {
+class FondeContainer extends StatelessWidget {
   /// Default horizontal padding.
   static const double defaultHorizontalPadding = 16.0;
 
@@ -79,9 +76,9 @@ class FondeContainer extends ConsumerWidget {
   final bool disableZoom;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  Widget build(BuildContext context) {
     // Get accessibility settings
-    final accessibilityConfig = ref.watch(fondeAccessibilityConfigProvider);
+    final accessibilityConfig = context.fondeAccessibility;
     final zoomScale = disableZoom ? 1.0 : accessibilityConfig.zoomScale;
 
     // Default padding (zoom scale applied)
@@ -195,19 +192,4 @@ class FondeContainer extends ConsumerWidget {
       child: containerChild,
     );
   }
-}
-
-/// Provider that supplies the default padding for FondeContainer.
-@riverpod
-EdgeInsetsGeometry fondeContainerPadding(Ref ref) {
-  return const EdgeInsets.symmetric(
-    horizontal: FondeContainer.defaultHorizontalPadding,
-    vertical: FondeContainer.defaultVerticalPadding,
-  );
-}
-
-/// Provider that supplies the leading widget width for FondeContainer.
-@riverpod
-double fondeContainerLeadingWidth(Ref ref) {
-  return FondeContainer.defaultHorizontalPadding;
 }

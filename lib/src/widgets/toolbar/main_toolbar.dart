@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../internal.dart';
 
 /// A title bar placed within the main content area.
@@ -8,7 +7,7 @@ import '../../internal.dart';
 /// In RinneGraph the original widget integrates a pathfinder search field
 /// and stack context. Extend or replace this widget to add application-
 /// specific content such as a search field or breadcrumb.
-class FondeMainToolbar extends ConsumerWidget {
+class FondeMainToolbar extends StatelessWidget {
   const FondeMainToolbar({
     super.key,
     this.leading,
@@ -31,8 +30,8 @@ class FondeMainToolbar extends ConsumerWidget {
   final double leadingOffset;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final appColorScheme = ref.watch(fondeEffectiveColorSchemeProvider);
+  Widget build(BuildContext context) {
+    final appColorScheme = context.fondeColorScheme;
 
     return Container(
       height: height,

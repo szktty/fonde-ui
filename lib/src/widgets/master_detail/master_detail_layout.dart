@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import './master_detail_state.dart';
 import '../widgets/fonde_divider.dart';
 
@@ -12,8 +11,8 @@ typedef FondeMasterItemBuilder =
       VoidCallback onSelect,
     );
 
-/// A layout widget that implements the master-detail pattern with Riverpod integration
-class FondeMasterDetailLayout extends ConsumerWidget {
+/// A layout widget that implements the master-detail pattern.
+class FondeMasterDetailLayout extends StatefulWidget {
   const FondeMasterDetailLayout({
     required this.items,
     required this.masterItemBuilder,
@@ -86,57 +85,61 @@ class FondeMasterDetailLayout extends ConsumerWidget {
   final String? initialSelectedId;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    // Set initial selected item
-    final selectedId = ref.watch(selectedItemProvider);
-    final masterWidth = ref.watch(masterWidthProvider);
-    final isDetailVisible = ref.watch(detailVisibilityProvider);
+  State<FondeMasterDetailLayout> createState() =>
+      _FondeMasterDetailLayoutState();
+}
 
-    // Set initial selected item (if selectedId is null and initialSelectedId is specified)
-    if (selectedId == null && initialSelectedId != null) {
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        ref
-            .read(selectedItemProvider.notifier)
-            .setSelectedId(initialSelectedId);
-      });
-    }
+class _FondeMasterDetailLayoutState extends State<FondeMasterDetailLayout> {
+  late FondeMasterDetailController _controller;
 
-    // Set initial visibility
-    if (ref.read(detailVisibilityProvider) != showDetailOnInit) {
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        ref
-            .read(detailVisibilityProvider.notifier)
-            .setVisible(showDetailOnInit);
-      });
-    }
+  @override
+  void initState() {
+    super.initState();
+    _controller = FondeMasterDetailController(
+      initialSelectedId: widget.initialSelectedId,
+      initialMasterWidth: widget.initialMasterWidth,
+      initialDetailVisible: widget.showDetailOnInit,
+    );
+    _controller.addListener(_onControllerChanged);
+  }
+
+  @override
+  void dispose() {
+    _controller.removeListener(_onControllerChanged);
+    _controller.dispose();
+    super.dispose();
+  }
+
+  void _onControllerChanged() => setState(() {});
+
+  @override
+  Widget build(BuildContext context) {
+    final selectedId = _controller.selectedId;
+    final masterWidth = _controller.masterWidth;
+    final isDetailVisible = _controller.detailVisible;
 
     return LayoutBuilder(
       builder: (context, constraints) {
-        final isDesktop = constraints.maxWidth > breakpoint;
+        final isDesktop = constraints.maxWidth > widget.breakpoint;
 
         // Build master view
         Widget buildMasterView(bool showingDetail) {
           return Padding(
-            padding: masterPadding,
+            padding: widget.masterPadding,
             child: ListView.builder(
               shrinkWrap: false,
               physics: const AlwaysScrollableScrollPhysics(),
-              itemCount: items.length,
+              itemCount: widget.items.length,
               itemBuilder: (context, index) {
-                final itemId = items[index];
-                return masterItemBuilder(
+                final itemId = widget.items[index];
+                return widget.masterItemBuilder(
                   context,
                   itemId,
                   itemId == selectedId,
                   () {
-                    ref
-                        .read(selectedItemProvider.notifier)
-                        .setSelectedId(itemId);
-                    // In mobile mode, show detail view when item is selected
+                    _controller.setSelectedId(itemId);
                     if (!isDesktop) {
-                      ref
-                          .read(detailVisibilityProvider.notifier)
-                          .setVisible(true);
+                      _controller.setVisible(true);
                     }
                   },
                 );
@@ -151,7 +154,7 @@ class FondeMasterDetailLayout extends ConsumerWidget {
             children: [
               Container(
                 width: masterWidth,
-                color: masterBackgroundColor,
+                color: widget.masterBackgroundColor,
                 child: buildMasterView(true),
               ),
               MouseRegion(
@@ -159,22 +162,22 @@ class FondeMasterDetailLayout extends ConsumerWidget {
                 child: GestureDetector(
                   onHorizontalDragUpdate: (details) {
                     final newWidth = masterWidth + details.delta.dx;
-                    if (newWidth >= minMasterWidth &&
-                        newWidth <= maxMasterWidth) {
-                      ref.read(masterWidthProvider.notifier).setWidth(newWidth);
+                    if (newWidth >= widget.minMasterWidth &&
+                        newWidth <= widget.maxMasterWidth) {
+                      _controller.setWidth(newWidth);
                     }
                   },
                   child: Container(
-                    width: resizeBarWidth + 8.0, // Extend tappable area
+                    width: widget.resizeBarWidth + 8.0,
                     height: double.infinity,
                     alignment: Alignment.center,
                     color: Colors.transparent,
                     child: SizedBox(
-                      width: resizeBarWidth,
+                      width: widget.resizeBarWidth,
                       height: double.infinity,
                       child: FondeVerticalDivider(
-                        thickness: resizeBarWidth,
-                        color: resizeBarColor ?? dividerColor,
+                        thickness: widget.resizeBarWidth,
+                        color: widget.resizeBarColor ?? widget.dividerColor,
                       ),
                     ),
                   ),
@@ -182,15 +185,13 @@ class FondeMasterDetailLayout extends ConsumerWidget {
               ),
               Expanded(
                 child: Container(
-                  color: detailBackgroundColor,
+                  color: widget.detailBackgroundColor,
                   child: Padding(
-                    padding: detailPadding,
-                    child: detailBuilder(
+                    padding: widget.detailPadding,
+                    child: widget.detailBuilder(
                       context,
                       selectedId,
-                      () => ref
-                          .read(detailVisibilityProvider.notifier)
-                          .setVisible(false),
+                      () => _controller.setVisible(false),
                     ),
                   ),
                 ),
@@ -202,13 +203,11 @@ class FondeMasterDetailLayout extends ConsumerWidget {
         // Mobile layout: stack with navigation
         return isDetailVisible
             ? Padding(
-              padding: detailPadding,
-              child: detailBuilder(
+              padding: widget.detailPadding,
+              child: widget.detailBuilder(
                 context,
                 selectedId,
-                () => ref
-                    .read(detailVisibilityProvider.notifier)
-                    .setVisible(false),
+                () => _controller.setVisible(false),
               ),
             )
             : buildMasterView(false);

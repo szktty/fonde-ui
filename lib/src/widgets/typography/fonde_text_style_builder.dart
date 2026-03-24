@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../internal.dart';
+import '../../core/context_extensions.dart';
 import 'fonde_text.dart';
 
 /// A utility class that builds a TextStyle from an FondeTextVariant.
@@ -13,7 +13,6 @@ class FondeTextStyleBuilder {
   ///
   /// [variant] - The text variant.
   /// [context] - BuildContext (for getting TextTheme).
-  /// [ref] - WidgetRef (for getting color scope).
   /// [color] - Custom text color (optional).
   /// [fontWeight] - Custom font weight (optional).
   /// [fontFamily] - Custom font family (optional).
@@ -21,7 +20,6 @@ class FondeTextStyleBuilder {
   static TextStyle buildTextStyle({
     required FondeTextVariant variant,
     required BuildContext context,
-    required WidgetRef ref,
     Color? color,
     FontWeight? fontWeight,
     String? fontFamily,
@@ -29,15 +27,14 @@ class FondeTextStyleBuilder {
   }) {
     // Get text style from ThemeData
     final flutterTheme = Theme.of(context);
-    final accessibilityConfig = ref.watch(fondeAccessibilityConfigProvider);
-    final zoomScale = disableZoom ? 1.0 : accessibilityConfig.zoomScale;
+    final zoomScale = disableZoom ? 1.0 : context.fondeZoomScale;
 
     return _buildTextStyle(
       variant,
       flutterTheme.textTheme,
       flutterTheme.colorScheme,
       zoomScale,
-      ref,
+      context,
       color: color,
       fontWeight: fontWeight,
       fontFamily: fontFamily,
@@ -52,7 +49,7 @@ class FondeTextStyleBuilder {
     TextTheme textTheme,
     ColorScheme colorScheme,
     double zoomScale,
-    WidgetRef ref, {
+    BuildContext context, {
     Color? color,
     FontWeight? fontWeight,
     String? fontFamily,
@@ -144,7 +141,7 @@ class FondeTextStyleBuilder {
     // Try to get the color scope
     Color textColor;
     try {
-      final colorScope = ref.read(fondeColorScopeProvider);
+      final colorScope = context.fondeColorScope;
       textColor = color ?? colorScope.text;
     } catch (e) {
       // Fallback if color scope is not available
@@ -171,7 +168,6 @@ class FondeTextStyleBuilder {
   static TextStyle buildTextStyleWithColor({
     required FondeTextVariant variant,
     required BuildContext context,
-    required WidgetRef ref,
     required Color color,
     FontWeight? fontWeight,
     String? fontFamily,
@@ -180,7 +176,6 @@ class FondeTextStyleBuilder {
     return buildTextStyle(
       variant: variant,
       context: context,
-      ref: ref,
       color: color,
       fontWeight: fontWeight,
       fontFamily: fontFamily,

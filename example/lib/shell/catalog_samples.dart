@@ -1,16 +1,14 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fonde_ui/fonde_ui.dart';
-import 'package:fonde_ui/fonde_ui_riverpod.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 import 'catalog_welcome.dart' show kCardSampleHeight;
 
-class ButtonsSample extends ConsumerWidget {
+class ButtonsSample extends StatelessWidget {
   const ButtonsSample();
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  Widget build(BuildContext context) {
     return Wrap(
       spacing: FondeSpacingValues.sm,
       runSpacing: FondeSpacingValues.sm,
@@ -34,11 +32,11 @@ class ButtonsSample extends ConsumerWidget {
   }
 }
 
-class InputSample extends ConsumerWidget {
+class InputSample extends StatelessWidget {
   const InputSample();
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  Widget build(BuildContext context) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       mainAxisSize: MainAxisSize.min,
@@ -64,12 +62,12 @@ class InputSample extends ConsumerWidget {
   }
 }
 
-class MenusSample extends ConsumerWidget {
+class MenusSample extends StatelessWidget {
   const MenusSample();
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final colorScheme = ref.watch(fondeEffectiveColorSchemeProvider);
+  Widget build(BuildContext context) {
+    final colorScheme = context.fondeColorScheme;
     return Container(
       decoration: BoxDecoration(
         border: Border.all(color: colorScheme.base.border),
@@ -107,12 +105,12 @@ class MenusSample extends ConsumerWidget {
   }
 }
 
-class NavigationSample extends ConsumerWidget {
+class NavigationSample extends StatelessWidget {
   const NavigationSample();
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final colorScheme = ref.watch(fondeEffectiveColorSchemeProvider);
+  Widget build(BuildContext context) {
+    final colorScheme = context.fondeColorScheme;
     return ClipRRect(
       borderRadius: FondeBorderRadiusValues.smallRadius,
       child: SizedBox(
@@ -242,12 +240,12 @@ class NavigationSample extends ConsumerWidget {
   }
 }
 
-class LayoutSample extends ConsumerWidget {
+class LayoutSample extends StatelessWidget {
   const LayoutSample();
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final colorScheme = ref.watch(fondeEffectiveColorSchemeProvider);
+  Widget build(BuildContext context) {
+    final colorScheme = context.fondeColorScheme;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       mainAxisSize: MainAxisSize.min,
@@ -320,12 +318,12 @@ class LayoutSample extends ConsumerWidget {
   }
 }
 
-class DataViewSample extends ConsumerWidget {
+class DataViewSample extends StatelessWidget {
   const DataViewSample();
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final colorScheme = ref.watch(fondeEffectiveColorSchemeProvider);
+  Widget build(BuildContext context) {
+    final colorScheme = context.fondeColorScheme;
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
@@ -390,12 +388,12 @@ class DataViewSample extends ConsumerWidget {
   }
 }
 
-class FeedbackSample extends ConsumerWidget {
+class FeedbackSample extends StatelessWidget {
   const FeedbackSample();
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final colorScheme = ref.watch(fondeEffectiveColorSchemeProvider);
+  Widget build(BuildContext context) {
+    final colorScheme = context.fondeColorScheme;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       mainAxisSize: MainAxisSize.min,
@@ -442,12 +440,12 @@ class FeedbackSample extends ConsumerWidget {
   }
 }
 
-class TypographySample extends ConsumerWidget {
+class TypographySample extends StatelessWidget {
   const TypographySample();
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final colorScheme = ref.watch(fondeEffectiveColorSchemeProvider);
+  Widget build(BuildContext context) {
+    final colorScheme = context.fondeColorScheme;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       mainAxisSize: MainAxisSize.min,

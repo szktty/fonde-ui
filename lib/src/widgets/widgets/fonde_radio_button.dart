@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../core/context_extensions.dart';
 import '../../internal.dart';
 
 /// Common RadioButton for App app.
 ///
 /// Provides a unified RadioButton style across the app.
 /// It has a circular shape, and when selected, a small circle is displayed in the center.
-class FondeRadioButton<T> extends ConsumerWidget {
+class FondeRadioButton<T> extends StatelessWidget {
   /// Value of the radio button.
   final T value;
 
@@ -48,10 +48,10 @@ class FondeRadioButton<T> extends ConsumerWidget {
   });
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    // Get theme color using core_themes API
-    final appColorScheme = ref.watch(effectiveColorSchemeWithThemeProvider);
-    final accessibilityConfig = ref.watch(fondeAccessibilityConfigProvider);
+  Widget build(BuildContext context) {
+    // Get theme color using context extensions
+    final appColorScheme = context.fondeColorScheme;
+    final accessibilityConfig = context.fondeAccessibility;
 
     // Determine size (use default value if not specified)
     final zoomScale = disableZoom ? 1.0 : accessibilityConfig.zoomScale;

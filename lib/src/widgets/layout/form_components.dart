@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../core/context_extensions.dart';
 import '../../internal.dart';
 import '../typography/fonde_text.dart';
 import '../widgets/fonde_expansion_tile.dart';
@@ -9,7 +9,7 @@ import '../widgets/fonde_expansion_tile.dart';
 ///
 /// Note: Basically, do not use description; clearly express the content
 /// with the label name.
-class FondeFormItemRow extends ConsumerWidget {
+class FondeFormItemRow extends StatelessWidget {
   const FondeFormItemRow({
     super.key,
     required this.label,
@@ -39,8 +39,8 @@ class FondeFormItemRow extends ConsumerWidget {
   final AlignmentGeometry alignment;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final appColorScheme = ref.watch(fondeEffectiveColorSchemeProvider);
+  Widget build(BuildContext context) {
+    final appColorScheme = context.fondeColorScheme;
 
     return Row(
       crossAxisAlignment: CrossAxisAlignment.center,
@@ -74,7 +74,7 @@ class FondeFormItemRow extends ConsumerWidget {
 /// Arranges labels and controls vertically.
 ///
 /// Used in sidebars, etc. where width is limited.
-class FondeFormItemColumn extends ConsumerWidget {
+class FondeFormItemColumn extends StatelessWidget {
   const FondeFormItemColumn({
     super.key,
     required this.label,
@@ -100,10 +100,9 @@ class FondeFormItemColumn extends ConsumerWidget {
   final bool disableZoom;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final appColorScheme = ref.watch(fondeEffectiveColorSchemeProvider);
-    final accessibilityConfig = ref.watch(fondeAccessibilityConfigProvider);
-    final zoomScale = disableZoom ? 1.0 : accessibilityConfig.zoomScale;
+  Widget build(BuildContext context) {
+    final appColorScheme = context.fondeColorScheme;
+    final zoomScale = disableZoom ? 1.0 : context.fondeZoomScale;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -142,7 +141,7 @@ class FondeFormItemColumn extends ConsumerWidget {
 /// Also integrates the functionality of SettingsSection, including right-end
 /// widgets and accessibility support.
 /// It can also be made collapsible using FondeExpansionTile.
-class FondeFormList extends ConsumerWidget {
+class FondeFormList extends StatelessWidget {
   const FondeFormList({
     super.key,
     this.title,
@@ -211,10 +210,9 @@ class FondeFormList extends ConsumerWidget {
   final ExpansibleController? expansionController;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final appColorScheme = ref.watch(fondeEffectiveColorSchemeProvider);
-    final accessibilityConfig = ref.watch(fondeAccessibilityConfigProvider);
-    final zoomScale = disableZoom ? 1.0 : accessibilityConfig.zoomScale;
+  Widget build(BuildContext context) {
+    final appColorScheme = context.fondeColorScheme;
+    final zoomScale = disableZoom ? 1.0 : context.fondeZoomScale;
 
     final scaledHeaderPadding = EdgeInsets.only(
       left: headerPadding.left * zoomScale,

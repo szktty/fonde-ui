@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../core/context_extensions.dart';
 import '../../internal.dart';
 
 /// An outline item with standard App application styling.
 ///
 /// An expandable item used for hierarchical outline display.
 /// By default, the expansion icon is placed on the left, providing visual feedback for the selected state.
-class FondeOutlineItem extends ConsumerStatefulWidget {
+class FondeOutlineItem extends StatefulWidget {
   const FondeOutlineItem({
     super.key,
     required this.title,
@@ -76,19 +76,17 @@ class FondeOutlineItem extends ConsumerStatefulWidget {
   final bool disableZoom;
 
   @override
-  ConsumerState<FondeOutlineItem> createState() => _FondeOutlineItemState();
+  State<FondeOutlineItem> createState() => _FondeOutlineItemState();
 }
 
-class _FondeOutlineItemState extends ConsumerState<FondeOutlineItem> {
+class _FondeOutlineItemState extends State<FondeOutlineItem> {
   bool _isHovered = false;
 
   @override
   Widget build(BuildContext context) {
-    final appColorScheme = ref.watch(fondeEffectiveColorSchemeProvider);
-    final accessibilityConfig = ref.watch(fondeAccessibilityConfigProvider);
-    final zoomScale = widget.disableZoom ? 1.0 : accessibilityConfig.zoomScale;
-    final borderScale =
-        widget.disableZoom ? 1.0 : accessibilityConfig.borderScale;
+    final appColorScheme = context.fondeColorScheme;
+    final zoomScale = widget.disableZoom ? 1.0 : context.fondeZoomScale;
+    final borderScale = widget.disableZoom ? 1.0 : context.fondeBorderScale;
     final theme = Theme.of(context);
 
     // Calculate indent based on depth

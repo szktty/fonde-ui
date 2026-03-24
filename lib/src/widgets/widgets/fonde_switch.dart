@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../core/context_extensions.dart';
 import '../../internal.dart';
 
 /// Visual style of [FondeSwitch].
@@ -27,7 +27,7 @@ enum FondeSwitchStyle {
 ///   onChanged: (v) => setState(() => isEnabled = v),
 /// )
 /// ```
-class FondeSwitch extends ConsumerStatefulWidget {
+class FondeSwitch extends StatefulWidget {
   /// Current value of the switch.
   final bool value;
 
@@ -61,10 +61,10 @@ class FondeSwitch extends ConsumerStatefulWidget {
   });
 
   @override
-  ConsumerState<FondeSwitch> createState() => _FondeSwitchState();
+  State<FondeSwitch> createState() => _FondeSwitchState();
 }
 
-class _FondeSwitchState extends ConsumerState<FondeSwitch>
+class _FondeSwitchState extends State<FondeSwitch>
     with SingleTickerProviderStateMixin {
   late AnimationController _controller;
   late Animation<double> _positionAnimation;
@@ -125,8 +125,8 @@ class _FondeSwitchState extends ConsumerState<FondeSwitch>
 
   @override
   Widget build(BuildContext context) {
-    final appColorScheme = ref.watch(effectiveColorSchemeWithThemeProvider);
-    final accessibilityConfig = ref.watch(fondeAccessibilityConfigProvider);
+    final appColorScheme = context.fondeColorScheme;
+    final accessibilityConfig = context.fondeAccessibility;
 
     final zoomScale = widget.disableZoom ? 1.0 : accessibilityConfig.zoomScale;
     final isEnabled = widget.onChanged != null;

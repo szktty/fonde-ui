@@ -1,6 +1,6 @@
 # Fonde UI
 
-**Desktop-first Flutter UI optimized for native-quality instant feedback, with accessibility built in.**
+**Desktop-first Flutter UI utility components optimized for native-like interaction, with zoom scaling support.**
 
 * **Fonde** (pronounced *fond*) — named after *fond de veau*.
 
@@ -10,7 +10,7 @@
 
 ## Overview
 
-`fonde_ui` is a Flutter UI component library for desktop applications, developed for [RinneGraph](https://github.com/szktty/rinne-graph). It provides improved multi-pane layouts, instant feedback interaction, and accessibility support out-of-the-box.
+`fonde_ui` is a Flutter UI utility component library for desktop applications, developed for [RinneGraph](https://github.com/szktty/rinne-graph). It provides improved multi-pane layouts, instant feedback interaction, and zoom scaling support out-of-the-box.
 
 ## Platform Support
 
@@ -25,15 +25,16 @@ Fonde UI's goal is to provide **operational and visual comfort** in desktop apps
 ## Features
 
 - 🖥️ **Desktop-first** — Optimized for desktop applications over mobile, with interactions and layouts tailored for keyboard, mouse, and large screens
-- ⚡ **Instant feedback interaction** — Native-grade responsiveness with restrained animations that never get in the way of smooth operation
+- ⚡ **Native-like interaction** — Instant feedback and restrained animations for smooth operation
 - 🎨 **Flat design** — Clean, simple visuals inspired by Figma, with smooth-curve corners throughout
 - 🪟 **Multi-pane layout** — Built-in support for a three-pane window with a vertical Launch Bar
-- 👤 **Accessibility support** — Zoom and other accessibility features built in from the ground up
+- 🔍 **Zoom scaling support** — All components scale uniformly with zoom, ensuring a consistent look at any size
+- 🔋 **Batteries included** — Handy widgets tuned for desktop applications, ready to use out of the box
 - 🏠️ **Customizable appearance** — Supports dark mode, color themes, and custom fonts
 - 🌐 **Cross-platform** — Runs on macOS, Windows, Linux, iOS, and Android
 
 
-## UI Components
+## UI Utility Components
 
 ### Layout
 

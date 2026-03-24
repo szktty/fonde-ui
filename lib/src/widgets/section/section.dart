@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../internal.dart';
+import '../../core/context_extensions.dart';
 
 /// A section container with a title and description.
 ///
 /// Automatically inserts dividers between child elements and supports accessibility
 /// zoom features. Provides a unified style for the layout of titles,
 /// descriptions, and child elements.
-class FondeSection extends ConsumerWidget {
+class FondeSection extends StatelessWidget {
   /// Creates a new section.
   const FondeSection({
     required this.children,
@@ -37,10 +37,9 @@ class FondeSection extends ConsumerWidget {
   final bool disableZoom;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final accessibilityConfig = ref.watch(fondeAccessibilityConfigProvider);
-    final zoomScale = disableZoom ? 1.0 : accessibilityConfig.zoomScale;
+    final zoomScale = disableZoom ? 1.0 : context.fondeZoomScale;
 
     final scaledSpacing = spacing * zoomScale;
 

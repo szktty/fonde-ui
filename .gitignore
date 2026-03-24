@@ -146,3 +146,5 @@ app.*.symbols
 
 .mcp.json
 .serena/
+
+private/

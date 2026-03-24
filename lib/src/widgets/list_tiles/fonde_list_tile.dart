@@ -1,18 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:riverpod_annotation/riverpod_annotation.dart';
 import '../../internal.dart';
-
-part 'fonde_list_tile.g.dart';
-
-/// Provider that supplies an effective FondeColorScheme.
-@riverpod
-FondeColorScheme effectiveAppColorSchemeForListTile(Ref ref) {
-  return FondeThemePresets.light.appColorScheme;
-}
+import '../../core/context_extensions.dart';
 
 /// A list tile that handles selection state and applies appropriate theme colors.
-class FondeListTile extends ConsumerWidget {
+class FondeListTile extends StatelessWidget {
   final Widget? leading;
   final Widget title;
   final Widget? subtitle;
@@ -45,11 +36,10 @@ class FondeListTile extends ConsumerWidget {
   });
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  Widget build(BuildContext context) {
     // Get FondeColorScheme and accessibility config
-    final appColorScheme = ref.watch(effectiveColorSchemeWithThemeProvider);
-    final accessibilityConfig = ref.watch(fondeAccessibilityConfigProvider);
-    final zoomScale = disableZoom ? 1.0 : accessibilityConfig.zoomScale;
+    final appColorScheme = context.fondeColorScheme;
+    final zoomScale = disableZoom ? 1.0 : context.fondeZoomScale;
 
     // Determine hover color (temporary implementation)
     final theme = Theme.of(context);

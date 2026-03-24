@@ -1,18 +1,16 @@
 import 'package:flutter/widgets.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fonde_ui/fonde_ui.dart';
-import 'package:fonde_ui/fonde_ui_riverpod.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 /// Placeholder for catalog pages that are not yet implemented
-class PlaceholderPage extends ConsumerWidget {
+class PlaceholderPage extends StatelessWidget {
   const PlaceholderPage({super.key, required this.title});
 
   final String title;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final colorScheme = ref.watch(fondeEffectiveColorSchemeProvider);
+  Widget build(BuildContext context) {
+    final colorScheme = context.fondeColorScheme;
     return Center(
       child: Column(
         mainAxisSize: MainAxisSize.min,

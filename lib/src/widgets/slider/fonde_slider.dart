@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../internal.dart';
 
 /// A theme-aware slider widget.
@@ -18,7 +17,7 @@ import '../../internal.dart';
 ///   label: '${(_volume * 100).round()}%',
 /// )
 /// ```
-class FondeSlider extends ConsumerWidget {
+class FondeSlider extends StatelessWidget {
   const FondeSlider({
     super.key,
     required this.value,
@@ -61,8 +60,8 @@ class FondeSlider extends ConsumerWidget {
   final bool disableZoom;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final colorScheme = ref.watch(fondeEffectiveColorSchemeProvider);
+  Widget build(BuildContext context) {
+    final colorScheme = context.fondeColorScheme;
 
     final activeColor = colorScheme.theme.primaryColor;
     final inactiveColor = colorScheme.base.divider;
@@ -105,7 +104,7 @@ class FondeSlider extends ConsumerWidget {
 }
 
 /// A range slider variant that allows selecting a range of values.
-class FondeRangeSlider extends ConsumerWidget {
+class FondeRangeSlider extends StatelessWidget {
   const FondeRangeSlider({
     super.key,
     required this.values,
@@ -132,8 +131,8 @@ class FondeRangeSlider extends ConsumerWidget {
   final bool disableZoom;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final colorScheme = ref.watch(fondeEffectiveColorSchemeProvider);
+  Widget build(BuildContext context) {
+    final colorScheme = context.fondeColorScheme;
 
     final activeColor = colorScheme.theme.primaryColor;
     final inactiveColor = colorScheme.base.divider;

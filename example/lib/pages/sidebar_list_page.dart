@@ -1,5 +1,4 @@
 import 'package:flutter/widgets.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fonde_ui/fonde_ui.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 
@@ -48,14 +47,14 @@ class SidebarListPage extends StatelessWidget {
 }
 
 // Basic demo
-class _BasicDemo extends ConsumerStatefulWidget {
+class _BasicDemo extends StatefulWidget {
   const _BasicDemo();
 
   @override
-  ConsumerState<_BasicDemo> createState() => _BasicDemoState();
+  State<_BasicDemo> createState() => _BasicDemoState();
 }
 
-class _BasicDemoState extends ConsumerState<_BasicDemo> {
+class _BasicDemoState extends State<_BasicDemo> {
   String? _selected = 'inbox';
   final List<String> _expanded = [];
 
@@ -80,14 +79,14 @@ class _BasicDemoState extends ConsumerState<_BasicDemo> {
 }
 
 // Group demo
-class _GroupDemo extends ConsumerStatefulWidget {
+class _GroupDemo extends StatefulWidget {
   const _GroupDemo();
 
   @override
-  ConsumerState<_GroupDemo> createState() => _GroupDemoState();
+  State<_GroupDemo> createState() => _GroupDemoState();
 }
 
-class _GroupDemoState extends ConsumerState<_GroupDemo> {
+class _GroupDemoState extends State<_GroupDemo> {
   String? _selected = 'home_page';
   List<String> _expanded = ['pages'];
 
@@ -133,14 +132,14 @@ class _GroupDemoState extends ConsumerState<_GroupDemo> {
 }
 
 // Icon demo
-class _IconDemo extends ConsumerStatefulWidget {
+class _IconDemo extends StatefulWidget {
   const _IconDemo();
 
   @override
-  ConsumerState<_IconDemo> createState() => _IconDemoState();
+  State<_IconDemo> createState() => _IconDemoState();
 }
 
-class _IconDemoState extends ConsumerState<_IconDemo> {
+class _IconDemoState extends State<_IconDemo> {
   String? _selected = 'home';
   List<String> _expanded = ['workspace'];
 
@@ -205,14 +204,14 @@ class _IconDemoState extends ConsumerState<_IconDemo> {
 }
 
 // Subtle style demo
-class _SubtleDemo extends ConsumerStatefulWidget {
+class _SubtleDemo extends StatefulWidget {
   const _SubtleDemo();
 
   @override
-  ConsumerState<_SubtleDemo> createState() => _SubtleDemoState();
+  State<_SubtleDemo> createState() => _SubtleDemoState();
 }
 
-class _SubtleDemoState extends ConsumerState<_SubtleDemo> {
+class _SubtleDemoState extends State<_SubtleDemo> {
   String? _selected = 'all';
   final List<String> _expanded = [];
 
@@ -253,14 +252,14 @@ class _SubtleDemoState extends ConsumerState<_SubtleDemo> {
 }
 
 // Inset style demo
-class _InsetDemo extends ConsumerStatefulWidget {
+class _InsetDemo extends StatefulWidget {
   const _InsetDemo();
 
   @override
-  ConsumerState<_InsetDemo> createState() => _InsetDemoState();
+  State<_InsetDemo> createState() => _InsetDemoState();
 }
 
-class _InsetDemoState extends ConsumerState<_InsetDemo> {
+class _InsetDemoState extends State<_InsetDemo> {
   String? _selected = 'home';
   List<String> _expanded = ['workspace'];
 
@@ -326,14 +325,14 @@ class _InsetDemoState extends ConsumerState<_InsetDemo> {
 }
 
 // Header demo
-class _HeaderDemo extends ConsumerStatefulWidget {
+class _HeaderDemo extends StatefulWidget {
   const _HeaderDemo();
 
   @override
-  ConsumerState<_HeaderDemo> createState() => _HeaderDemoState();
+  State<_HeaderDemo> createState() => _HeaderDemoState();
 }
 
-class _HeaderDemoState extends ConsumerState<_HeaderDemo> {
+class _HeaderDemoState extends State<_HeaderDemo> {
   String? _selected = 'inbox';
   final List<String> _expanded = [];
 

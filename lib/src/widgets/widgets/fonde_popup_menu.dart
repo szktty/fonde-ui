@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../internal.dart';
 import '../spacing/fonde_spacing.dart';
 
@@ -44,7 +43,7 @@ class FondePopupMenuDividerEntry<T> extends FondePopupMenuEntry<T> {
 }
 
 /// A popup menu compliant with the App design system.
-class FondePopupMenu<T> extends ConsumerWidget {
+class FondePopupMenu<T> extends StatelessWidget {
   const FondePopupMenu({
     super.key,
     required this.child,
@@ -113,9 +112,9 @@ class FondePopupMenu<T> extends ConsumerWidget {
   final Color? menuOpenBackgroundColor;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final colorScheme = ref.watch(fondeEffectiveColorSchemeProvider);
-    final accessibilityConfig = ref.watch(fondeAccessibilityConfigProvider);
+  Widget build(BuildContext context) {
+    final colorScheme = context.fondeColorScheme;
+    final accessibilityConfig = context.fondeAccessibility;
     final zoomScale = disableZoom ? 1.0 : accessibilityConfig.zoomScale;
 
     return _AppPopupMenuButton<T>(
@@ -509,7 +508,7 @@ class _AppPopupMenuDividerWidget extends StatelessWidget {
 }
 
 /// Circular action button widget with hover effect.
-class _CircleActionButton extends ConsumerStatefulWidget {
+class _CircleActionButton extends StatefulWidget {
   const _CircleActionButton({
     required this.icon,
     required this.iconSize,
@@ -531,16 +530,15 @@ class _CircleActionButton extends ConsumerStatefulWidget {
   final double size;
 
   @override
-  ConsumerState<_CircleActionButton> createState() =>
-      _CircleActionButtonState();
+  State<_CircleActionButton> createState() => _CircleActionButtonState();
 }
 
-class _CircleActionButtonState extends ConsumerState<_CircleActionButton> {
+class _CircleActionButtonState extends State<_CircleActionButton> {
   bool _isHovered = false;
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = ref.watch(fondeEffectiveColorSchemeProvider);
+    final colorScheme = context.fondeColorScheme;
 
     // Determine default background and hover colors
     final defaultBackgroundColor =

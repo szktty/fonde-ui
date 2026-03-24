@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../core/context_extensions.dart';
 import '../../internal.dart';
 
 /// Divider between navigation items.
-class FondeNavigationDivider extends ConsumerWidget {
+class FondeNavigationDivider extends StatelessWidget {
   /// Color of the divider.
   final Color? color;
 
@@ -40,10 +40,9 @@ class FondeNavigationDivider extends ConsumerWidget {
   });
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final accessibilityConfig = ref.watch(fondeAccessibilityConfigProvider);
-    final zoomScale = disableZoom ? 1.0 : accessibilityConfig.zoomScale;
-    final borderScale = disableZoom ? 1.0 : accessibilityConfig.borderScale;
+  Widget build(BuildContext context) {
+    final zoomScale = disableZoom ? 1.0 : context.fondeZoomScale;
+    final borderScale = disableZoom ? 1.0 : context.fondeBorderScale;
 
     final theme = Theme.of(context);
     final effectiveColor = color ?? theme.dividerColor.withValues(alpha: 0.2);

@@ -1,13 +1,13 @@
 # fonde_ui
 
-**Desktop-first Flutter UI optimized for native-quality instant feedback, with accessibility built in.**
+**Desktop-first Flutter UI utility components optimized for native-like interaction, with zoom scaling support.**
 
 Developed for [RinneGraph](https://github.com/szktty/rinne-graph). Currently prototype status; API is not stable.
 
 ## Package info
 
 - name: fonde_ui
-- version: 0.5.0
+- version: 0.6.0
 - Dart SDK: ^3.7.0
 - Flutter: >=3.41.2
 

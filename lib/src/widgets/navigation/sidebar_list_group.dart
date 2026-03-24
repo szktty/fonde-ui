@@ -1,13 +1,12 @@
 import 'package:figma_squircle/figma_squircle.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../core/context_extensions.dart';
 import '../../internal.dart';
 import '../widgets/fonde_gesture_detector.dart';
-import '../icons/icon_theme_providers.dart';
 import 'sidebar_list_item.dart';
 
 /// A collapsible group of navigation items.
-class FondeSidebarListGroup extends ConsumerStatefulWidget {
+class FondeSidebarListGroup extends StatefulWidget {
   /// The unique identifier for the widget.
   final String id;
 
@@ -100,10 +99,10 @@ class FondeSidebarListGroup extends ConsumerStatefulWidget {
   });
 
   @override
-  ConsumerState<FondeSidebarListGroup> createState() => _NavigationGroupState();
+  State<FondeSidebarListGroup> createState() => _NavigationGroupState();
 }
 
-class _NavigationGroupState extends ConsumerState<FondeSidebarListGroup>
+class _NavigationGroupState extends State<FondeSidebarListGroup>
     with SingleTickerProviderStateMixin {
   late bool _isExpandedState;
   late AnimationController _animationController;
@@ -148,12 +147,11 @@ class _NavigationGroupState extends ConsumerState<FondeSidebarListGroup>
 
   @override
   Widget build(BuildContext context) {
-    final accessibilityConfig = ref.watch(fondeAccessibilityConfigProvider);
-    final iconTheme = ref.watch(fondeDefaultIconThemeProvider);
-    final zoomScale = widget.disableZoom ? 1.0 : accessibilityConfig.zoomScale;
+    final iconTheme = context.fondeIconTheme;
+    final zoomScale = widget.disableZoom ? 1.0 : context.fondeZoomScale;
 
     final theme = Theme.of(context);
-    final colorScope = ref.watch(fondeSideBarColorScopeProvider);
+    final colorScope = context.fondeColorScope;
     final effectiveBackgroundColor = switch (widget.style) {
       FondeSidebarListItemStyle.filled =>
         widget.isSelected

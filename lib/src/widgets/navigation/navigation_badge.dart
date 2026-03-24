@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../core/context_extensions.dart';
 import '../../internal.dart';
 import '../typography/fonde_text.dart';
 
 /// A badge element to be displayed on a navigation item.
-class FondeNavigationBadge extends ConsumerWidget {
+class FondeNavigationBadge extends StatelessWidget {
   /// The text to display on the badge.
   final String? text;
 
@@ -41,9 +41,8 @@ class FondeNavigationBadge extends ConsumerWidget {
   });
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final accessibilityConfig = ref.watch(fondeAccessibilityConfigProvider);
-    final zoomScale = disableZoom ? 1.0 : accessibilityConfig.zoomScale;
+  Widget build(BuildContext context) {
+    final zoomScale = disableZoom ? 1.0 : context.fondeZoomScale;
 
     final theme = Theme.of(context);
     final effectiveBackgroundColor =

@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fonde_ui/fonde_ui.dart';
-import 'package:fonde_ui/fonde_ui_riverpod.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
@@ -24,38 +22,31 @@ const _zoomLevels = [0.75, 0.9, 1.0, 1.1, 1.25, 1.5];
 
 const _kGitHubUrl = 'https://github.com/szktty/fonde-ui';
 
-final _packageVersionProvider = FutureProvider<String>((ref) async {
-  final info = await PackageInfo.fromPlatform();
-  return info.version;
-});
-
 /// Toolbar trailing area: theme toggle, font settings, and zoom controls
-class CatalogToolbarControls extends ConsumerStatefulWidget {
+class CatalogToolbarControls extends StatefulWidget {
   @override
-  ConsumerState<CatalogToolbarControls> createState() =>
-      _CatalogToolbarControlsState();
+  State<CatalogToolbarControls> createState() => _CatalogToolbarControlsState();
 }
 
-class _CatalogToolbarControlsState
-    extends ConsumerState<CatalogToolbarControls> {
+class _CatalogToolbarControlsState extends State<CatalogToolbarControls> {
   String _selectedFontFamily = '';
   bool _fontLoading = false;
 
-  Future<void> _applyFontFamily(String fontFamily) async {
+  Future<void> _applyFontFamily(BuildContext context, String fontFamily) async {
     if (fontFamily.isEmpty) {
       setState(() {
         _selectedFontFamily = fontFamily;
         _fontLoading = false;
       });
-      final current = ref.read(fondeActiveThemeProvider);
+      final current = context.fondeThemeController.theme;
       // Explicitly restore the preset typography (Roboto) instead of using clearTypography.
       // Setting it to null leaves ThemeData.textTheme in an undefined state,
       // which breaks widgets that depend on theme.textTheme.titleSmall,
       // such as sidebar_list_group.
       final preset = FondeThemePresets.system;
-      ref
-          .read(fondeActiveThemeProvider.notifier)
-          .setTheme(current.copyWith(typography: preset.typography));
+      context.fondeThemeController.setTheme(
+        current.copyWith(typography: preset.typography),
+      );
       return;
     }
 
@@ -71,7 +62,7 @@ class _CatalogToolbarControlsState
     if (!mounted) return;
 
     final resolvedFamily = textStyle.fontFamily ?? fontFamily;
-    final current = ref.read(fondeActiveThemeProvider);
+    final current = context.fondeThemeController.theme;
     final typography = FondeTypographyConfig(
       uiFont: FondeFontConfig(
         fontFamily: resolvedFamily,
@@ -89,15 +80,15 @@ class _CatalogToolbarControlsState
       ),
       codeBlockFont: current.typography?.codeBlockFont,
     );
-    ref
-        .read(fondeActiveThemeProvider.notifier)
-        .setTheme(current.copyWith(typography: typography));
+    context.fondeThemeController.setTheme(
+      current.copyWith(typography: typography),
+    );
 
     setState(() => _fontLoading = false);
   }
 
-  void _setFontSize(double newSize) {
-    final current = ref.read(fondeActiveThemeProvider);
+  void _setFontSize(BuildContext context, double newSize) {
+    final current = context.fondeThemeController.theme;
     final defaultTypography = FondeThemePresets.system.typography!;
     final typography = (current.typography ?? defaultTypography).copyWith(
       uiFont: (current.typography?.uiFont ?? defaultTypography.uiFont!)
@@ -105,22 +96,22 @@ class _CatalogToolbarControlsState
       textFont: (current.typography?.textFont ?? defaultTypography.textFont!)
           .copyWith(size: newSize + 2),
     );
-    ref
-        .read(fondeActiveThemeProvider.notifier)
-        .setTheme(current.copyWith(typography: typography));
+    context.fondeThemeController.setTheme(
+      current.copyWith(typography: typography),
+    );
   }
 
-  void _adjustFontSize(int delta) {
-    final current = ref.read(fondeActiveThemeProvider);
+  void _adjustFontSize(BuildContext context, int delta) {
+    final current = context.fondeThemeController.theme;
     final baseSize = current.typography?.uiFont?.size ?? 14.0;
-    _setFontSize((baseSize + delta).clamp(10.0, 24.0));
+    _setFontSize(context, (baseSize + delta).clamp(10.0, 24.0));
   }
 
-  void _setZoom(double zoom) {
-    final config = ref.read(fondeAccessibilityConfigProvider);
-    ref
-        .read(fondeAccessibilityConfigProvider.notifier)
-        .updateConfig(config.copyWith(zoomScale: zoom));
+  void _setZoom(BuildContext context, double zoom) {
+    final config = context.fondeAccessibility;
+    context.fondeAccessibilityController.updateConfig(
+      config.copyWith(zoomScale: zoom),
+    );
   }
 
   int _zoomIndex(double zoom) {
@@ -132,9 +123,9 @@ class _CatalogToolbarControlsState
 
   @override
   Widget build(BuildContext context) {
-    final activeTheme = ref.watch(fondeActiveThemeProvider);
-    final accessibility = ref.watch(fondeAccessibilityConfigProvider);
-    final colorScheme = ref.watch(fondeEffectiveColorSchemeProvider);
+    final activeTheme = context.fondeThemeController.theme;
+    final accessibility = context.fondeAccessibility;
+    final colorScheme = context.fondeColorScheme;
     final isSystem = activeTheme.themeMode == ThemeMode.system;
     final isDark = activeTheme.themeMode == ThemeMode.dark;
     final currentFontSize = activeTheme.typography?.uiFont?.size ?? 14.0;
@@ -148,19 +139,19 @@ class _CatalogToolbarControlsState
         title: 'Smaller Font',
         icon: LucideIcons.minus,
         enabled: currentFontSize > 10,
-        onSelected: () => _adjustFontSize(-1),
+        onSelected: () => _adjustFontSize(context, -1),
       ),
       FondeOverflowMenuItem(
         value: 'font_reset',
         title: 'Reset Font Size (${currentFontSize.round()}px)',
-        onSelected: () => _setFontSize(14.0),
+        onSelected: () => _setFontSize(context, 14.0),
       ),
       FondeOverflowMenuItem(
         value: 'font_larger',
         title: 'Larger Font',
         icon: LucideIcons.plus,
         enabled: currentFontSize < 24,
-        onSelected: () => _adjustFontSize(1),
+        onSelected: () => _adjustFontSize(context, 1),
       ),
       const FondeOverflowMenuDivider(),
       // Zoom
@@ -171,17 +162,17 @@ class _CatalogToolbarControlsState
         enabled: currentZoom > _zoomLevels.first,
         onSelected: () {
           if (zoomIdx > 0) {
-            _setZoom(_zoomLevels[zoomIdx - 1]);
+            _setZoom(context, _zoomLevels[zoomIdx - 1]);
           } else if (zoomIdx < 0) {
             final lower = _zoomLevels.where((z) => z < currentZoom).toList();
-            if (lower.isNotEmpty) _setZoom(lower.last);
+            if (lower.isNotEmpty) _setZoom(context, lower.last);
           }
         },
       ),
       FondeOverflowMenuItem(
         value: 'zoom_reset',
         title: 'Reset Zoom (${(currentZoom * 100).round()}%)',
-        onSelected: () => _setZoom(1.0),
+        onSelected: () => _setZoom(context, 1.0),
       ),
       FondeOverflowMenuItem(
         value: 'zoom_in',
@@ -190,10 +181,10 @@ class _CatalogToolbarControlsState
         enabled: currentZoom < _zoomLevels.last,
         onSelected: () {
           if (zoomIdx >= 0 && zoomIdx < _zoomLevels.length - 1) {
-            _setZoom(_zoomLevels[zoomIdx + 1]);
+            _setZoom(context, _zoomLevels[zoomIdx + 1]);
           } else if (zoomIdx < 0) {
             final higher = _zoomLevels.where((z) => z > currentZoom).toList();
-            if (higher.isNotEmpty) _setZoom(higher.first);
+            if (higher.isNotEmpty) _setZoom(context, higher.first);
           }
         },
       ),
@@ -205,9 +196,8 @@ class _CatalogToolbarControlsState
         icon: LucideIcons.monitor,
         enabled: !isSystem,
         onSelected:
-            () => ref
-                .read(fondeActiveThemeProvider.notifier)
-                .setTheme(FondeThemePresets.system),
+            () =>
+                context.fondeThemeController.setTheme(FondeThemePresets.system),
       ),
       FondeOverflowMenuItem(
         value: 'theme_light',
@@ -215,9 +205,8 @@ class _CatalogToolbarControlsState
         icon: LucideIcons.sun,
         enabled: isSystem || isDark,
         onSelected:
-            () => ref
-                .read(fondeActiveThemeProvider.notifier)
-                .setTheme(FondeThemePresets.light),
+            () =>
+                context.fondeThemeController.setTheme(FondeThemePresets.light),
       ),
       FondeOverflowMenuItem(
         value: 'theme_dark',
@@ -225,9 +214,7 @@ class _CatalogToolbarControlsState
         icon: LucideIcons.moon,
         enabled: isSystem || !isDark,
         onSelected:
-            () => ref
-                .read(fondeActiveThemeProvider.notifier)
-                .setTheme(FondeThemePresets.dark),
+            () => context.fondeThemeController.setTheme(FondeThemePresets.dark),
       ),
       const FondeOverflowMenuDivider(),
       FondeOverflowMenuItem(
@@ -261,7 +248,7 @@ class _CatalogToolbarControlsState
                 width: 180,
                 initialSelection: _selectedFontFamily,
                 onSelected: (value) {
-                  if (value != null) _applyFontFamily(value);
+                  if (value != null) _applyFontFamily(context, value);
                 },
                 dropdownMenuEntries: [
                   for (final (label, value) in _fontFamilies)
@@ -274,17 +261,17 @@ class _CatalogToolbarControlsState
                 icon: LucideIcons.minus,
                 tooltip: 'Smaller Font',
                 enabled: currentFontSize > 10,
-                onPressed: () => _adjustFontSize(-1),
+                onPressed: () => _adjustFontSize(context, -1),
               ),
               _FontSizeLabel(
                 size: currentFontSize,
-                onTap: () => _setFontSize(14.0),
+                onTap: () => _setFontSize(context, 14.0),
               ),
               FondeIconButton(
                 icon: LucideIcons.plus,
                 tooltip: 'Larger Font',
                 enabled: currentFontSize < 24,
-                onPressed: () => _adjustFontSize(1),
+                onPressed: () => _adjustFontSize(context, 1),
               ),
               _ToolbarDivider(),
               // Zoom controls
@@ -294,26 +281,29 @@ class _CatalogToolbarControlsState
                 enabled: currentZoom > _zoomLevels.first,
                 onPressed: () {
                   if (zoomIdx > 0) {
-                    _setZoom(_zoomLevels[zoomIdx - 1]);
+                    _setZoom(context, _zoomLevels[zoomIdx - 1]);
                   } else if (zoomIdx < 0) {
                     final lower =
                         _zoomLevels.where((z) => z < currentZoom).toList();
-                    if (lower.isNotEmpty) _setZoom(lower.last);
+                    if (lower.isNotEmpty) _setZoom(context, lower.last);
                   }
                 },
               ),
-              _ZoomLabel(zoom: currentZoom, onTap: () => _setZoom(1.0)),
+              _ZoomLabel(
+                zoom: currentZoom,
+                onTap: () => _setZoom(context, 1.0),
+              ),
               FondeIconButton(
                 icon: LucideIcons.zoomIn,
                 tooltip: 'Zoom In',
                 enabled: currentZoom < _zoomLevels.last,
                 onPressed: () {
                   if (zoomIdx >= 0 && zoomIdx < _zoomLevels.length - 1) {
-                    _setZoom(_zoomLevels[zoomIdx + 1]);
+                    _setZoom(context, _zoomLevels[zoomIdx + 1]);
                   } else if (zoomIdx < 0) {
                     final higher =
                         _zoomLevels.where((z) => z > currentZoom).toList();
-                    if (higher.isNotEmpty) _setZoom(higher.first);
+                    if (higher.isNotEmpty) _setZoom(context, higher.first);
                   }
                 },
               ),
@@ -324,36 +314,41 @@ class _CatalogToolbarControlsState
                 tooltip: 'System',
                 enabled: !isSystem,
                 onPressed:
-                    () => ref
-                        .read(fondeActiveThemeProvider.notifier)
-                        .setTheme(FondeThemePresets.system),
+                    () => context.fondeThemeController.setTheme(
+                      FondeThemePresets.system,
+                    ),
               ),
               FondeIconButton(
                 icon: LucideIcons.sun,
                 tooltip: 'Light',
                 enabled: isSystem || isDark,
                 onPressed:
-                    () => ref
-                        .read(fondeActiveThemeProvider.notifier)
-                        .setTheme(FondeThemePresets.light),
+                    () => context.fondeThemeController.setTheme(
+                      FondeThemePresets.light,
+                    ),
               ),
               FondeIconButton(
                 icon: LucideIcons.moon,
                 tooltip: 'Dark',
                 enabled: isSystem || !isDark,
                 onPressed:
-                    () => ref
-                        .read(fondeActiveThemeProvider.notifier)
-                        .setTheme(FondeThemePresets.dark),
+                    () => context.fondeThemeController.setTheme(
+                      FondeThemePresets.dark,
+                    ),
               ),
               _ToolbarDivider(),
               // Version
-              FondeText(
-                ref
-                    .watch(_packageVersionProvider)
-                    .maybeWhen(data: (v) => 'v$v', orElse: () => ''),
-                variant: FondeTextVariant.captionText,
-                color: colorScheme.base.foreground.withValues(alpha: 0.45),
+              FutureBuilder<PackageInfo>(
+                future: PackageInfo.fromPlatform(),
+                builder: (context, snapshot) {
+                  final version =
+                      snapshot.hasData ? 'v${snapshot.data!.version}' : '';
+                  return FondeText(
+                    version,
+                    variant: FondeTextVariant.captionText,
+                    color: colorScheme.base.foreground.withValues(alpha: 0.45),
+                  );
+                },
               ),
               // GitHub
               FondeIconButton.circle(
@@ -377,10 +372,10 @@ class _CatalogToolbarControlsState
   }
 }
 
-class _ToolbarDivider extends ConsumerWidget {
+class _ToolbarDivider extends StatelessWidget {
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final colorScheme = ref.watch(fondeEffectiveColorSchemeProvider);
+  Widget build(BuildContext context) {
+    final colorScheme = context.fondeColorScheme;
     return SizedBox(
       height: 16,
       child: VerticalDivider(
@@ -392,13 +387,13 @@ class _ToolbarDivider extends ConsumerWidget {
   }
 }
 
-class _ZoomLabel extends ConsumerWidget {
+class _ZoomLabel extends StatelessWidget {
   const _ZoomLabel({required this.zoom, required this.onTap});
   final double zoom;
   final VoidCallback onTap;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  Widget build(BuildContext context) {
     final label = zoom == 1.0 ? '100%' : '${(zoom * 100).round()}%';
     return _ToolbarTextButton(
       label: label,
@@ -408,13 +403,13 @@ class _ZoomLabel extends ConsumerWidget {
   }
 }
 
-class _FontSizeLabel extends ConsumerWidget {
+class _FontSizeLabel extends StatelessWidget {
   const _FontSizeLabel({required this.size, required this.onTap});
   final double size;
   final VoidCallback onTap;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  Widget build(BuildContext context) {
     return _ToolbarTextButton(
       label: '${size.round()}px',
       tooltip: 'Reset Font Size',
@@ -423,7 +418,7 @@ class _FontSizeLabel extends ConsumerWidget {
   }
 }
 
-class _ToolbarTextButton extends ConsumerWidget {
+class _ToolbarTextButton extends StatelessWidget {
   const _ToolbarTextButton({
     required this.label,
     required this.onTap,
@@ -434,8 +429,8 @@ class _ToolbarTextButton extends ConsumerWidget {
   final String? tooltip;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final colorScheme = ref.watch(fondeEffectiveColorSchemeProvider);
+  Widget build(BuildContext context) {
+    final colorScheme = context.fondeColorScheme;
     final widget = GestureDetector(
       onTap: onTap,
       child: MouseRegion(

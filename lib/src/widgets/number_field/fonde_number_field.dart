@@ -1,15 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:figma_squircle/figma_squircle.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import '../../internal.dart';
-import '../widgets/fonde_rectangle_border.dart';
 
 /// Numeric input field with increment/decrement buttons.
 ///
 /// Displays a text field accepting numeric input flanked by − and + buttons.
 /// Supports integer and decimal values, with optional min/max bounds and step.
-class FondeNumberField extends ConsumerStatefulWidget {
+class FondeNumberField extends StatefulWidget {
   /// Initial value.
   final num? initialValue;
 
@@ -59,10 +58,10 @@ class FondeNumberField extends ConsumerStatefulWidget {
   });
 
   @override
-  ConsumerState<FondeNumberField> createState() => _FondeNumberFieldState();
+  State<FondeNumberField> createState() => _FondeNumberFieldState();
 }
 
-class _FondeNumberFieldState extends ConsumerState<FondeNumberField> {
+class _FondeNumberFieldState extends State<FondeNumberField> {
   late TextEditingController _controller;
   late FocusNode _focusNode;
   num? _value;
@@ -161,8 +160,8 @@ class _FondeNumberFieldState extends ConsumerState<FondeNumberField> {
 
   @override
   Widget build(BuildContext context) {
-    final appColorScheme = ref.watch(fondeColorSchemeProvider);
-    final accessibilityConfig = ref.watch(fondeAccessibilityConfigProvider);
+    final appColorScheme = context.fondeColorScheme;
+    final accessibilityConfig = context.fondeAccessibility;
     final zoomScale = widget.disableZoom ? 1.0 : accessibilityConfig.zoomScale;
     final borderScale =
         widget.disableZoom ? 1.0 : accessibilityConfig.borderScale;
@@ -203,11 +202,13 @@ class _FondeNumberFieldState extends ConsumerState<FondeNumberField> {
       width: width,
       height: height,
       child: DecoratedBox(
-        decoration: ref.watch(
-          fondeShapeDecorationProvider(
-            color: backgroundColor,
-            cornerRadius: 12.0 * zoomScale,
-            cornerSmoothing: 0.6,
+        decoration: ShapeDecoration(
+          color: backgroundColor,
+          shape: SmoothRectangleBorder(
+            borderRadius: SmoothBorderRadius(
+              cornerRadius: 12.0 * zoomScale,
+              cornerSmoothing: 0.6,
+            ),
             side: BorderSide(color: borderColor, width: 1.5 * borderScale),
           ),
         ),
@@ -302,7 +303,7 @@ class _FondeNumberFieldState extends ConsumerState<FondeNumberField> {
   }
 }
 
-class _StepButton extends ConsumerStatefulWidget {
+class _StepButton extends StatefulWidget {
   const _StepButton({
     required this.icon,
     required this.width,
@@ -324,16 +325,16 @@ class _StepButton extends ConsumerStatefulWidget {
   final bool isLeft;
 
   @override
-  ConsumerState<_StepButton> createState() => _StepButtonState();
+  State<_StepButton> createState() => _StepButtonState();
 }
 
-class _StepButtonState extends ConsumerState<_StepButton> {
+class _StepButtonState extends State<_StepButton> {
   bool _isHovered = false;
   bool _isPressed = false;
 
   @override
   Widget build(BuildContext context) {
-    final appColorScheme = ref.watch(fondeColorSchemeProvider);
+    final appColorScheme = context.fondeColorScheme;
     final hoverBg = appColorScheme.interactive.button.background.hover;
 
     Color? bg;

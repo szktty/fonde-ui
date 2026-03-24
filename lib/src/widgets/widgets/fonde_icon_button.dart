@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../internal.dart';
 import '../styling/fonde_border_radius.dart';
 import 'fonde_gesture_detector.dart';
@@ -17,7 +16,7 @@ enum FondeIconButtonShape {
 ///
 /// A custom icon button that uses FondeGestureDetector for immediate press
 /// feedback without ripple effects, consistent with FondeButton behavior.
-class FondeIconButton extends ConsumerStatefulWidget {
+class FondeIconButton extends StatefulWidget {
   /// Icon
   final IconData icon;
 
@@ -155,18 +154,17 @@ class FondeIconButton extends ConsumerStatefulWidget {
   }) : shape = FondeIconButtonShape.circle;
 
   @override
-  ConsumerState<FondeIconButton> createState() => _FondeIconButtonState();
+  State<FondeIconButton> createState() => _FondeIconButtonState();
 }
 
-class _FondeIconButtonState extends ConsumerState<FondeIconButton> {
+class _FondeIconButtonState extends State<FondeIconButton> {
   bool _isPressed = false;
   bool _isHovered = false;
 
   @override
   Widget build(BuildContext context) {
-    final appColorScheme = ref.watch(fondeEffectiveColorSchemeProvider);
-    final accessibilityConfig = ref.watch(fondeAccessibilityConfigProvider);
-    final zoomScale = accessibilityConfig.zoomScale;
+    final appColorScheme = context.fondeColorScheme;
+    final zoomScale = context.fondeZoomScale;
 
     final effectiveIconSize =
         widget.iconSize != null ? widget.iconSize! * zoomScale : null;

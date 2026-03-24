@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../core/context_extensions.dart';
 import '../../internal.dart';
 
 /// A button that displays an icon and a label with optional trailing widget.
-class FondeIconLabelButton extends ConsumerWidget {
+class FondeIconLabelButton extends StatelessWidget {
   const FondeIconLabelButton({
     required this.icon,
     required this.label,
@@ -65,11 +65,10 @@ class FondeIconLabelButton extends ConsumerWidget {
   final bool disableZoom;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final appColorScheme = ref.watch(fondeEffectiveColorSchemeProvider);
-    final themeData = ref.watch(fondeEffectiveThemeDataProvider);
-    final accessibilityConfig = ref.watch(fondeAccessibilityConfigProvider);
-    final zoomScale = disableZoom ? 1.0 : accessibilityConfig.zoomScale;
+  Widget build(BuildContext context) {
+    final appColorScheme = context.fondeColorScheme;
+    final themeData = Theme.of(context);
+    final zoomScale = disableZoom ? 1.0 : context.fondeZoomScale;
 
     // Default colors based on rinne_graph_desktop theme
     final defaultBackgroundColor = Colors.transparent;

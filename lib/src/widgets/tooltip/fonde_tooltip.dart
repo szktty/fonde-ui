@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../internal.dart';
+import '../../core/context_extensions.dart';
 import '../styling/fonde_border_radius.dart';
 import '../typography/fonde_text.dart';
 
@@ -24,7 +24,7 @@ import '../typography/fonde_text.dart';
 ///   child: myButton,
 /// )
 /// ```
-class FondeTooltip extends ConsumerWidget {
+class FondeTooltip extends StatelessWidget {
   const FondeTooltip({
     super.key,
     required this.child,
@@ -58,7 +58,9 @@ class FondeTooltip extends ConsumerWidget {
   final bool disableZoom;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  Widget build(BuildContext context) {
+    final colorScheme = context.fondeColorScheme;
+    final zoomScale = disableZoom ? 1.0 : context.fondeZoomScale;
     return Tooltip(
       waitDuration: waitDuration,
       preferBelow: preferBelow,
@@ -70,14 +72,18 @@ class FondeTooltip extends ConsumerWidget {
           disableZoom: disableZoom,
         ),
       ),
-      decoration: _FondeTooltipDecoration(ref: ref, disableZoom: disableZoom),
+      decoration: _FondeTooltipDecoration(
+        background: colorScheme.uiAreas.dialog.background,
+        border: colorScheme.base.border,
+        radius: FondeBorderRadiusValues.small * zoomScale,
+      ),
       child: child,
     );
   }
 }
 
 /// Internal tooltip content widget.
-class _FondeTooltipContent extends ConsumerWidget {
+class _FondeTooltipContent extends StatelessWidget {
   const _FondeTooltipContent({
     required this.title,
     this.description,
@@ -91,10 +97,9 @@ class _FondeTooltipContent extends ConsumerWidget {
   final bool disableZoom;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final colorScheme = ref.watch(fondeEffectiveColorSchemeProvider);
-    final accessibilityConfig = ref.watch(fondeAccessibilityConfigProvider);
-    final zoomScale = disableZoom ? 1.0 : accessibilityConfig.zoomScale;
+  Widget build(BuildContext context) {
+    final colorScheme = context.fondeColorScheme;
+    final zoomScale = disableZoom ? 1.0 : context.fondeZoomScale;
 
     final foreground = colorScheme.base.foreground;
     final mutedForeground = foreground.withValues(alpha: 0.65);
@@ -181,20 +186,22 @@ class _ShortcutBadge extends StatelessWidget {
 
 /// Custom tooltip decoration using fonde theme colors.
 class _FondeTooltipDecoration extends Decoration {
-  const _FondeTooltipDecoration({required this.ref, required this.disableZoom});
+  const _FondeTooltipDecoration({
+    required this.background,
+    required this.border,
+    required this.radius,
+  });
 
-  final WidgetRef ref;
-  final bool disableZoom;
+  final Color background;
+  final Color border;
+  final double radius;
 
   @override
   BoxPainter createBoxPainter([VoidCallback? onChanged]) {
-    final colorScheme = ref.read(fondeEffectiveColorSchemeProvider);
-    final accessibilityConfig = ref.read(fondeAccessibilityConfigProvider);
-    final zoomScale = disableZoom ? 1.0 : accessibilityConfig.zoomScale;
     return _FondeTooltipPainter(
-      background: colorScheme.uiAreas.dialog.background,
-      border: colorScheme.base.border,
-      radius: FondeBorderRadiusValues.small * zoomScale,
+      background: background,
+      border: border,
+      radius: radius,
     );
   }
 }
