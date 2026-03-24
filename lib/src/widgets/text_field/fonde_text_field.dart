@@ -399,7 +399,19 @@ class _AppTextFieldState extends State<FondeTextField> {
           isDense: true,
           contentPadding: EdgeInsets.symmetric(
             horizontal: widget.contentPadding.horizontal / 2 * zoomScale,
-            vertical: widget.contentPadding.vertical / 2 * zoomScale,
+            vertical: () {
+              final textStyle =
+                  widget.style ??
+                  _buildTextStyle(
+                    flutterTheme.textTheme,
+                    appColorScheme,
+                    zoomScale,
+                  );
+              final fontSize = (textStyle.fontSize ?? 14.0);
+              final fieldHeight = 32.0 * zoomScale;
+              final verticalPadding = (fieldHeight - fontSize) / 2 - 2.0;
+              return verticalPadding.clamp(0.0, double.infinity);
+            }(),
           ),
         ),
         keyboardType: widget.keyboardType,
@@ -410,8 +422,7 @@ class _AppTextFieldState extends State<FondeTextField> {
             _buildTextStyle(flutterTheme.textTheme, appColorScheme, zoomScale),
         strutStyle: widget.strutStyle,
         textAlign: widget.textAlign,
-        textAlignVertical:
-            widget.textAlignVertical ?? const TextAlignVertical(y: 0.1),
+        textAlignVertical: widget.textAlignVertical ?? TextAlignVertical.center,
         textDirection: widget.textDirection,
         readOnly: widget.readOnly,
         showCursor: widget.showCursor,
