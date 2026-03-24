@@ -1,3 +1,4 @@
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import '../../internal.dart';
@@ -423,13 +424,12 @@ class _AppDropdownButtonState<T> extends State<_AppDropdownButton<T>> {
   // GlobalKey for the menu panel container — used for hit testing via Y coordinate.
   final GlobalKey _menuPanelKey = GlobalKey();
 
-  // Whether the current pointer sequence started on the button (press-drag-release)
-  bool _pointerDownActive = false;
-  // Timestamp when the menu was opened
-  DateTime? _menuOpenedAt;
-  // How long the pointer must be held after opening before a release can
-  // select an item. Matches the approximate macOS feel (~700ms).
-  static const _selectionDelay = Duration(milliseconds: 700);
+  // The pointer ID of the tap that opened the menu.
+  // When the overlay sees a pointerUp with this same ID, it is the release
+  // of the opening tap — keep the menu open instead of selecting.
+  // Set to null after that first release, so subsequent taps select normally.
+  int? _openingPointerId;
+  bool _globalRouteRegistered = false;
 
   @override
   void dispose() {
@@ -440,24 +440,45 @@ class _AppDropdownButtonState<T> extends State<_AppDropdownButton<T>> {
   }
 
   void _removeOverlay() {
+    if (_globalRouteRegistered) {
+      GestureBinding.instance.pointerRouter.removeGlobalRoute(
+        _onGlobalPointerEvent,
+      );
+      _globalRouteRegistered = false;
+    }
     _overlayEntry?.remove();
     _overlayEntry = null;
     _isOpen = false;
     _hoveredIndex.value = null;
-    // Return focus to the primary focus scope so other widgets are unaffected.
     _keyboardFocusNode.unfocus();
   }
 
-  void _openOverlay() {
+  void _openOverlay(int pointerId) {
     if (_isOpen) return;
-    _menuOpenedAt = DateTime.now();
+    _openingPointerId = pointerId;
     _overlayEntry = _createOverlayEntry();
     Overlay.of(context).insert(_overlayEntry!);
+    // Register a root-level pointer route so we receive move events regardless
+    // of which widget the pointer is over (including the menu panel itself).
+    if (!_globalRouteRegistered) {
+      GestureBinding.instance.pointerRouter.addGlobalRoute(
+        _onGlobalPointerEvent,
+      );
+      _globalRouteRegistered = true;
+    }
     // Request focus after the overlay is inserted so keyboard events are received.
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (_isOpen) _keyboardFocusNode.requestFocus();
     });
     setState(() => _isOpen = true);
+  }
+
+  void _onGlobalPointerEvent(PointerEvent event) {
+    if (!_isOpen) return;
+    if (event is PointerMoveEvent || event is PointerHoverEvent) {
+      final index = _findItemIndexAt(event.position);
+      _hoveredIndex.value = index;
+    }
   }
 
   /// Find which item index (if any) contains [globalPosition].
@@ -483,50 +504,39 @@ class _AppDropdownButtonState<T> extends State<_AppDropdownButton<T>> {
 
   void _handlePointerDown(PointerDownEvent event) {
     if (!widget.enabled) return;
-    _pointerDownActive = true;
-    _openOverlay();
+    if (!_isOpen) {
+      _openOverlay(event.pointer);
+    }
+    // If already open, do nothing on down — let pointerUp handle it.
   }
 
-  // Called from the button's Listener — drives hover during press-drag.
+  // Called from the button's Listener — kept for press-drag from button.
   void _handlePointerMove(PointerMoveEvent event) {
-    if (!_isOpen || !_pointerDownActive) return;
-    final index = _findItemIndexAt(event.position);
-    _hoveredIndex.value = index;
+    // Handled by _onGlobalPointerEvent; nothing needed here.
   }
 
   // All pointer-up handling is done here (called from the overlay Listener).
   void _handleOverlayPointerUp(PointerUpEvent event) {
     if (!_isOpen) return;
 
-    final openedAt = _menuOpenedAt;
-    final elapsed =
-        openedAt != null
-            ? DateTime.now().difference(openedAt)
-            : _selectionDelay;
-
-    // If the pointer was released too quickly after the menu opened, it is
-    // the same tap that triggered the open. Keep the menu open.
-    if (elapsed < _selectionDelay && _pointerDownActive) {
-      _pointerDownActive = false;
+    // The tap that opened the menu — keep it open, then clear the ID.
+    if (event.pointer == _openingPointerId) {
+      _openingPointerId = null;
       return;
     }
 
-    _pointerDownActive = false;
-
+    // Any subsequent release: select item under pointer (if any) then close.
     final index = _findItemIndexAt(event.position);
     if (index != null) {
       final entry = widget.dropdownMenuEntries[index];
       widget.onSelected?.call(entry.value);
     }
-    // Close whether or not an item was hit (click outside = dismiss).
     _removeOverlay();
     setState(() {});
   }
 
   void _handleOverlayPointerMove(PointerMoveEvent event) {
-    if (!_isOpen) return;
-    final index = _findItemIndexAt(event.position);
-    _hoveredIndex.value = index;
+    // Handled by _onGlobalPointerEvent.
   }
 
   void _handleKeyEvent(KeyEvent event) {
@@ -883,62 +893,65 @@ class _AppDropdownMenuItem<T> extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final iconTheme = context.fondeIconTheme;
-    return Container(
-      height: _AppDropdownMenuConstants.defaultHeight * zoomScale,
-      color: isHovered ? hoverBackgroundColor : Colors.transparent,
-      padding: EdgeInsets.symmetric(
-        horizontal: _AppDropdownMenuConstants.horizontalPadding * zoomScale,
-        vertical: _AppDropdownMenuConstants.verticalPadding * zoomScale,
-      ),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          if (showCheckmark &&
-              alignment != FondeDropdownMenuAlignment.left) ...[
-            SizedBox(
-              width: _AppDropdownMenuConstants.checkboxSpaceWidth * zoomScale,
-              child:
-                  isSelected
-                      ? Align(
-                        alignment: Alignment.topLeft,
-                        child: Padding(
-                          padding: EdgeInsets.only(top: 4.0 * zoomScale),
-                          child: Icon(
-                            iconTheme.check,
-                            color: textColor,
-                            size:
-                                _AppDropdownMenuConstants.checkIconSize *
-                                zoomScale,
+    // IgnorePointer lets move/up events pass through to the overlay Listener.
+    return IgnorePointer(
+      child: Container(
+        height: _AppDropdownMenuConstants.defaultHeight * zoomScale,
+        color: isHovered ? hoverBackgroundColor : Colors.transparent,
+        padding: EdgeInsets.symmetric(
+          horizontal: _AppDropdownMenuConstants.horizontalPadding * zoomScale,
+          vertical: _AppDropdownMenuConstants.verticalPadding * zoomScale,
+        ),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            if (showCheckmark &&
+                alignment != FondeDropdownMenuAlignment.left) ...[
+              SizedBox(
+                width: _AppDropdownMenuConstants.checkboxSpaceWidth * zoomScale,
+                child:
+                    isSelected
+                        ? Align(
+                          alignment: Alignment.topLeft,
+                          child: Padding(
+                            padding: EdgeInsets.only(top: 4.0 * zoomScale),
+                            child: Icon(
+                              iconTheme.check,
+                              color: textColor,
+                              size:
+                                  _AppDropdownMenuConstants.checkIconSize *
+                                  zoomScale,
+                            ),
                           ),
-                        ),
-                      )
-                      : null,
+                        )
+                        : null,
+              ),
+              SizedBox(width: _AppDropdownMenuConstants.spacing * zoomScale),
+            ],
+            if (entry.leadingIcon != null) ...[
+              Padding(
+                padding: EdgeInsets.only(top: 2.0 * zoomScale),
+                child: entry.leadingIcon!,
+              ),
+              SizedBox(width: _AppDropdownMenuConstants.spacing * zoomScale),
+            ],
+            Flexible(
+              child:
+                  entry.labelWidget ??
+                  FondeText(
+                    entry.label,
+                    variant: FondeTextVariant.bodyText,
+                    color: textColor,
+                    overflow: TextOverflow.ellipsis,
+                    maxLines: 1,
+                  ),
             ),
-            SizedBox(width: _AppDropdownMenuConstants.spacing * zoomScale),
+            if (entry.trailingIcon != null) ...[
+              SizedBox(width: _AppDropdownMenuConstants.spacing * zoomScale),
+              entry.trailingIcon!,
+            ],
           ],
-          if (entry.leadingIcon != null) ...[
-            Padding(
-              padding: EdgeInsets.only(top: 2.0 * zoomScale),
-              child: entry.leadingIcon!,
-            ),
-            SizedBox(width: _AppDropdownMenuConstants.spacing * zoomScale),
-          ],
-          Flexible(
-            child:
-                entry.labelWidget ??
-                FondeText(
-                  entry.label,
-                  variant: FondeTextVariant.bodyText,
-                  color: textColor,
-                  overflow: TextOverflow.ellipsis,
-                  maxLines: 1,
-                ),
-          ),
-          if (entry.trailingIcon != null) ...[
-            SizedBox(width: _AppDropdownMenuConstants.spacing * zoomScale),
-            entry.trailingIcon!,
-          ],
-        ],
+        ),
       ),
     );
   }
