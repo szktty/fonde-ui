@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../internal.dart';
 import '../../core/context_extensions.dart';
+import '../widgets/fonde_gesture_detector.dart';
 
 /// A list tile that handles selection state and applies appropriate theme colors.
 class FondeListTile extends StatelessWidget {
@@ -10,6 +11,7 @@ class FondeListTile extends StatelessWidget {
   final Widget? trailing;
   final bool isSelected;
   final VoidCallback? onTap;
+  final VoidCallback? onDoubleTap;
   final VoidCallback? onLongPress;
   final bool dense;
   final EdgeInsetsGeometry? contentPadding;
@@ -26,6 +28,7 @@ class FondeListTile extends StatelessWidget {
     this.trailing,
     required this.isSelected,
     this.onTap,
+    this.onDoubleTap,
     this.onLongPress,
     this.dense = false,
     this.contentPadding,
@@ -46,8 +49,11 @@ class FondeListTile extends StatelessWidget {
     final effectiveHoverColor =
         enableHover ? (hoverColor ?? theme.hoverColor) : Colors.transparent;
 
-    return Theme(
-      data: Theme.of(context).copyWith(splashFactory: NoSplash.splashFactory),
+    final tile = Theme(
+      data: Theme.of(context).copyWith(
+        splashFactory: NoSplash.splashFactory,
+        highlightColor: Colors.transparent,
+      ),
       child: ListTile(
         leading: leading,
         trailing: trailing,
@@ -58,13 +64,23 @@ class FondeListTile extends StatelessWidget {
         selectedColor: appColorScheme.interactive.list.selectedText,
         hoverColor: effectiveHoverColor,
         splashColor: Colors.transparent,
-        enabled: onTap != null,
-        onTap: onTap,
+        enabled: onTap != null || onDoubleTap != null,
+        onTap: onDoubleTap != null ? null : onTap,
         onLongPress: onLongPress,
         dense: dense,
         contentPadding:
             contentPadding != null ? contentPadding! * zoomScale : null,
       ),
     );
+
+    if (onDoubleTap != null) {
+      return FondeGestureDetector(
+        onTap: onTap,
+        onDoubleTap: onDoubleTap,
+        behavior: HitTestBehavior.translucent,
+        child: tile,
+      );
+    }
+    return tile;
   }
 }
