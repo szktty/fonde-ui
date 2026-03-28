@@ -2,7 +2,9 @@
 .github/
 
 # Documentation source (not needed by consumers)
-doc/
+doc/design/
+doc/plan/
+doc/*.md
 
 # Internal development notes
 private/
