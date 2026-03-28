@@ -220,7 +220,6 @@ class _CatalogToolbarControlsState extends State<CatalogToolbarControls> {
       FondeOverflowMenuItem(
         value: 'github',
         title: 'GitHub',
-        icon: LucideIcons.github,
         onSelected: () => launchUrl(Uri.parse(_kGitHubUrl)),
       ),
     ];
@@ -351,17 +350,8 @@ class _CatalogToolbarControlsState extends State<CatalogToolbarControls> {
                 },
               ),
               // GitHub
-              FondeIconButton.circle(
-                icon: LucideIcons.github,
-                tooltip: 'GitHub',
-                iconSize: 16,
-                backgroundColor: colorScheme.base.foreground.withValues(
-                  alpha: 0.15,
-                ),
-                constraints: const BoxConstraints.tightFor(
-                  width: 28,
-                  height: 28,
-                ),
+              FondeButton(
+                label: 'GitHub',
                 onPressed: () => launchUrl(Uri.parse(_kGitHubUrl)),
               ),
             ],
