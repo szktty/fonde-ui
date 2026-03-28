@@ -99,6 +99,8 @@ class FondeSidebar extends StatelessWidget {
             borderColor: Colors.transparent,
           );
 
+      final borderColor = appColorScheme.base.border;
+
       return Container(
         width: width * zoomScale,
         color: outerBackground,
@@ -107,6 +109,7 @@ class FondeSidebar extends StatelessWidget {
           decoration: ShapeDecoration(
             color: panelBackground,
             shape: SmoothRectangleBorder(
+              side: BorderSide(color: borderColor, width: 1.0 * borderScale),
               borderRadius: SmoothBorderRadius(
                 cornerRadius: cornerRadius,
                 cornerSmoothing: 0.6,
