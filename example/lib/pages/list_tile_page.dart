@@ -84,10 +84,12 @@ class _TapDemo extends StatefulWidget {
 class _TapDemoState extends State<_TapDemo> {
   String _log = 'Tap or double-tap an item';
 
-  Future<void> _updateLog(String message) async {
+  void _updateLog(String message) {
+    setState(() => _log = message);
+  }
+
+  void _clearLog() {
     setState(() => _log = '');
-    await Future.delayed(const Duration(milliseconds: 80));
-    if (mounted) setState(() => _log = message);
   }
 
   @override
@@ -98,12 +100,14 @@ class _TapDemoState extends State<_TapDemo> {
         FondeListTile(
           title: const FondeText('Item A', variant: FondeTextVariant.bodyText),
           isSelected: false,
+          onTapDown: (_) => _clearLog(),
           onTap: () => _updateLog('Item A: single tap'),
           onDoubleTap: () => _updateLog('Item A: double tap'),
         ),
         FondeListTile(
           title: const FondeText('Item B', variant: FondeTextVariant.bodyText),
           isSelected: false,
+          onTapDown: (_) => _clearLog(),
           onTap: () => _updateLog('Item B: single tap'),
           onDoubleTap: () => _updateLog('Item B: double tap'),
         ),

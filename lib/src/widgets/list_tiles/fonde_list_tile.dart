@@ -12,6 +12,8 @@ class FondeListTile extends StatelessWidget {
   final bool isSelected;
   final VoidCallback? onTap;
   final VoidCallback? onDoubleTap;
+  final VoidCallback? onTapCancel;
+  final GestureTapDownCallback? onTapDown;
   final VoidCallback? onLongPress;
   final bool dense;
   final EdgeInsetsGeometry? contentPadding;
@@ -29,6 +31,8 @@ class FondeListTile extends StatelessWidget {
     required this.isSelected,
     this.onTap,
     this.onDoubleTap,
+    this.onTapCancel,
+    this.onTapDown,
     this.onLongPress,
     this.dense = false,
     this.contentPadding,
@@ -73,9 +77,11 @@ class FondeListTile extends StatelessWidget {
       ),
     );
 
-    if (onDoubleTap != null) {
+    if (onDoubleTap != null || onTapDown != null) {
       return FondeGestureDetector(
+        onTapDown: onTapDown,
         onTap: onTap,
+        onTapCancel: onTapCancel,
         onDoubleTap: onDoubleTap,
         behavior: HitTestBehavior.translucent,
         child: tile,
