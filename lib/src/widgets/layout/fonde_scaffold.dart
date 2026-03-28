@@ -258,6 +258,7 @@ class _FondeScaffoldState extends State<FondeScaffold> {
         dividerPainter: DividerPainters.background(
           color: appColorScheme.base.divider,
           highlightedColor: appColorScheme.theme.primaryColor,
+          animationDuration: const Duration(milliseconds: 100),
         ),
         dividerHandleBuffer: 6,
       ),

@@ -9,9 +9,14 @@
 - FIX
   - Bug fixes
 
-## 0.7.0-dev
+## 0.7.0
+
+**Release date**: 2026-03-28
 
 - [UPDATE] `FondeDropdownColors`: add button-specific color properties (`buttonBackground`, `buttonHoverBackground`, `buttonBorder`, `buttonText`) and item hover colors (`itemHoverBackground`, `itemHoverText`)
+- [UPDATE] `FondeSidebar`: show border on floating panel style
+- [UPDATE] `FondeGestureDetector`: fire single tap immediately even when `onDoubleTap` is also set; add `onTapDown` and `onTapCancel` support
+- [ADD] `FondeListTile`: add `onDoubleTap`, `onTapDown`, and `onTapCancel` callbacks
 - [FIX] `FondeDropdownMenu`: overhaul interaction to match macOS native behavior
   - Open on pointer down (tap-down)
   - press-drag-release selection
@@ -20,6 +25,7 @@
   - macOS-style selection flash effect and fade-out on close
 - [FIX] `FondeSidebarList`: apply sidebar color scope so selected item text is no longer invisible
 - [FIX] `FondeTextField`: fix text vertical alignment to stay centered at any zoom scale
+- [FIX] `FondeScaffold`, `FondeSplitPane`: shorten divider hover animation from 250ms to 100ms
 
 ## 0.6.1
 

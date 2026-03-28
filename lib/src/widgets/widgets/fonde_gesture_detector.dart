@@ -333,19 +333,10 @@ class _AppGestureDetectorState extends State<FondeGestureDetector> {
     if (widget.onDoubleTap == null) {
       _executeSingleTap();
     } else if (widget.onTap != null) {
-      if (widget.onTapCancel != null) {
-        _executeSingleTap();
-        _singleTapTimer = Timer(widget.doubleTapTimeout, () {
-          _resetTapState();
-        });
-      } else {
-        _singleTapTimer = Timer(widget.doubleTapTimeout, () {
-          if (mounted) {
-            _executeSingleTap();
-          }
-          _resetTapState();
-        });
-      }
+      _executeSingleTap();
+      _singleTapTimer = Timer(widget.doubleTapTimeout, () {
+        _resetTapState();
+      });
     }
   }
 

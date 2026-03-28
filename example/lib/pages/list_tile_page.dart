@@ -63,8 +63,56 @@ class ListTilePage extends StatelessWidget {
                 ),
               ),
             ),
+            const CatalogDemo(
+              label: 'Tap / Double tap',
+              child: SizedBox(width: 400, child: _TapDemo()),
+            ),
           ],
         ),
+      ],
+    );
+  }
+}
+
+class _TapDemo extends StatefulWidget {
+  const _TapDemo();
+
+  @override
+  State<_TapDemo> createState() => _TapDemoState();
+}
+
+class _TapDemoState extends State<_TapDemo> {
+  String _log = 'Tap or double-tap an item';
+
+  void _updateLog(String message) {
+    setState(() => _log = message);
+  }
+
+  void _clearLog() {
+    setState(() => _log = '');
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        FondeListTile(
+          title: const FondeText('Item A', variant: FondeTextVariant.bodyText),
+          isSelected: false,
+          onTapDown: (_) => _clearLog(),
+          onTap: () => _updateLog('Item A: single tap'),
+          onDoubleTap: () => _updateLog('Item A: double tap'),
+        ),
+        FondeListTile(
+          title: const FondeText('Item B', variant: FondeTextVariant.bodyText),
+          isSelected: false,
+          onTapDown: (_) => _clearLog(),
+          onTap: () => _updateLog('Item B: single tap'),
+          onDoubleTap: () => _updateLog('Item B: double tap'),
+        ),
+        const SizedBox(height: 8),
+        FondeText(_log, variant: FondeTextVariant.captionText),
       ],
     );
   }
