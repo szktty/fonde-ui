@@ -110,6 +110,7 @@ class _FondeSplitPaneState extends State<FondeSplitPane> {
         dividerPainter: DividerPainters.background(
           color: appColorScheme.base.divider,
           highlightedColor: appColorScheme.theme.primaryColor,
+          animationDuration: const Duration(milliseconds: 100),
         ),
         dividerHandleBuffer: 6,
       ),
