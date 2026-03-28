@@ -137,9 +137,9 @@ Fonde UI's goal is to provide **operational and visual comfort** in desktop apps
 
 ## State Management
 
-The current version uses **Riverpod 3.x** for theme, accessibility config, and sidebar state management.
+fonde_ui uses plain Flutter state management (`ChangeNotifier` + `InheritedWidget`). No Riverpod dependency.
 
-Riverpod integration is optional — import `fonde_ui_riverpod.dart` separately when needed.
+Theme, accessibility config, and sidebar state are accessible via `BuildContext` extensions from any widget's `build` method.
 
 ## Setup
 
@@ -147,14 +147,13 @@ Add to your `pubspec.yaml`:
 
 ```yaml
 dependencies:
-  fonde_ui: ^0.5.0-dev
+  fonde_ui: ^0.7.0
 ```
 
 ### Minimal Example
 
 ```dart
-import 'package:fonde_ui/fonde_ui.dart';               // Core + all widgets
-import 'package:fonde_ui/fonde_ui_riverpod.dart';      // Riverpod providers (optional)
+import 'package:fonde_ui/fonde_ui.dart';
 
 void main() {
   runApp(
@@ -169,7 +168,46 @@ void main() {
 }
 ```
 
-`FondeApp` wraps Riverpod's `ProviderScope` and Material's `MaterialApp` internally.
+`FondeApp` wraps `MaterialApp` internally.
+
+### FondeScaffold — Multi-pane Layout
+
+`FondeScaffold` provides the top-level window layout for desktop apps:
+
+```
+[ Launch Bar | Primary Sidebar | Main Content | Secondary Sidebar ]
+```
+
+- **Launch Bar** — vertical icon bar on the far left, split into top (main) and bottom (meta) sections
+- **Primary Sidebar** — resizable (240–480px), collapsible; supports standard and floating panel (macOS) styles
+- **Secondary Sidebar** — resizable (200–400px), collapsible
+- **Main Content** — fills remaining space
+
+```dart
+FondeScaffold(
+  toolbar: FondeMainToolbar(children: [...]),
+  launchBar: FondeLaunchBar(
+    topItems: [
+      FondeLaunchBarItem(icon: LucideIcons.house, label: 'Home', logicalIndex: 0, onTap: () {}),
+    ],
+    bottomItems: [
+      FondeLaunchBarItem(icon: LucideIcons.settings, label: 'Settings', logicalIndex: 99),
+    ],
+    selectedIndex: 0,
+  ),
+  primarySidebar: FondeSidebar(
+    child: FondeSidebarList(children: [...]),
+  ),
+  content: MyMainContent(),
+)
+```
+
+Sidebar visibility and width are controlled via `FondeSidebarControllerScope`:
+
+```dart
+// Toggle primary sidebar
+FondeSidebarControllerScope.primaryOf(context)?.toggle();
+```
 
 ## Documentation
 
