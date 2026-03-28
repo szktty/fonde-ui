@@ -3,6 +3,7 @@
 // Verifies entry rendering, initial selection, onSelected callback, and disabled state.
 
 import 'package:flutter/material.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:fonde_ui/fonde_ui.dart';
 
@@ -62,19 +63,33 @@ void main() {
           FondeDropdownMenu<String>(
             dropdownMenuEntries: _entries(),
             onSelected: (v) => selected = v,
+            selectionEffect: false,
           ),
         );
-        // Open the dropdown
-        await tester.tap(find.byType(FondeDropdownMenu<String>));
-        await tester.pumpAndSettle();
-        // Tap Banana entry
+        // Open the dropdown via pointer down (menu opens on pointer down)
+        final buttonCenter = tester.getCenter(
+          find.byType(FondeDropdownMenu<String>),
+        );
+        final gesture = await tester.startGesture(
+          buttonCenter,
+          kind: PointerDeviceKind.mouse,
+        );
+        // Hold long enough to exceed _longPressThreshold (500ms),
+        // so release selects regardless of movement distance.
+        await tester.pump(const Duration(milliseconds: 600));
+
+        // Banana entry should now be visible — move to it and release
         final bananaFinder = find.text('Banana').last;
         if (bananaFinder.evaluate().isNotEmpty) {
-          await tester.tap(bananaFinder);
+          final bananaCenter = tester.getCenter(bananaFinder);
+          await gesture.moveTo(bananaCenter);
+          await tester.pump();
+          await gesture.up();
           await tester.pumpAndSettle();
           expect(selected, 'banana');
         } else {
-          // Entries may not be visible in test environment — smoke pass
+          await gesture.up();
+          // Entries not visible in test environment — smoke pass
           expect(find.byType(FondeDropdownMenu<String>), findsOneWidget);
         }
       });
