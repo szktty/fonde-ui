@@ -9,6 +9,13 @@
 - FIX
   - Bug fixes
 
+## 0.7.1
+
+**Release date**: 2026-03-29
+
+- [FIX] `FondeDropdownMenu`: fix item hover background to use theme-appropriate gray instead of accent color
+- [FIX] `FondeSidebarList`: remove unused imports
+
 ## 0.7.0
 
 **Release date**: 2026-03-28

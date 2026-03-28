@@ -357,7 +357,10 @@ class FondeColorScheme {
           isDark
               ? _AppColorConstants.darkInputBorder
               : _AppColorConstants.lightInputBorder,
-      itemHoverBackground: themeColorScheme.primaryColor,
+      itemHoverBackground:
+          isDark
+              ? _AppColorConstants.darkDropdownItemHoverBackground
+              : _AppColorConstants.lightDropdownItemHoverBackground,
       itemHoverText: Colors.white,
       itemText: baseColors.foreground,
     );

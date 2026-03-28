@@ -1,6 +1,4 @@
 import 'package:flutter/material.dart';
-import '../../core/color_scope_widget.dart';
-import '../../core/context_extensions.dart';
 import '../../internal.dart';
 import 'sidebar.dart';
 import 'sidebar_list_item.dart';
