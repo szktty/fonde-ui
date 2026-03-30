@@ -35,6 +35,7 @@ Desktop-first Flutter UI optimized for native-quality instant feedback, with acc
 ## Before Committing
 
 - Always run `fvm dart format .` before creating a commit
+- Always ask the user for permission before running any destructive git operations, especially commits
 
 ## Documentation
 
