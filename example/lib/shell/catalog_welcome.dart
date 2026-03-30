@@ -173,7 +173,6 @@ class CatalogCard extends StatelessWidget {
                 FondeText(
                   category,
                   variant: FondeTextVariant.sectionTitleSecondary,
-                  color: colorScheme.theme.primaryColor,
                 ),
                 const FondeSpacing.xs(),
                 FondeText(
