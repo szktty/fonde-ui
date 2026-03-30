@@ -2,6 +2,7 @@ import 'package:figma_squircle/figma_squircle.dart';
 import 'package:flutter/material.dart';
 import '../../internal.dart';
 import '../widgets/fonde_icon_button.dart';
+import '../widgets/fonde_rectangle_border.dart';
 
 /// A platform-adaptive search field widget with suggestions support.
 class FondeSearchField extends StatefulWidget {
@@ -122,27 +123,18 @@ class _FondeSearchFieldState extends State<FondeSearchField> {
       FocusNode fieldFocusNode,
       VoidCallback onFieldSubmitted,
     ) {
-      // Sync Autocomplete's internal controller with ours when external
-      // controller is provided.
       if (widget.controller != null &&
           fieldController.text != _controller.text) {
         fieldController.text = _controller.text;
       }
 
-      return Container(
+      return FondeRectangleBorder(
+        cornerRadius: 8.0 * zoomScale,
         width: double.infinity,
         height: 28.0 * zoomScale,
-        decoration: ShapeDecoration(
-          shape: SmoothRectangleBorder(
-            borderRadius: SmoothBorderRadius(
-              cornerRadius: 8.0 * zoomScale,
-              cornerSmoothing: 0.6,
-            ),
-            side: BorderSide(
-              color: _isFocused ? activeBorderColor : borderColor,
-              width: borderScale,
-            ),
-          ),
+        side: BorderSide(
+          color: _isFocused ? activeBorderColor : borderColor,
+          width: borderScale,
         ),
         child: TextSelectionTheme(
           data: TextSelectionThemeData(
@@ -215,6 +207,7 @@ class _FondeSearchFieldState extends State<FondeSearchField> {
       AutocompleteOnSelected<String> onSelected,
       Iterable<String> options,
     ) {
+      final radius = FondeBorderRadius.small();
       return Align(
         alignment: Alignment.topLeft,
         child: Material(
@@ -228,10 +221,7 @@ class _FondeSearchFieldState extends State<FondeSearchField> {
             decoration: ShapeDecoration(
               color: appColorScheme.uiAreas.sideBar.background,
               shape: SmoothRectangleBorder(
-                borderRadius: SmoothBorderRadius(
-                  cornerRadius: 8.0 * zoomScale,
-                  cornerSmoothing: 0.6,
-                ),
+                borderRadius: radius.toSmoothBorderRadius(),
                 side: BorderSide(
                   color: appColorScheme.base.divider,
                   width: borderScale,
@@ -246,10 +236,7 @@ class _FondeSearchFieldState extends State<FondeSearchField> {
               ],
             ),
             child: ClipSmoothRect(
-              radius: SmoothBorderRadius(
-                cornerRadius: 8.0 * zoomScale,
-                cornerSmoothing: 0.6,
-              ),
+              radius: radius.toSmoothBorderRadius(),
               child: ListView.builder(
                 padding: EdgeInsets.symmetric(vertical: 4.0 * zoomScale),
                 shrinkWrap: true,
