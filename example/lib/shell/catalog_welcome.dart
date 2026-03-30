@@ -146,7 +146,7 @@ class CatalogCard extends StatelessWidget {
               width: width,
               height: kCardSampleHeight,
               child: ColoredBox(
-                color: colorScheme.base.divider,
+                color: colorScheme.base.background,
                 child: ClipRect(
                   child: Padding(
                     padding: const EdgeInsets.all(FondeSpacingValues.md),
