@@ -9,7 +9,6 @@ class FondeSearchField extends StatefulWidget {
   const FondeSearchField({
     super.key,
     this.controller,
-    this.focusNode,
     this.onClear,
     this.suggestions,
     this.onSuggestionTap,
@@ -22,9 +21,6 @@ class FondeSearchField extends StatefulWidget {
 
   /// External controller (optional). If not provided, managed internally.
   final TextEditingController? controller;
-
-  /// External focus node (optional). If not provided, managed internally.
-  final FocusNode? focusNode;
 
   /// The list of suggestions to show.
   final List<String>? suggestions;
@@ -56,18 +52,17 @@ class FondeSearchField extends StatefulWidget {
 
 class _FondeSearchFieldState extends State<FondeSearchField> {
   late TextEditingController _controller;
-  late FocusNode _focusNode;
   bool _isFocused = false;
   bool _hasText = false;
+  // The actual focus node passed by Autocomplete's fieldViewBuilder.
+  FocusNode? _fieldFocusNode;
 
   @override
   void initState() {
     super.initState();
     _controller =
         widget.controller ?? TextEditingController(text: widget.value);
-    _focusNode = widget.focusNode ?? FocusNode();
     _hasText = _controller.text.isNotEmpty;
-    _focusNode.addListener(_handleFocusChange);
     _controller.addListener(_handleTextChange);
   }
 
@@ -78,17 +73,20 @@ class _FondeSearchFieldState extends State<FondeSearchField> {
     } else {
       _controller.removeListener(_handleTextChange);
     }
-    if (widget.focusNode == null) {
-      _focusNode.dispose();
-    } else {
-      _focusNode.removeListener(_handleFocusChange);
-    }
+    _fieldFocusNode?.removeListener(_handleFocusChange);
     super.dispose();
+  }
+
+  void _attachFocusNode(FocusNode node) {
+    if (_fieldFocusNode == node) return;
+    _fieldFocusNode?.removeListener(_handleFocusChange);
+    _fieldFocusNode = node;
+    _fieldFocusNode!.addListener(_handleFocusChange);
   }
 
   void _handleFocusChange() {
     setState(() {
-      _isFocused = _focusNode.hasFocus;
+      _isFocused = _fieldFocusNode?.hasFocus ?? false;
     });
   }
 
@@ -123,6 +121,7 @@ class _FondeSearchFieldState extends State<FondeSearchField> {
       FocusNode fieldFocusNode,
       VoidCallback onFieldSubmitted,
     ) {
+      _attachFocusNode(fieldFocusNode);
       if (widget.controller != null &&
           fieldController.text != _controller.text) {
         fieldController.text = _controller.text;
@@ -131,11 +130,15 @@ class _FondeSearchFieldState extends State<FondeSearchField> {
       return FondeRectangleBorder(
         cornerRadius: 8.0 * zoomScale,
         width: double.infinity,
-        height: 28.0 * zoomScale,
+        height: 32.0 * zoomScale,
         side: BorderSide(
-          color: _isFocused ? activeBorderColor : borderColor,
+          color: _isFocused ? Colors.transparent : borderColor,
           width: borderScale,
         ),
+        outerSide:
+            _isFocused
+                ? BorderSide(color: activeBorderColor, width: 2.0 * borderScale)
+                : null,
         child: TextSelectionTheme(
           data: TextSelectionThemeData(
             selectionColor: selectionColor.withAlpha(100),
@@ -158,7 +161,7 @@ class _FondeSearchFieldState extends State<FondeSearchField> {
               ),
               prefixIconConstraints: BoxConstraints(
                 minWidth: 32.0 * zoomScale,
-                minHeight: 28.0 * zoomScale,
+                minHeight: 32.0 * zoomScale,
               ),
               suffixIcon:
                   _hasText && widget.onClear != null
@@ -181,10 +184,10 @@ class _FondeSearchFieldState extends State<FondeSearchField> {
               suffixIconConstraints:
                   _hasText && widget.onClear != null
                       ? BoxConstraints(
-                        minWidth: 28.0 * zoomScale,
-                        maxWidth: 28.0 * zoomScale,
-                        minHeight: 28.0 * zoomScale,
-                        maxHeight: 28.0 * zoomScale,
+                        minWidth: 32.0 * zoomScale,
+                        maxWidth: 32.0 * zoomScale,
+                        minHeight: 32.0 * zoomScale,
+                        maxHeight: 32.0 * zoomScale,
                       )
                       : null,
               border: InputBorder.none,
