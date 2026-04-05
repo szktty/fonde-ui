@@ -57,6 +57,7 @@ Use git flow for releases:
 git flow release start <version>       # e.g. 1.2.0
 # Update version in pubspec.yaml, example/pubspec.yaml, llms.txt
 # Update CHANGELOG.md (remove -dev suffix, confirm release date)
+# Update llms.txt to reflect API changes (added/removed/modified APIs, removed dependencies)
 fvm dart format .
 cd example && fvm flutter build macos  # verify build
 git add -p && git commit -m "Release version <version>"
