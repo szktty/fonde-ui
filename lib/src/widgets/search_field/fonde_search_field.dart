@@ -2,7 +2,6 @@ import 'package:figma_squircle/figma_squircle.dart';
 import 'package:flutter/material.dart';
 import '../../internal.dart';
 import '../widgets/fonde_icon_button.dart';
-import '../widgets/fonde_rectangle_border.dart';
 
 /// A platform-adaptive search field widget with suggestions support.
 class FondeSearchField extends StatefulWidget {
@@ -10,8 +9,7 @@ class FondeSearchField extends StatefulWidget {
     super.key,
     this.controller,
     this.onClear,
-    this.suggestions,
-    this.onSuggestionTap,
+    this.suggestionOverlayBuilder,
     this.onSubmit,
     this.hint = '',
     this.enabled = true,
@@ -22,11 +20,14 @@ class FondeSearchField extends StatefulWidget {
   /// External controller (optional). If not provided, managed internally.
   final TextEditingController? controller;
 
-  /// The list of suggestions to show.
-  final List<String>? suggestions;
-
-  /// Called when a suggestion is tapped.
-  final void Function(String)? onSuggestionTap;
+  /// Builder for the suggestion overlay. When provided, the overlay is shown
+  /// whenever the field is focused. The [close] callback hides the overlay.
+  final Widget? Function(
+    BuildContext context,
+    TextEditingController controller,
+    VoidCallback close,
+  )?
+  suggestionOverlayBuilder;
 
   /// Called when the search field is submitted.
   final void Function(String)? onSubmit;
@@ -57,7 +58,6 @@ class _FondeSearchFieldState extends State<FondeSearchField> {
   final LayerLink _layerLink = LayerLink();
   bool _isFocused = false;
   bool _hasText = false;
-  List<String> _filteredSuggestions = [];
 
   @override
   void initState() {
@@ -86,7 +86,12 @@ class _FondeSearchFieldState extends State<FondeSearchField> {
     setState(() {
       _isFocused = _focusNode.hasFocus;
     });
-    if (!_focusNode.hasFocus) {
+    if (_focusNode.hasFocus) {
+      if (widget.suggestionOverlayBuilder != null &&
+          !_overlayController.isShowing) {
+        _overlayController.show();
+      }
+    } else {
       _closeOverlay();
     }
   }
@@ -100,28 +105,12 @@ class _FondeSearchFieldState extends State<FondeSearchField> {
       });
     }
     widget.onChange?.call(text);
-    _updateSuggestions(text);
-  }
-
-  void _updateSuggestions(String text) {
-    final suggestions = widget.suggestions ?? [];
-    if (text.isEmpty || suggestions.isEmpty) {
-      _closeOverlay();
-      return;
-    }
-    final filtered =
-        suggestions
-            .where((s) => s.toLowerCase().contains(text.toLowerCase()))
-            .toList();
-    if (filtered.isEmpty) {
-      _closeOverlay();
-      return;
-    }
-    setState(() {
-      _filteredSuggestions = filtered;
-    });
-    if (!_overlayController.isShowing) {
-      _overlayController.show();
+    if (widget.suggestionOverlayBuilder != null && _isFocused) {
+      if (!_overlayController.isShowing) {
+        _overlayController.show();
+      } else {
+        setState(() {});
+      }
     }
   }
 
@@ -129,14 +118,6 @@ class _FondeSearchFieldState extends State<FondeSearchField> {
     if (_overlayController.isShowing) {
       _overlayController.hide();
     }
-  }
-
-  void _selectSuggestion(String value) {
-    _controller.text = value;
-    _controller.selection = TextSelection.collapsed(offset: value.length);
-    _closeOverlay();
-    widget.onSuggestionTap?.call(value);
-    _focusNode.unfocus();
   }
 
   @override
@@ -155,20 +136,20 @@ class _FondeSearchFieldState extends State<FondeSearchField> {
     return OverlayPortal(
       controller: _overlayController,
       overlayChildBuilder: (overlayContext) {
+        final child = widget.suggestionOverlayBuilder?.call(
+          overlayContext,
+          _controller,
+          _closeOverlay,
+        );
+        if (child == null) {
+          _closeOverlay();
+          return const SizedBox.shrink();
+        }
         return CompositedTransformFollower(
           link: _layerLink,
           showWhenUnlinked: false,
           offset: Offset(0, 32.0 * zoomScale + 4.0),
-          child: Align(
-            alignment: Alignment.topLeft,
-            child: _SuggestionList(
-              options: _filteredSuggestions,
-              zoomScale: zoomScale,
-              borderScale: borderScale,
-              appColorScheme: appColorScheme,
-              onSelected: _selectSuggestion,
-            ),
-          ),
+          child: Align(alignment: Alignment.topLeft, child: child),
         );
       },
       child: CompositedTransformTarget(
@@ -274,74 +255,6 @@ class _FondeSearchFieldState extends State<FondeSearchField> {
                 ),
               ),
             ),
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class _SuggestionList extends StatelessWidget {
-  const _SuggestionList({
-    required this.options,
-    required this.zoomScale,
-    required this.borderScale,
-    required this.appColorScheme,
-    required this.onSelected,
-  });
-
-  final List<String> options;
-  final double zoomScale;
-  final double borderScale;
-  final FondeColorScheme appColorScheme;
-  final void Function(String) onSelected;
-
-  @override
-  Widget build(BuildContext context) {
-    final radius = FondeBorderRadius.small();
-    return Material(
-      color: Colors.transparent,
-      child: Container(
-        constraints: BoxConstraints(
-          maxHeight: 200.0 * zoomScale,
-          maxWidth: 300.0 * zoomScale,
-        ),
-        decoration: ShapeDecoration(
-          color: appColorScheme.uiAreas.sideBar.background,
-          shape: SmoothRectangleBorder(
-            borderRadius: radius.toSmoothBorderRadius(),
-            side: BorderSide(
-              color: appColorScheme.base.divider,
-              width: borderScale,
-            ),
-          ),
-          shadows: const [
-            BoxShadow(
-              color: Color(0x1A000000),
-              blurRadius: 8,
-              offset: Offset(0, 4),
-            ),
-          ],
-        ),
-        child: ClipSmoothRect(
-          radius: radius.toSmoothBorderRadius(),
-          child: ListView.builder(
-            padding: EdgeInsets.symmetric(vertical: 4.0 * zoomScale),
-            shrinkWrap: true,
-            itemCount: options.length,
-            itemBuilder: (context, index) {
-              final option = options[index];
-              return InkWell(
-                onTap: () => onSelected(option),
-                child: Padding(
-                  padding: EdgeInsets.symmetric(
-                    horizontal: 12.0 * zoomScale,
-                    vertical: 6.0 * zoomScale,
-                  ),
-                  child: Text(option),
-                ),
-              );
-            },
           ),
         ),
       ),
