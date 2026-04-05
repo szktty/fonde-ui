@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:figma_squircle/figma_squircle.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import '../../internal.dart';
+import 'dart:ui' as ui;
 
 /// Numeric input field with increment/decrement buttons.
 ///
@@ -152,6 +153,72 @@ class _FondeNumberFieldState extends State<FondeNumberField> {
     return (_value ?? (widget.min ?? 0)) < widget.max!;
   }
 
+  Widget _buildEditableText({
+    required Color textColor,
+    required Color hintColor,
+    required double zoomScale,
+    required List<TextInputFormatter> formatters,
+  }) {
+    final textStyle = TextStyle(fontSize: 13.0 * zoomScale, color: textColor);
+    final strutStyle = StrutStyle(
+      fontSize: textStyle.fontSize,
+      height: 1.0,
+      forceStrutHeight: true,
+    );
+
+    Widget editable = EditableText(
+      controller: _controller,
+      focusNode: _focusNode,
+      readOnly: !widget.enabled,
+      style: textStyle,
+      strutStyle: strutStyle,
+      cursorColor: textColor,
+      backgroundCursorColor: Colors.transparent,
+      cursorWidth: 1.5,
+      selectionColor: textColor.withValues(alpha: 0.3),
+      keyboardType: const TextInputType.numberWithOptions(
+        decimal: true,
+        signed: true,
+      ),
+      textAlign: TextAlign.center,
+      inputFormatters: formatters,
+      onSubmitted: _commitText,
+      rendererIgnoresPointer: true,
+      mouseCursor: MouseCursor.defer,
+      enableInteractiveSelection: true,
+      selectionHeightStyle: ui.BoxHeightStyle.tight,
+      selectionWidthStyle: ui.BoxWidthStyle.tight,
+      contextMenuBuilder: (context, editableTextState) {
+        return AdaptiveTextSelectionToolbar.editableText(
+          editableTextState: editableTextState,
+        );
+      },
+      keyboardAppearance: Brightness.light,
+    );
+
+    if (widget.hintText != null) {
+      editable = Stack(
+        alignment: Alignment.center,
+        children: [
+          ValueListenableBuilder<TextEditingValue>(
+            valueListenable: _controller,
+            builder: (context, value, _) {
+              if (value.text.isNotEmpty) return const SizedBox.shrink();
+              return Text(
+                widget.hintText!,
+                style: TextStyle(fontSize: 13.0 * zoomScale, color: hintColor),
+                maxLines: 1,
+              );
+            },
+          ),
+          editable,
+        ],
+      );
+    }
+
+    return editable;
+  }
+
   bool get _canDecrement {
     if (!widget.enabled) return false;
     if (widget.min == null) return true;
@@ -236,44 +303,35 @@ class _FondeNumberFieldState extends State<FondeNumberField> {
             ),
             // Text field
             Expanded(
-              child: TextField(
-                controller: _controller,
-                focusNode: _focusNode,
-                enabled: widget.enabled,
-                keyboardType: const TextInputType.numberWithOptions(
-                  decimal: true,
-                  signed: true,
-                ),
-                inputFormatters: formatters,
-                textAlign: TextAlign.center,
-                textAlignVertical: const TextAlignVertical(y: 0.1),
-                style: TextStyle(
-                  fontSize: 13.0 * zoomScale,
-                  color: textColor,
-                  height: 1.0,
-                ),
-                decoration: InputDecoration(
-                  hintText: widget.hintText,
-                  hintStyle: TextStyle(
-                    fontSize: 13.0 * zoomScale,
-                    color: hintColor,
-                  ),
-                  suffixText: widget.suffix,
-                  suffixStyle: TextStyle(
-                    fontSize: 12.0 * zoomScale,
-                    color: textColor.withValues(alpha: 0.6),
-                  ),
-                  border: InputBorder.none,
-                  enabledBorder: InputBorder.none,
-                  focusedBorder: InputBorder.none,
-                  disabledBorder: InputBorder.none,
-                  isDense: true,
-                  contentPadding: EdgeInsets.symmetric(
-                    horizontal: 4.0 * zoomScale,
-                    vertical: 0,
+              child: GestureDetector(
+                behavior: HitTestBehavior.opaque,
+                onTap: () {
+                  if (!widget.enabled) return;
+                  if (!_focusNode.hasFocus) _focusNode.requestFocus();
+                },
+                child: Center(
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Flexible(
+                        child: _buildEditableText(
+                          textColor: textColor,
+                          hintColor: hintColor,
+                          zoomScale: zoomScale,
+                          formatters: formatters,
+                        ),
+                      ),
+                      if (widget.suffix != null)
+                        Text(
+                          widget.suffix!,
+                          style: TextStyle(
+                            fontSize: 12.0 * zoomScale,
+                            color: textColor.withValues(alpha: 0.6),
+                          ),
+                        ),
+                    ],
                   ),
                 ),
-                onSubmitted: _commitText,
               ),
             ),
             // Divider
