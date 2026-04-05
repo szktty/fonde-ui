@@ -9,9 +9,9 @@
 - FIX
   - Bug fixes
 
-## 0.8.0-dev
+## 0.8.0
 
-**Release date**: TBD
+**Release date**: 2026-04-06
 
 - [CHANGE] `FondeSearchField`: remove `suggestions` and `onSuggestionTap` parameters; replace with `suggestionOverlayBuilder` — a builder that receives the `TextEditingController` and a `close` callback, giving full control over the suggestion UI
 - [CHANGE] Remove `searchfield` package dependency — `FondeSearchField` is now fully implemented with Flutter built-ins
