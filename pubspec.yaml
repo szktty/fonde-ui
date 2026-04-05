@@ -1,6 +1,6 @@
 name: fonde_ui
 description: Desktop-first Flutter UI utility components with native-like interaction and zoom scaling support.
-version: 0.7.1
+version: 0.8.0
 
 repository: https://github.com/szktty/fonde-ui
 
@@ -18,10 +18,8 @@ dependencies:
   json_annotation: ^4.9.0
   lucide_icons_flutter: ^3.1.11
   figma_squircle: ^0.6.3
-  uuid: ^4.5.1
   multi_split_view: ^3.2.1
   dots_indicator: ^4.0.1
-  searchfield: ^2.0.0
   pluto_grid: ^8.0.0
   textfield_tags: ^3.0.1
   popover: ^0.3.1

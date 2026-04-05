@@ -9,6 +9,17 @@
 - FIX
   - Bug fixes
 
+## 0.8.0
+
+**Release date**: 2026-04-06
+
+- [CHANGE] `FondeSearchField`: remove `suggestions` and `onSuggestionTap` parameters; replace with `suggestionOverlayBuilder` — a builder that receives the `TextEditingController` and a `close` callback, giving full control over the suggestion UI
+- [CHANGE] Remove `searchfield` package dependency — `FondeSearchField` is now fully implemented with Flutter built-ins
+- [CHANGE] Remove `uuid` package dependency
+- [UPDATE] `FondeSearchField`: use `FondeRectangleBorder` (squircle) for consistent rounded-corner styling
+- [FIX] `FondeSearchField`: fix cursor not appearing on single click on desktop
+- [FIX] `FondeRectangleBorder`: fix focus border rendering using outer border overlay
+
 ## 0.7.1
 
 **Release date**: 2026-03-29

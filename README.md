@@ -137,7 +137,7 @@ Fonde UI's goal is to provide **operational and visual comfort** in desktop apps
 
 ## State Management
 
-fonde_ui uses plain Flutter state management (`ChangeNotifier` + `InheritedWidget`). No Riverpod dependency.
+fonde_ui uses plain Flutter state management (`ChangeNotifier` + `InheritedWidget`).
 
 Theme, accessibility config, and sidebar state are accessible via `BuildContext` extensions from any widget's `build` method.
 

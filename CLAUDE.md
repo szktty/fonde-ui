@@ -25,6 +25,7 @@ Desktop-first Flutter UI optimized for native-quality instant feedback, with acc
 ## Implementation Guidelines
 
 - Use `FondeGestureDetector` instead of `GestureDetector`. Supports tap, double tap, tap down/up/cancel, hover, and cursor — with no single-tap delay when double tap is also set.
+- Use `FondeRectangleBorder` for all rounded corner elements. Do not use `BorderRadius.circular` or `OutlineInputBorder` with plain `BorderRadius` — use the Figma squircle shape consistently.
 
 ## Specific Tooling
 
@@ -34,11 +35,13 @@ Desktop-first Flutter UI optimized for native-quality instant feedback, with acc
 ## Before Committing
 
 - Always run `fvm dart format .` before creating a commit
+- Always ask the user for permission before running any destructive git operations, especially commits
+- If a task cannot be completed after 3 attempts, ask the user for alternative approaches or options. Do not change the task requirements just to achieve completion.
 
 ## Documentation
 
-- Design guidelines: @doc/design/
-- LLM documentation: @llms.txt
+- Design guidelines: `doc/design/`
+- LLM documentation: `llms.txt`
 
 ## Branch Strategy
 

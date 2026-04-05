@@ -11,6 +11,7 @@ class FondeRectangleBorder extends StatelessWidget {
     this.cornerRadius,
     this.cornerSmoothing,
     this.side,
+    this.outerSide,
     this.color,
     this.padding,
     this.width,
@@ -21,7 +22,14 @@ class FondeRectangleBorder extends StatelessWidget {
   final Widget? child;
   final double? cornerRadius;
   final double? cornerSmoothing;
+
+  /// Inner border drawn inside the widget bounds (default).
   final BorderSide? side;
+
+  /// Outer border drawn outside the widget bounds via Stack overlay.
+  /// Use this when the border should not affect the internal layout.
+  final BorderSide? outerSide;
+
   final Color? color;
   final EdgeInsetsGeometry? padding;
   final double? width;
@@ -37,7 +45,7 @@ class FondeRectangleBorder extends StatelessWidget {
     final effectiveSide =
         side ?? BorderSide(color: appColors.base.border, width: 1.5);
 
-    return Container(
+    Widget container = Container(
       width: width,
       height: height,
       alignment: alignment,
@@ -53,6 +61,9 @@ class FondeRectangleBorder extends StatelessWidget {
       ),
       child: padding != null ? Padding(padding: padding!, child: child) : child,
     );
+
+    if (outerSide == null) return container;
+    return container;
   }
 }
 
