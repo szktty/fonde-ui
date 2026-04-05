@@ -63,33 +63,7 @@ class FondeRectangleBorder extends StatelessWidget {
     );
 
     if (outerSide == null) return container;
-
-    final outerWidth = outerSide!.width;
-    return Stack(
-      clipBehavior: Clip.none,
-      children: [
-        container,
-        Positioned(
-          left: -outerWidth,
-          top: -outerWidth,
-          right: -outerWidth,
-          bottom: -outerWidth,
-          child: IgnorePointer(
-            child: Container(
-              decoration: ShapeDecoration(
-                shape: SmoothRectangleBorder(
-                  borderRadius: SmoothBorderRadius(
-                    cornerRadius: effectiveCornerRadius + outerWidth,
-                    cornerSmoothing: effectiveCornerSmoothing,
-                  ),
-                  side: outerSide!,
-                ),
-              ),
-            ),
-          ),
-        ),
-      ],
-    );
+    return container;
   }
 }
 

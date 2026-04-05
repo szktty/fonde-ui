@@ -52,17 +52,21 @@ class FondeSearchField extends StatefulWidget {
 
 class _FondeSearchFieldState extends State<FondeSearchField> {
   late TextEditingController _controller;
+  late FocusNode _focusNode;
+  final OverlayPortalController _overlayController = OverlayPortalController();
+  final LayerLink _layerLink = LayerLink();
   bool _isFocused = false;
   bool _hasText = false;
-  // The actual focus node passed by Autocomplete's fieldViewBuilder.
-  FocusNode? _fieldFocusNode;
+  List<String> _filteredSuggestions = [];
 
   @override
   void initState() {
     super.initState();
     _controller =
         widget.controller ?? TextEditingController(text: widget.value);
+    _focusNode = FocusNode();
     _hasText = _controller.text.isNotEmpty;
+    _focusNode.addListener(_handleFocusChange);
     _controller.addListener(_handleTextChange);
   }
 
@@ -73,31 +77,66 @@ class _FondeSearchFieldState extends State<FondeSearchField> {
     } else {
       _controller.removeListener(_handleTextChange);
     }
-    _fieldFocusNode?.removeListener(_handleFocusChange);
+    _focusNode.removeListener(_handleFocusChange);
+    _focusNode.dispose();
     super.dispose();
-  }
-
-  void _attachFocusNode(FocusNode node) {
-    if (_fieldFocusNode == node) return;
-    _fieldFocusNode?.removeListener(_handleFocusChange);
-    _fieldFocusNode = node;
-    _fieldFocusNode!.addListener(_handleFocusChange);
   }
 
   void _handleFocusChange() {
     setState(() {
-      _isFocused = _fieldFocusNode?.hasFocus ?? false;
+      _isFocused = _focusNode.hasFocus;
     });
+    if (!_focusNode.hasFocus) {
+      _closeOverlay();
+    }
   }
 
   void _handleTextChange() {
-    final hasText = _controller.text.isNotEmpty;
+    final text = _controller.text;
+    final hasText = text.isNotEmpty;
     if (hasText != _hasText) {
       setState(() {
         _hasText = hasText;
       });
     }
-    widget.onChange?.call(_controller.text);
+    widget.onChange?.call(text);
+    _updateSuggestions(text);
+  }
+
+  void _updateSuggestions(String text) {
+    final suggestions = widget.suggestions ?? [];
+    if (text.isEmpty || suggestions.isEmpty) {
+      _closeOverlay();
+      return;
+    }
+    final filtered =
+        suggestions
+            .where((s) => s.toLowerCase().contains(text.toLowerCase()))
+            .toList();
+    if (filtered.isEmpty) {
+      _closeOverlay();
+      return;
+    }
+    setState(() {
+      _filteredSuggestions = filtered;
+    });
+    if (!_overlayController.isShowing) {
+      _overlayController.show();
+    }
+  }
+
+  void _closeOverlay() {
+    if (_overlayController.isShowing) {
+      _overlayController.hide();
+    }
+  }
+
+  void _selectSuggestion(String value) {
+    _controller.text = value;
+    _controller.selection = TextSelection.collapsed(offset: value.length);
+    _closeOverlay();
+    widget.onSuggestionTap?.call(value);
+    _focusNode.unfocus();
   }
 
   @override
@@ -113,175 +152,243 @@ class _FondeSearchFieldState extends State<FondeSearchField> {
     final cursorColor = appColorScheme.base.foreground;
     final selectionColor = appColorScheme.base.border;
 
-    final effectiveSuggestions = widget.suggestions ?? [];
-
-    Widget fieldView(
-      BuildContext fieldContext,
-      TextEditingController fieldController,
-      FocusNode fieldFocusNode,
-      VoidCallback onFieldSubmitted,
-    ) {
-      _attachFocusNode(fieldFocusNode);
-      if (widget.controller != null &&
-          fieldController.text != _controller.text) {
-        fieldController.text = _controller.text;
-      }
-
-      return FondeRectangleBorder(
-        cornerRadius: 8.0 * zoomScale,
-        width: double.infinity,
-        height: 32.0 * zoomScale,
-        side: BorderSide(
-          color: _isFocused ? Colors.transparent : borderColor,
-          width: borderScale,
-        ),
-        outerSide:
-            _isFocused
-                ? BorderSide(color: activeBorderColor, width: 2.0 * borderScale)
-                : null,
-        child: TextSelectionTheme(
-          data: TextSelectionThemeData(
-            selectionColor: selectionColor.withAlpha(100),
-          ),
-          child: TextField(
-            controller: fieldController,
-            focusNode: fieldFocusNode,
-            enabled: widget.enabled,
-            cursorColor: cursorColor,
-            onSubmitted: (value) {
-              onFieldSubmitted();
-              widget.onSubmit?.call(value);
-            },
-            decoration: InputDecoration(
-              hintText: widget.hint,
-              prefixIcon: Icon(
-                iconTheme.search,
-                color: appColorScheme.uiAreas.sideBar.inactiveItemText,
-                size: 16.0 * zoomScale,
-              ),
-              prefixIconConstraints: BoxConstraints(
-                minWidth: 32.0 * zoomScale,
-                minHeight: 32.0 * zoomScale,
-              ),
-              suffixIcon:
-                  _hasText && widget.onClear != null
-                      ? FondeIconButton.circle(
-                        icon: iconTheme.x,
-                        iconSize: 14.0 * zoomScale,
-                        iconColor: appColorScheme.base.foreground,
-                        backgroundColor: appColorScheme.base.border,
-                        constraints: BoxConstraints.tightFor(
-                          width: 20.0 * zoomScale,
-                          height: 20.0 * zoomScale,
-                        ),
-                        onPressed: () {
-                          fieldController.clear();
-                          widget.onClear?.call();
-                        },
-                        tooltip: 'Clear',
-                      )
-                      : null,
-              suffixIconConstraints:
-                  _hasText && widget.onClear != null
-                      ? BoxConstraints(
-                        minWidth: 32.0 * zoomScale,
-                        maxWidth: 32.0 * zoomScale,
-                        minHeight: 32.0 * zoomScale,
-                        maxHeight: 32.0 * zoomScale,
-                      )
-                      : null,
-              border: InputBorder.none,
-              enabledBorder: InputBorder.none,
-              focusedBorder: InputBorder.none,
-              disabledBorder: InputBorder.none,
-              isDense: true,
-              contentPadding: EdgeInsets.symmetric(
-                horizontal: 4.0 * zoomScale,
-                vertical: 4.0 * zoomScale,
-              ),
+    return OverlayPortal(
+      controller: _overlayController,
+      overlayChildBuilder: (overlayContext) {
+        return CompositedTransformFollower(
+          link: _layerLink,
+          showWhenUnlinked: false,
+          offset: Offset(0, 32.0 * zoomScale + 4.0),
+          child: Align(
+            alignment: Alignment.topLeft,
+            child: _SuggestionList(
+              options: _filteredSuggestions,
+              zoomScale: zoomScale,
+              borderScale: borderScale,
+              appColorScheme: appColorScheme,
+              onSelected: _selectSuggestion,
             ),
           ),
-        ),
-      );
-    }
-
-    Widget optionsView(
-      BuildContext context,
-      AutocompleteOnSelected<String> onSelected,
-      Iterable<String> options,
-    ) {
-      final radius = FondeBorderRadius.small();
-      return Align(
-        alignment: Alignment.topLeft,
-        child: Material(
-          color: Colors.transparent,
-          child: Container(
-            constraints: BoxConstraints(
-              maxHeight: 200.0 * zoomScale,
-              maxWidth: 300.0 * zoomScale,
-            ),
-            margin: EdgeInsets.only(top: 4.0 * zoomScale),
-            decoration: ShapeDecoration(
-              color: appColorScheme.uiAreas.sideBar.background,
-              shape: SmoothRectangleBorder(
-                borderRadius: radius.toSmoothBorderRadius(),
-                side: BorderSide(
-                  color: appColorScheme.base.divider,
-                  width: borderScale,
-                ),
-              ),
-              shadows: const [
-                BoxShadow(
-                  color: Color(0x1A000000),
-                  blurRadius: 8,
-                  offset: Offset(0, 4),
-                ),
-              ],
-            ),
-            child: ClipSmoothRect(
-              radius: radius.toSmoothBorderRadius(),
-              child: ListView.builder(
-                padding: EdgeInsets.symmetric(vertical: 4.0 * zoomScale),
-                shrinkWrap: true,
-                itemCount: options.length,
-                itemBuilder: (context, index) {
-                  final option = options.elementAt(index);
-                  return InkWell(
-                    onTap: () {
-                      onSelected(option);
-                      widget.onSuggestionTap?.call(option);
-                    },
-                    child: Padding(
-                      padding: EdgeInsets.symmetric(
-                        horizontal: 12.0 * zoomScale,
-                        vertical: 6.0 * zoomScale,
-                      ),
-                      child: Text(option),
-                    ),
-                  );
-                },
-              ),
-            ),
-          ),
-        ),
-      );
-    }
-
-    return Autocomplete<String>(
-      initialValue: TextEditingValue(text: widget.value ?? ''),
-      optionsBuilder: (textEditingValue) {
-        if (textEditingValue.text.isEmpty || effectiveSuggestions.isEmpty) {
-          return const [];
-        }
-        return effectiveSuggestions.where(
-          (s) => s.toLowerCase().contains(textEditingValue.text.toLowerCase()),
         );
       },
-      onSelected: (value) {
-        widget.onSuggestionTap?.call(value);
-      },
-      fieldViewBuilder: fieldView,
-      optionsViewBuilder: optionsView,
+      child: CompositedTransformTarget(
+        link: _layerLink,
+        child: CustomPaint(
+          foregroundPainter:
+              _isFocused
+                  ? _OuterBorderPainter(
+                    color: activeBorderColor,
+                    borderWidth: 2.0 * borderScale,
+                    cornerRadius: 8.0 * zoomScale,
+                  )
+                  : null,
+          child: SizedBox(
+            width: double.infinity,
+            height: 32.0 * zoomScale,
+            child: DecoratedBox(
+              decoration: ShapeDecoration(
+                shape: SmoothRectangleBorder(
+                  borderRadius: SmoothBorderRadius(
+                    cornerRadius: 8.0 * zoomScale,
+                    cornerSmoothing: 0.6,
+                  ),
+                  side: BorderSide(
+                    color: _isFocused ? Colors.transparent : borderColor,
+                    width: borderScale,
+                  ),
+                ),
+              ),
+              child: TextSelectionTheme(
+                data: TextSelectionThemeData(
+                  selectionColor: selectionColor.withAlpha(100),
+                ),
+                child: TextField(
+                  controller: _controller,
+                  focusNode: _focusNode,
+                  enabled: widget.enabled,
+                  cursorColor: cursorColor,
+                  onTap: () {
+                    // On desktop, a single click does not always place the cursor.
+                    // Force selection to ensure the cursor becomes visible.
+                    final text = _controller.text;
+                    _controller.selection = TextSelection.collapsed(
+                      offset:
+                          _controller.selection.isValid
+                              ? _controller.selection.baseOffset
+                              : text.length,
+                    );
+                  },
+                  onSubmitted: (value) {
+                    _closeOverlay();
+                    widget.onSubmit?.call(value);
+                  },
+                  decoration: InputDecoration(
+                    hintText: widget.hint,
+                    prefixIcon: Icon(
+                      iconTheme.search,
+                      color: appColorScheme.uiAreas.sideBar.inactiveItemText,
+                      size: 16.0 * zoomScale,
+                    ),
+                    prefixIconConstraints: BoxConstraints(
+                      minWidth: 32.0 * zoomScale,
+                      minHeight: 32.0 * zoomScale,
+                    ),
+                    suffixIcon:
+                        _hasText && widget.onClear != null
+                            ? FondeIconButton.circle(
+                              icon: iconTheme.x,
+                              iconSize: 14.0 * zoomScale,
+                              iconColor: appColorScheme.base.foreground,
+                              backgroundColor: appColorScheme.base.border,
+                              constraints: BoxConstraints.tightFor(
+                                width: 20.0 * zoomScale,
+                                height: 20.0 * zoomScale,
+                              ),
+                              onPressed: () {
+                                _controller.clear();
+                                _closeOverlay();
+                                widget.onClear?.call();
+                              },
+                              tooltip: 'Clear',
+                            )
+                            : null,
+                    suffixIconConstraints:
+                        _hasText && widget.onClear != null
+                            ? BoxConstraints(
+                              minWidth: 32.0 * zoomScale,
+                              maxWidth: 32.0 * zoomScale,
+                              minHeight: 32.0 * zoomScale,
+                              maxHeight: 32.0 * zoomScale,
+                            )
+                            : null,
+                    border: InputBorder.none,
+                    enabledBorder: InputBorder.none,
+                    focusedBorder: InputBorder.none,
+                    disabledBorder: InputBorder.none,
+                    isDense: true,
+                    contentPadding: EdgeInsets.symmetric(
+                      horizontal: 4.0 * zoomScale,
+                      vertical: 4.0 * zoomScale,
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
     );
   }
+}
+
+class _SuggestionList extends StatelessWidget {
+  const _SuggestionList({
+    required this.options,
+    required this.zoomScale,
+    required this.borderScale,
+    required this.appColorScheme,
+    required this.onSelected,
+  });
+
+  final List<String> options;
+  final double zoomScale;
+  final double borderScale;
+  final FondeColorScheme appColorScheme;
+  final void Function(String) onSelected;
+
+  @override
+  Widget build(BuildContext context) {
+    final radius = FondeBorderRadius.small();
+    return Material(
+      color: Colors.transparent,
+      child: Container(
+        constraints: BoxConstraints(
+          maxHeight: 200.0 * zoomScale,
+          maxWidth: 300.0 * zoomScale,
+        ),
+        decoration: ShapeDecoration(
+          color: appColorScheme.uiAreas.sideBar.background,
+          shape: SmoothRectangleBorder(
+            borderRadius: radius.toSmoothBorderRadius(),
+            side: BorderSide(
+              color: appColorScheme.base.divider,
+              width: borderScale,
+            ),
+          ),
+          shadows: const [
+            BoxShadow(
+              color: Color(0x1A000000),
+              blurRadius: 8,
+              offset: Offset(0, 4),
+            ),
+          ],
+        ),
+        child: ClipSmoothRect(
+          radius: radius.toSmoothBorderRadius(),
+          child: ListView.builder(
+            padding: EdgeInsets.symmetric(vertical: 4.0 * zoomScale),
+            shrinkWrap: true,
+            itemCount: options.length,
+            itemBuilder: (context, index) {
+              final option = options[index];
+              return InkWell(
+                onTap: () => onSelected(option),
+                child: Padding(
+                  padding: EdgeInsets.symmetric(
+                    horizontal: 12.0 * zoomScale,
+                    vertical: 6.0 * zoomScale,
+                  ),
+                  child: Text(option),
+                ),
+              );
+            },
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _OuterBorderPainter extends CustomPainter {
+  const _OuterBorderPainter({
+    required this.color,
+    required this.borderWidth,
+    required this.cornerRadius,
+  });
+
+  final Color color;
+  final double borderWidth;
+  final double cornerRadius;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint =
+        Paint()
+          ..color = color
+          ..style = PaintingStyle.stroke
+          ..strokeWidth = borderWidth;
+
+    final expand = borderWidth / 2;
+    final rect = Rect.fromLTWH(
+      -expand,
+      -expand,
+      size.width + borderWidth,
+      size.height + borderWidth,
+    );
+
+    final path = SmoothRectangleBorder(
+      borderRadius: SmoothBorderRadius(
+        cornerRadius: cornerRadius + expand,
+        cornerSmoothing: 0.6,
+      ),
+    ).getOuterPath(rect);
+
+    canvas.drawPath(path, paint);
+  }
+
+  @override
+  bool shouldRepaint(_OuterBorderPainter oldDelegate) =>
+      color != oldDelegate.color ||
+      borderWidth != oldDelegate.borderWidth ||
+      cornerRadius != oldDelegate.cornerRadius;
 }
