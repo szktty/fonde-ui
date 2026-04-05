@@ -20,7 +20,6 @@ dependencies:
   figma_squircle: ^0.6.3
   multi_split_view: ^3.2.1
   dots_indicator: ^4.0.1
-  searchfield: ^2.0.0
   pluto_grid: ^8.0.0
   textfield_tags: ^3.0.1
   popover: ^0.3.1
