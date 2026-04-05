@@ -434,6 +434,17 @@ class _FondeTextFieldState extends State<FondeTextField> {
   }) {
     final iconSize = fieldHeight;
 
+    // Tapping the prefix/suffix padding areas should move focus to the field.
+    // The editable area itself handles pointer events directly (cursor
+    // placement, selection, keyboard shortcuts) — no GestureDetector there.
+    void onPaddingTap() {
+      if (!_isEnabled) return;
+      widget.onTap?.call();
+      if (!_focusNode.hasFocus) {
+        _focusNode.requestFocus();
+      }
+    }
+
     return SizedBox(
       width: double.infinity,
       height: fieldHeight,
@@ -441,50 +452,49 @@ class _FondeTextFieldState extends State<FondeTextField> {
         cursor:
             widget.mouseCursor ??
             (_isEnabled ? SystemMouseCursors.text : SystemMouseCursors.basic),
-        child: GestureDetector(
-          behavior: HitTestBehavior.opaque,
-          onTap: () {
-            if (!_isEnabled) return;
-            widget.onTap?.call();
-            if (!_focusNode.hasFocus) {
-              _focusNode.requestFocus();
-            }
-          },
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              // Prefix icon
-              if (widget.prefixIcon != null)
-                SizedBox(
-                  width: iconSize,
-                  height: iconSize,
-                  child: Center(child: widget.prefixIcon),
-                )
-              else
-                SizedBox(width: hPadding),
-
-              // Editable text with hint overlay
-              Expanded(
-                child: _buildEditableArea(
-                  appColorScheme: appColorScheme,
-                  zoomScale: zoomScale,
-                  textStyle: textStyle,
-                  hintStyle: hintStyle,
-                  brightness: brightness,
-                ),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            // Prefix icon or left padding area (tappable → focus)
+            if (widget.prefixIcon != null)
+              SizedBox(
+                width: iconSize,
+                height: iconSize,
+                child: Center(child: widget.prefixIcon),
+              )
+            else
+              GestureDetector(
+                behavior: HitTestBehavior.opaque,
+                onTap: onPaddingTap,
+                child: SizedBox(width: hPadding, height: fieldHeight),
               ),
 
-              // Suffix icon
-              if (widget.suffixIcon != null)
-                SizedBox(
-                  width: iconSize,
-                  height: iconSize,
-                  child: Center(child: widget.suffixIcon),
-                )
-              else
-                SizedBox(width: hPadding),
-            ],
-          ),
+            // Editable text — receives pointer events directly so that
+            // tapping places the cursor at the correct position.
+            Expanded(
+              child: _buildEditableArea(
+                appColorScheme: appColorScheme,
+                zoomScale: zoomScale,
+                textStyle: textStyle,
+                hintStyle: hintStyle,
+                brightness: brightness,
+              ),
+            ),
+
+            // Suffix icon or right padding area (tappable → focus)
+            if (widget.suffixIcon != null)
+              SizedBox(
+                width: iconSize,
+                height: iconSize,
+                child: Center(child: widget.suffixIcon),
+              )
+            else
+              GestureDetector(
+                behavior: HitTestBehavior.opaque,
+                onTap: onPaddingTap,
+                child: SizedBox(width: hPadding, height: fieldHeight),
+              ),
+          ],
         ),
       ),
     );
@@ -559,7 +569,6 @@ class _FondeTextFieldState extends State<FondeTextField> {
             ),
           ...?widget.inputFormatters,
         ],
-        rendererIgnoresPointer: true,
         mouseCursor: MouseCursor.defer,
         scrollController: widget.scrollController,
         scrollPhysics: widget.scrollPhysics,

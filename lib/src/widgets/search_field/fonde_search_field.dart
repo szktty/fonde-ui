@@ -175,7 +175,6 @@ class _FondeSearchFieldState extends State<FondeSearchField> {
           widget.onSubmit?.call(value);
         },
         onChanged: (_) {},
-        rendererIgnoresPointer: true,
         mouseCursor: MouseCursor.defer,
         enableInteractiveSelection: true,
         contextMenuBuilder: (context, editableTextState) {
@@ -227,25 +226,27 @@ class _FondeSearchFieldState extends State<FondeSearchField> {
             )
             : null;
 
+    // Tapping the search icon focuses the field; the text area handles its own
+    // pointer events so cursor placement and selection work correctly.
+    void onIconTap() {
+      if (!widget.enabled) return;
+      if (!_focusNode.hasFocus) _focusNode.requestFocus();
+    }
+
     Widget fieldRow = SizedBox(
       width: double.infinity,
       height: fieldHeight,
       child: MouseRegion(
         cursor:
             widget.enabled ? SystemMouseCursors.text : SystemMouseCursors.basic,
-        child: GestureDetector(
-          behavior: HitTestBehavior.opaque,
-          onTap: () {
-            if (!widget.enabled) return;
-            if (!_focusNode.hasFocus) {
-              _focusNode.requestFocus();
-            }
-          },
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              // Search icon
-              SizedBox(
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            // Search icon — tapping it focuses the field
+            GestureDetector(
+              behavior: HitTestBehavior.opaque,
+              onTap: onIconTap,
+              child: SizedBox(
                 width: iconAreaWidth,
                 height: iconAreaWidth,
                 child: Center(
@@ -256,22 +257,22 @@ class _FondeSearchFieldState extends State<FondeSearchField> {
                   ),
                 ),
               ),
-              // Text area
-              Expanded(
-                child: Align(
-                  alignment: Alignment.centerLeft,
-                  child: editableText,
-                ),
+            ),
+            // Text area — EditableText handles pointer events directly
+            Expanded(
+              child: Align(
+                alignment: Alignment.centerLeft,
+                child: editableText,
               ),
-              // Clear button
-              if (clearButton != null)
-                SizedBox(
-                  width: iconAreaWidth,
-                  height: iconAreaWidth,
-                  child: Center(child: clearButton),
-                ),
-            ],
-          ),
+            ),
+            // Clear button
+            if (clearButton != null)
+              SizedBox(
+                width: iconAreaWidth,
+                height: iconAreaWidth,
+                child: Center(child: clearButton),
+              ),
+          ],
         ),
       ),
     );

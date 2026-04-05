@@ -183,7 +183,6 @@ class _FondeNumberFieldState extends State<FondeNumberField> {
       textAlign: TextAlign.center,
       inputFormatters: formatters,
       onSubmitted: _commitText,
-      rendererIgnoresPointer: true,
       mouseCursor: MouseCursor.defer,
       enableInteractiveSelection: true,
       selectionHeightStyle: ui.BoxHeightStyle.tight,
@@ -301,36 +300,29 @@ class _FondeNumberFieldState extends State<FondeNumberField> {
                 color: dividerColor,
               ),
             ),
-            // Text field
+            // Text field — EditableText handles pointer events directly
             Expanded(
-              child: GestureDetector(
-                behavior: HitTestBehavior.opaque,
-                onTap: () {
-                  if (!widget.enabled) return;
-                  if (!_focusNode.hasFocus) _focusNode.requestFocus();
-                },
-                child: Center(
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Flexible(
-                        child: _buildEditableText(
-                          textColor: textColor,
-                          hintColor: hintColor,
-                          zoomScale: zoomScale,
-                          formatters: formatters,
+              child: Center(
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Flexible(
+                      child: _buildEditableText(
+                        textColor: textColor,
+                        hintColor: hintColor,
+                        zoomScale: zoomScale,
+                        formatters: formatters,
+                      ),
+                    ),
+                    if (widget.suffix != null)
+                      Text(
+                        widget.suffix!,
+                        style: TextStyle(
+                          fontSize: 12.0 * zoomScale,
+                          color: textColor.withValues(alpha: 0.6),
                         ),
                       ),
-                      if (widget.suffix != null)
-                        Text(
-                          widget.suffix!,
-                          style: TextStyle(
-                            fontSize: 12.0 * zoomScale,
-                            color: textColor.withValues(alpha: 0.6),
-                          ),
-                        ),
-                    ],
-                  ),
+                  ],
                 ),
               ),
             ),
