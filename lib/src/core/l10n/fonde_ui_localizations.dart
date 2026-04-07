@@ -3,7 +3,6 @@ import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
-import 'package:intl/intl.dart' as intl;
 
 import 'fonde_ui_localizations_en.dart';
 import 'fonde_ui_localizations_ja.dart';
@@ -62,8 +61,7 @@ import 'fonde_ui_localizations_ja.dart';
 /// be consistent with the languages listed in the FondeUILocalizations.supportedLocales
 /// property.
 abstract class FondeUILocalizations {
-  FondeUILocalizations(String locale)
-    : localeName = intl.Intl.canonicalizedLocale(locale.toString());
+  FondeUILocalizations(String locale) : localeName = locale;
 
   final String localeName;
 

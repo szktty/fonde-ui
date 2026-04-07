@@ -13,7 +13,6 @@ dependencies:
     sdk: flutter
   flutter_localizations:
     sdk: flutter
-  intl: ^0.20.2
   lucide_icons_flutter: ^3.1.12
   figma_squircle: ^0.6.3
   multi_split_view: ^3.2.1
@@ -29,4 +28,3 @@ dev_dependencies:
 
 flutter:
   uses-material-design: false
-  generate: true
