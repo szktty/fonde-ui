@@ -9,6 +9,18 @@
 - FIX
   - Bug fixes
 
+## 0.9.0
+
+**Release date**: 2026-04-07
+
+- [CHANGE] `FondeTextField`: rewrite with `EditableText` instead of `TextField`/`InputDecoration` — eliminates zoom-scale vertical centering bug; `errorText` is now rendered below the field via a `Column`
+- [UPDATE] `FondeTextField`: use `FondeBorderRadius` for border shape construction
+- [UPDATE] `FondeSearchField`: apply `rendererIgnoresPointer` and `TextFieldTapRegion` for correct gesture handling
+- [UPDATE] `FondeNumberField`: use `FondeTextField` internally instead of raw `TextField`
+- [FIX] `FondeTextField`: fix text vertical centering at non-1.0 zoom scales
+- [FIX] `FondeTextField`: fix text selection highlight and double-tap word selection on desktop
+- [FIX] `FondeTextField`: fix cursor placement on click and keyboard shortcut handling (Cmd+A, Cmd+C/V)
+
 ## 0.8.0
 
 **Release date**: 2026-04-06
