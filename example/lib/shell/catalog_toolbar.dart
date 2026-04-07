@@ -3,7 +3,6 @@ import 'package:url_launcher/url_launcher.dart';
 import 'package:fonde_ui/fonde_ui.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 // Font family options (downloaded via google_fonts)
 // (display name, font name passed to GoogleFonts method, or empty string for system default)

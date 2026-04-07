@@ -1,6 +1,5 @@
 import 'package:flutter/widgets.dart';
 import 'package:fonde_ui/fonde_ui.dart';
-import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 /// Catalog category definitions
 class CatalogCategory {

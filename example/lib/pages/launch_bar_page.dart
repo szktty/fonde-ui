@@ -1,6 +1,5 @@
 import 'package:flutter/widgets.dart';
 import 'package:fonde_ui/fonde_ui.dart';
-import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 import '../widgets/catalog_page.dart';
 

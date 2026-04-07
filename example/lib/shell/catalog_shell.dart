@@ -1,7 +1,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:fonde_ui/fonde_ui.dart';
-import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 import '../pages/button_page.dart';
 import '../pages/icon_button_page.dart';
