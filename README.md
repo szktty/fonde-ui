@@ -38,34 +38,34 @@ Fonde UI's goal is to provide **operational and visual comfort** in desktop apps
 
 ### Layout
 
-- Scaffold — integrated three-pane layout with Launch Bar, primary/secondary sidebar, and main content
-- Master Detail Layout — master/detail split layout
-- Tab View — tab bar and tab view
-- Split Pane — resizable split pane
-- Panel — container with themed background and border
+- Scaffold — three-pane window layout with Launch Bar, resizable primary/secondary sidebars, and main content area
+- Master Detail Layout — master/detail split with synchronized selection
+- Tab View — tab bar and content area
+- Split Pane — draggable resizable split pane with minimum width constraints
+- Panel — themed container with background and border
 - Section
 - Scroll View
 
 ### Navigation
 
-- Toolbar — main, primary/secondary sidebar
-- Launch Bar — vertical icon navigation bar with top/bottom sections
-- Sidebar — resizable primary and secondary sidebar areas; standard and floating panel (macOS) styles
-- Sidebar List — with `filled`, `subtle`, and `inset` item styles
+- Toolbar — main, primary/secondary sidebar variants
+- Launch Bar — vertical icon navigation bar with top/bottom sections; collapses to icons-only
+- Sidebar — resizable primary and secondary areas; standard and floating panel (macOS) styles
+- Sidebar List — `filled`, `subtle`, and `inset` item styles
 
 ### Data View
 
-- Table View
-- Outline View — tree-style outline view
-- List Tile
+- Table View — sortable columns, row selection, keyboard navigation
+- Outline View — collapsible tree-style list
+- List Tile — single/double-tap aware, hover highlight
 
 ### Buttons
 
-- Button — general purpose button, smooth curve corner
+- Button — squircle corners, multiple size and style variants
 - Icon Button
 - Icon Label Button
 - Segmented Button
-- Split Button — button with dropdown for secondary actions
+- Split Button — primary action with secondary dropdown
 - Button Group
 - Overflow Menu Button — collapses excess items into a popup menu
 
@@ -73,7 +73,7 @@ Fonde UI's goal is to provide **operational and visual comfort** in desktop apps
 
 - Context Menu
 - Overflow Menu
-- Dropdown Menu — macOS-style press-drag-release, keyboard navigation. No submenu support yet.
+- Dropdown Menu — macOS-style press-drag-release selection, keyboard navigation. No submenu support yet.
 
   ![Dropdown Menu](doc/movies/dropdown_menu_behavior.gif)
 
@@ -81,9 +81,9 @@ Fonde UI's goal is to provide **operational and visual comfort** in desktop apps
 
 ### Input
 
-- Text Field
-- Search Field
-- Tags Field
+- Text Field — zoom-scalable, squircle border, cursor and selection fully functional on desktop
+- Search Field — with optional suggestion overlay
+- Tags Field — inline tag editing; keyboard navigation (`←`/`→` to move between tags, `Backspace` for 2-step delete, `Delete`, `Escape`)
 - Number Field — numeric input with − / + buttons, min/max/step
 - Checkbox — rectangle/circle shape; filled/outline/iconOnly fill style
 - Radio Button
@@ -99,7 +99,7 @@ Fonde UI's goal is to provide **operational and visual comfort** in desktop apps
 - Confirmation Dialog
 - Toast
 - Snack Bar
-- Popover
+- Popover — directional, auto-dismiss, animated
 - Notification Overlay
 - Tooltip
 - Linear Progress Indicator
@@ -107,7 +107,7 @@ Fonde UI's goal is to provide **operational and visual comfort** in desktop apps
 
 ### Typography
 
-- Text — with semantic variants (page title, body, caption, code, table, etc.)
+- Text — semantic variants: page title, body, caption, code, table, and more
 
 ### Visual
 
@@ -120,7 +120,7 @@ Fonde UI's goal is to provide **operational and visual comfort** in desktop apps
 
 ### Interaction
 
-- Gesture Detector — single/double tap without delay, hover and cursor support
+- Gesture Detector — single/double tap without delay; hover and cursor support
 - Draggable
 - Shortcut Scope
 

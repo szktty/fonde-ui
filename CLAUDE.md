@@ -10,13 +10,10 @@ Desktop-first Flutter UI optimized for native-quality instant feedback, with acc
 - `lib/src`: Source code
   - `lib/src/core`: Core functionality
   - `lib/src/widgets`: Widgets
-  - `lib/src/riverpod`: Riverpod-related code
 - `doc`: Documentation
 
 ## Design Policy
 
-- Use Riverpod for state management
-  - APIs that depend on Riverpod must be exported via `fonde_ui_riverpod.dart`
 - Component design decisions follow the priority order defined in `@doc/design/01-foundations.md`:
   1. Accessibility
   2. Desktop platform conventions
