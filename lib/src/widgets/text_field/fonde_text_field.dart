@@ -267,14 +267,29 @@ class FondeTextField extends StatefulWidget {
   State<FondeTextField> createState() => _FondeTextFieldState();
 }
 
-class _FondeTextFieldState extends State<FondeTextField> {
+class _FondeTextFieldState extends State<FondeTextField>
+    implements TextSelectionGestureDetectorBuilderDelegate {
   late TextEditingController _controller;
   late FocusNode _focusNode;
   bool _isFocused = false;
 
+  // TextSelectionGestureDetectorBuilderDelegate
+  @override
+  final GlobalKey<EditableTextState> editableTextKey =
+      GlobalKey<EditableTextState>();
+  @override
+  bool get forcePressEnabled => false;
+  @override
+  bool get selectionEnabled => widget.enableInteractiveSelection ?? true;
+
+  late _FondeTextFieldSelectionGestureDetectorBuilder
+  _selectionGestureDetectorBuilder;
+
   @override
   void initState() {
     super.initState();
+    _selectionGestureDetectorBuilder =
+        _FondeTextFieldSelectionGestureDetectorBuilder(state: this);
     _controller = widget.controller ?? TextEditingController();
     _focusNode =
         widget.focusNode ?? FocusNode(canRequestFocus: widget.canRequestFocus);
@@ -390,8 +405,12 @@ class _FondeTextFieldState extends State<FondeTextField> {
       ),
     );
 
-    // Wrap in TapRegion for outside-tap detection
-    field = TapRegion(
+    // Wrap in TextFieldTapRegion so that prefix/suffix icons, padding, and
+    // the editable area all belong to the same tap-region group as the
+    // EditableText's internal TextFieldTapRegion (groupId: EditableText).
+    // This prevents taps inside the field from triggering onTapOutside, which
+    // was causing spurious unfocus events (e.g. after Cmd+A, context menu).
+    field = TextFieldTapRegion(
       onTapOutside:
           widget.onTapOutside ??
           (_) {
@@ -507,9 +526,9 @@ class _FondeTextFieldState extends State<FondeTextField> {
     required TextStyle hintStyle,
     required Brightness brightness,
   }) {
-    final selectionColor = appColorScheme.base.border;
     final cursorColor =
         widget.cursorColor ?? appColorScheme.interactive.input.text;
+    final selectionColor = appColorScheme.base.selection.withValues(alpha: 0.4);
 
     // StrutStyle with forceStrutHeight eliminates font-metrics variance,
     // ensuring the line box height is determined solely by fontSize × height.
@@ -519,87 +538,89 @@ class _FondeTextFieldState extends State<FondeTextField> {
       forceStrutHeight: true,
     );
 
-    Widget editableText = TextSelectionTheme(
-      data: TextSelectionThemeData(
-        selectionColor: selectionColor.withValues(alpha: 0.3),
+    final effectiveSelectionControls =
+        widget.selectionControls ?? desktopTextSelectionControls;
+
+    Widget editableText = EditableText(
+      key: editableTextKey,
+      controller: _controller,
+      focusNode: _focusNode,
+      style: textStyle,
+      strutStyle: strutStyle,
+      cursorColor: cursorColor,
+      backgroundCursorColor: Colors.transparent,
+      cursorWidth: widget.cursorWidth * zoomScale,
+      cursorHeight:
+          widget.cursorHeight != null ? widget.cursorHeight! * zoomScale : null,
+      cursorRadius:
+          widget.cursorRadius != null
+              ? Radius.circular(widget.cursorRadius!.x * zoomScale)
+              : null,
+      selectionColor: selectionColor,
+      keyboardType: widget.keyboardType,
+      textInputAction: widget.textInputAction,
+      textCapitalization: widget.textCapitalization,
+      textAlign: widget.textAlign,
+      textDirection: widget.textDirection,
+      readOnly: widget.readOnly || !_isEnabled,
+      showCursor: widget.showCursor,
+      autofocus: widget.autofocus,
+      obscuringCharacter: widget.obscuringCharacter,
+      obscureText: widget.obscureText,
+      autocorrect: widget.autocorrect,
+      smartDashesType: widget.smartDashesType,
+      smartQuotesType: widget.smartQuotesType,
+      enableSuggestions: widget.enableSuggestions,
+      maxLines: widget.maxLines,
+      minLines: widget.minLines,
+      expands: widget.expands,
+      onChanged: widget.onChanged,
+      onEditingComplete: widget.onEditingComplete,
+      onSubmitted: widget.onSubmitted,
+      onAppPrivateCommand: widget.onAppPrivateCommand,
+      inputFormatters: [
+        if (widget.maxLength != null)
+          LengthLimitingTextInputFormatter(
+            widget.maxLength,
+            maxLengthEnforcement: widget.maxLengthEnforcement,
+          ),
+        ...?widget.inputFormatters,
+      ],
+      mouseCursor: MouseCursor.defer,
+      rendererIgnoresPointer: true,
+      scrollController: widget.scrollController,
+      scrollPhysics: widget.scrollPhysics,
+      scrollPadding: EdgeInsets.only(
+        left: widget.scrollPadding.left * zoomScale,
+        top: widget.scrollPadding.top * zoomScale,
+        right: widget.scrollPadding.right * zoomScale,
+        bottom: widget.scrollPadding.bottom * zoomScale,
       ),
-      child: EditableText(
-        controller: _controller,
-        focusNode: _focusNode,
-        style: textStyle,
-        strutStyle: strutStyle,
-        cursorColor: cursorColor,
-        backgroundCursorColor: Colors.transparent,
-        cursorWidth: widget.cursorWidth * zoomScale,
-        cursorHeight:
-            widget.cursorHeight != null
-                ? widget.cursorHeight! * zoomScale
-                : null,
-        cursorRadius:
-            widget.cursorRadius != null
-                ? Radius.circular(widget.cursorRadius!.x * zoomScale)
-                : null,
-        selectionColor: selectionColor.withValues(alpha: 0.3),
-        keyboardType: widget.keyboardType,
-        textInputAction: widget.textInputAction,
-        textCapitalization: widget.textCapitalization,
-        textAlign: widget.textAlign,
-        textDirection: widget.textDirection,
-        readOnly: widget.readOnly || !_isEnabled,
-        showCursor: widget.showCursor,
-        autofocus: widget.autofocus,
-        obscuringCharacter: widget.obscuringCharacter,
-        obscureText: widget.obscureText,
-        autocorrect: widget.autocorrect,
-        smartDashesType: widget.smartDashesType,
-        smartQuotesType: widget.smartQuotesType,
-        enableSuggestions: widget.enableSuggestions,
-        maxLines: widget.maxLines,
-        minLines: widget.minLines,
-        expands: widget.expands,
-        onChanged: widget.onChanged,
-        onEditingComplete: widget.onEditingComplete,
-        onSubmitted: widget.onSubmitted,
-        onAppPrivateCommand: widget.onAppPrivateCommand,
-        inputFormatters: [
-          if (widget.maxLength != null)
-            LengthLimitingTextInputFormatter(
-              widget.maxLength,
-              maxLengthEnforcement: widget.maxLengthEnforcement,
-            ),
-          ...?widget.inputFormatters,
-        ],
-        mouseCursor: MouseCursor.defer,
-        scrollController: widget.scrollController,
-        scrollPhysics: widget.scrollPhysics,
-        scrollPadding: EdgeInsets.only(
-          left: widget.scrollPadding.left * zoomScale,
-          top: widget.scrollPadding.top * zoomScale,
-          right: widget.scrollPadding.right * zoomScale,
-          bottom: widget.scrollPadding.bottom * zoomScale,
-        ),
-        dragStartBehavior: widget.dragStartBehavior,
-        enableInteractiveSelection: widget.enableInteractiveSelection ?? true,
-        selectionControls: widget.selectionControls,
-        autofillHints: widget.autofillHints,
-        restorationId: widget.restorationId,
-        enableIMEPersonalizedLearning: widget.enableIMEPersonalizedLearning,
-        contextMenuBuilder:
-            widget.contextMenuBuilder ??
-            (context, editableTextState) {
-              return AdaptiveTextSelectionToolbar.editableText(
-                editableTextState: editableTextState,
-              );
-            },
-        spellCheckConfiguration: widget.spellCheckConfiguration,
-        magnifierConfiguration:
-            widget.magnifierConfiguration ??
-            TextMagnifier.adaptiveMagnifierConfiguration,
-        contentInsertionConfiguration: widget.contentInsertionConfiguration,
-        selectionHeightStyle: ui.BoxHeightStyle.tight,
-        selectionWidthStyle: ui.BoxWidthStyle.tight,
-        keyboardAppearance: brightness,
-      ),
+      dragStartBehavior: widget.dragStartBehavior,
+      enableInteractiveSelection: widget.enableInteractiveSelection ?? true,
+      selectionControls: effectiveSelectionControls,
+      autofillHints: widget.autofillHints,
+      restorationId: widget.restorationId,
+      enableIMEPersonalizedLearning: widget.enableIMEPersonalizedLearning,
+      contextMenuBuilder:
+          widget.contextMenuBuilder ??
+          (context, editableTextState) {
+            return AdaptiveTextSelectionToolbar.editableText(
+              editableTextState: editableTextState,
+            );
+          },
+      spellCheckConfiguration: widget.spellCheckConfiguration,
+      magnifierConfiguration:
+          widget.magnifierConfiguration ??
+          TextMagnifier.adaptiveMagnifierConfiguration,
+      contentInsertionConfiguration: widget.contentInsertionConfiguration,
+      selectionHeightStyle: ui.BoxHeightStyle.tight,
+      selectionWidthStyle: ui.BoxWidthStyle.tight,
+      keyboardAppearance: brightness,
+      // Suppress EditableText's built-in TextFieldTapRegion unfocus behaviour.
+      // Outside-tap handling is delegated to the TapRegion that wraps the
+      // entire field (including prefix/suffix icons).
+      onTapOutside: (_) {},
     );
 
     // Hint text layered under the editable text via a Stack.
@@ -625,8 +646,15 @@ class _FondeTextFieldState extends State<FondeTextField> {
       );
     }
 
+    // Wrap with the gesture detector that handles tap-to-place-cursor,
+    // double-tap word selection, drag selection, and keyboard shortcuts.
+    editableText = _selectionGestureDetectorBuilder.buildGestureDetector(
+      behavior: HitTestBehavior.translucent,
+      child: editableText,
+    );
+
     // Align vertically center; EditableText itself is inline/text-baseline
-    // aligned, so wrapping in Center gives us reliable vertical centering
+    // aligned, so wrapping in Align gives us reliable vertical centering
     // independent of font metrics or zoom scale.
     return Align(alignment: Alignment.centerLeft, child: editableText);
   }
@@ -646,5 +674,24 @@ class _FondeTextFieldState extends State<FondeTextField> {
               ? colorScheme.interactive.input.text
               : colorScheme.interactive.input.text.withValues(alpha: 0.4),
     );
+  }
+}
+
+/// Gesture detector builder that wires standard text-selection gestures
+/// (tap-to-place, double-tap word select, drag select) to [EditableText].
+///
+/// Mirrors the pattern used internally by [TextField].
+class _FondeTextFieldSelectionGestureDetectorBuilder
+    extends TextSelectionGestureDetectorBuilder {
+  _FondeTextFieldSelectionGestureDetectorBuilder({
+    required _FondeTextFieldState state,
+  }) : _state = state,
+       super(delegate: state);
+
+  final _FondeTextFieldState _state;
+
+  @override
+  void onUserTap() {
+    _state.widget.onTap?.call();
   }
 }

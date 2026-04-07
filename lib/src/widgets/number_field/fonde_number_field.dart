@@ -3,7 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:figma_squircle/figma_squircle.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import '../../internal.dart';
-import 'dart:ui' as ui;
+import '../text_field/fonde_text_field.dart';
 
 /// Numeric input field with increment/decrement buttons.
 ///
@@ -159,63 +159,29 @@ class _FondeNumberFieldState extends State<FondeNumberField> {
     required double zoomScale,
     required List<TextInputFormatter> formatters,
   }) {
-    final textStyle = TextStyle(fontSize: 13.0 * zoomScale, color: textColor);
-    final strutStyle = StrutStyle(
-      fontSize: textStyle.fontSize,
-      height: 1.0,
-      forceStrutHeight: true,
-    );
-
-    Widget editable = EditableText(
+    return FondeTextField(
       controller: _controller,
       focusNode: _focusNode,
+      hintText: widget.hintText,
+      enabled: widget.enabled,
       readOnly: !widget.enabled,
-      style: textStyle,
-      strutStyle: strutStyle,
-      cursorColor: textColor,
-      backgroundCursorColor: Colors.transparent,
-      cursorWidth: 1.5,
-      selectionColor: textColor.withValues(alpha: 0.3),
+      style: TextStyle(fontSize: 13.0 * zoomScale, color: textColor),
+      textAlign: TextAlign.center,
       keyboardType: const TextInputType.numberWithOptions(
         decimal: true,
         signed: true,
       ),
-      textAlign: TextAlign.center,
       inputFormatters: formatters,
       onSubmitted: _commitText,
-      mouseCursor: MouseCursor.defer,
-      enableInteractiveSelection: true,
-      selectionHeightStyle: ui.BoxHeightStyle.tight,
-      selectionWidthStyle: ui.BoxWidthStyle.tight,
-      contextMenuBuilder: (context, editableTextState) {
-        return AdaptiveTextSelectionToolbar.editableText(
-          editableTextState: editableTextState,
-        );
-      },
-      keyboardAppearance: Brightness.light,
+      cursorColor: textColor,
+      cursorWidth: 1.5,
+      // Transparent border/background — FondeNumberField provides its own outer frame
+      backgroundColor: Colors.transparent,
+      borderColor: Colors.transparent,
+      activeBorderColor: Colors.transparent,
+      contentPadding: EdgeInsets.zero,
+      disableZoom: true,
     );
-
-    if (widget.hintText != null) {
-      editable = Stack(
-        alignment: Alignment.center,
-        children: [
-          ValueListenableBuilder<TextEditingValue>(
-            valueListenable: _controller,
-            builder: (context, value, _) {
-              if (value.text.isNotEmpty) return const SizedBox.shrink();
-              return Text(
-                widget.hintText!,
-                style: TextStyle(fontSize: 13.0 * zoomScale, color: hintColor),
-                maxLines: 1,
-              );
-            },
-          ),
-          editable,
-        ],
-      );
-    }
-
-    return editable;
   }
 
   bool get _canDecrement {

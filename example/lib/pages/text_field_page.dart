@@ -1,4 +1,4 @@
-import 'package:flutter/widgets.dart';
+import 'package:flutter/material.dart';
 import 'package:fonde_ui/fonde_ui.dart';
 
 import '../widgets/catalog_page.dart';

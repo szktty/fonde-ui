@@ -1,5 +1,6 @@
 import 'package:figma_squircle/figma_squircle.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
 import '../../internal.dart';
 import '../text_field/focus_ring_painter.dart';
@@ -53,7 +54,8 @@ class FondeSearchField extends StatefulWidget {
   State<FondeSearchField> createState() => _FondeSearchFieldState();
 }
 
-class _FondeSearchFieldState extends State<FondeSearchField> {
+class _FondeSearchFieldState extends State<FondeSearchField>
+    implements TextSelectionGestureDetectorBuilderDelegate {
   late TextEditingController _controller;
   late FocusNode _focusNode;
   final OverlayPortalController _overlayController = OverlayPortalController();
@@ -61,9 +63,23 @@ class _FondeSearchFieldState extends State<FondeSearchField> {
   bool _isFocused = false;
   bool _hasText = false;
 
+  // TextSelectionGestureDetectorBuilderDelegate
+  @override
+  final GlobalKey<EditableTextState> editableTextKey =
+      GlobalKey<EditableTextState>();
+  @override
+  bool get forcePressEnabled => false;
+  @override
+  bool get selectionEnabled => widget.enabled;
+
+  late _FondeSearchFieldSelectionGestureDetectorBuilder
+  _selectionGestureDetectorBuilder;
+
   @override
   void initState() {
     super.initState();
+    _selectionGestureDetectorBuilder =
+        _FondeSearchFieldSelectionGestureDetectorBuilder(state: this);
     _controller =
         widget.controller ?? TextEditingController(text: widget.value);
     _focusNode = FocusNode();
@@ -85,39 +101,54 @@ class _FondeSearchFieldState extends State<FondeSearchField> {
   }
 
   void _handleFocusChange() {
-    setState(() {
-      _isFocused = _focusNode.hasFocus;
-    });
-    if (_focusNode.hasFocus) {
-      if (widget.suggestionOverlayBuilder != null &&
-          !_overlayController.isShowing) {
-        _overlayController.show();
+    final hasFocus = _focusNode.hasFocus;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      setState(() {
+        _isFocused = hasFocus;
+      });
+      if (hasFocus) {
+        if (widget.suggestionOverlayBuilder != null &&
+            !_overlayController.isShowing) {
+          _overlayController.show();
+        }
+      } else {
+        if (_overlayController.isShowing) {
+          _overlayController.hide();
+        }
       }
-    } else {
-      _closeOverlay();
-    }
+    });
   }
 
   void _handleTextChange() {
     final text = _controller.text;
     final hasText = text.isNotEmpty;
-    if (hasText != _hasText) {
-      setState(() {
-        _hasText = hasText;
-      });
-    }
     widget.onChange?.call(text);
-    if (widget.suggestionOverlayBuilder != null && _isFocused) {
-      if (!_overlayController.isShowing) {
-        _overlayController.show();
-      } else {
-        setState(() {});
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      if (hasText != _hasText) {
+        setState(() {
+          _hasText = hasText;
+        });
       }
-    }
+      if (widget.suggestionOverlayBuilder != null && _isFocused) {
+        if (!_overlayController.isShowing) {
+          _overlayController.show();
+        } else {
+          setState(() {});
+        }
+      }
+    });
   }
 
   void _closeOverlay() {
-    if (_overlayController.isShowing) {
+    if (!_overlayController.isShowing) return;
+    if (SchedulerBinding.instance.schedulerPhase ==
+        SchedulerPhase.persistentCallbacks) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted && _overlayController.isShowing) _overlayController.hide();
+      });
+    } else {
       _overlayController.hide();
     }
   }
@@ -133,7 +164,7 @@ class _FondeSearchFieldState extends State<FondeSearchField> {
     final borderColor = appColorScheme.base.divider;
     final activeBorderColor = appColorScheme.theme.primaryColor;
     final cursorColor = appColorScheme.base.foreground;
-    final selectionColor = appColorScheme.base.border;
+    final selectionColor = appColorScheme.base.selection;
     final fieldHeight = 32.0 * zoomScale;
 
     final textStyle = TextStyle(
@@ -156,9 +187,10 @@ class _FondeSearchFieldState extends State<FondeSearchField> {
 
     Widget editableText = TextSelectionTheme(
       data: TextSelectionThemeData(
-        selectionColor: selectionColor.withValues(alpha: 0.3),
+        selectionColor: selectionColor.withValues(alpha: 0.4),
       ),
       child: EditableText(
+        key: editableTextKey,
         controller: _controller,
         focusNode: _focusNode,
         readOnly: !widget.enabled,
@@ -167,8 +199,8 @@ class _FondeSearchFieldState extends State<FondeSearchField> {
         cursorColor: cursorColor,
         backgroundCursorColor: Colors.transparent,
         cursorWidth: 1.5,
-        selectionColor: selectionColor.withValues(alpha: 0.3),
-        selectionControls: materialTextSelectionControls,
+        selectionColor: selectionColor.withValues(alpha: 0.4),
+        selectionControls: desktopTextSelectionControls,
         textInputAction: TextInputAction.search,
         onSubmitted: (value) {
           _closeOverlay();
@@ -176,7 +208,9 @@ class _FondeSearchFieldState extends State<FondeSearchField> {
         },
         onChanged: (_) {},
         mouseCursor: MouseCursor.defer,
+        rendererIgnoresPointer: true,
         enableInteractiveSelection: true,
+        onTapOutside: (_) {},
         contextMenuBuilder: (context, editableTextState) {
           return AdaptiveTextSelectionToolbar.editableText(
             editableTextState: editableTextState,
@@ -204,6 +238,11 @@ class _FondeSearchFieldState extends State<FondeSearchField> {
         ),
         editableText,
       ],
+    );
+
+    editableText = _selectionGestureDetectorBuilder.buildGestureDetector(
+      behavior: HitTestBehavior.translucent,
+      child: editableText,
     );
 
     final clearButton =
@@ -326,4 +365,11 @@ class _FondeSearchFieldState extends State<FondeSearchField> {
       child: CompositedTransformTarget(link: _layerLink, child: fieldRow),
     );
   }
+}
+
+class _FondeSearchFieldSelectionGestureDetectorBuilder
+    extends TextSelectionGestureDetectorBuilder {
+  _FondeSearchFieldSelectionGestureDetectorBuilder({
+    required _FondeSearchFieldState state,
+  }) : super(delegate: state);
 }
