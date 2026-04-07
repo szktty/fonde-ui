@@ -9,6 +9,10 @@
 - FIX
   - Bug fixes
 
+## develop
+
+- [CHANGE] Remove `textfield_tags` dependency — `FondeTagsField` now supports desktop-native keyboard navigation (`←`/`→` tag selection, 2-step `Backspace` delete, `Delete`, `Escape`)
+
 ## 0.9.0
 
 **Release date**: 2026-04-08
