@@ -11,6 +11,12 @@
 
 ## develop
 
+- [UPDATE] Raise `multi_split_view` constraint to `^3.3.0` to fix downgrade analysis failure (`dividerHandleBuffer` not available in 3.2.x)
+- [UPDATE] Raise `popover` constraint to `^0.4.0` to support latest stable version
+- [UPDATE] Remove `example/` from `.pubignore` so pub.dev can detect the example app
+- [FIX] Remove leftover `intl` import from `fonde_ui_localizations_en.dart` and `fonde_ui_localizations_ja.dart`
+- [FIX] Remove unnecessary `flutter/services.dart` import from `FondeSearchField`
+- [ADD] Declare supported platforms in `pubspec.yaml` (android, ios, linux, macos, windows)
 - [CHANGE] `FondeTextField`: rewrite with `EditableText` instead of `TextField`/`InputDecoration` — eliminates zoom-scale vertical centering bug; `errorText` is now rendered below the field via a `Column`
 - [CHANGE] Remove `lucide_icons_flutter` dependency — Lucide font (1.7.0, ISC License) is now bundled directly; `LucideIcons` class is provided by fonde_ui with only the icons in use; stroke weight variants removed (all icons use single weight)
 - [CHANGE] Remove `freezed_annotation`, `json_annotation`, `freezed`, `json_serializable`, `build_runner` dependencies — none were in use
