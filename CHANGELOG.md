@@ -12,6 +12,7 @@
 ## develop
 
 - [CHANGE] `FondeTextField`: rewrite with `EditableText` instead of `TextField`/`InputDecoration` — eliminates zoom-scale vertical centering bug; `errorText` is now rendered below the field via a `Column`
+- [CHANGE] Remove `lucide_icons_flutter` dependency — Lucide font (1.7.0, ISC License) is now bundled directly; `LucideIcons` class is provided by fonde_ui with only the icons in use; stroke weight variants removed (all icons use single weight)
 - [CHANGE] Remove `freezed_annotation`, `json_annotation`, `freezed`, `json_serializable`, `build_runner` dependencies — none were in use
 - [CHANGE] Remove `dots_indicator` dependency — `FondePageIndicator` is now self-contained
 - [UPDATE] `FondeTextField`: use `FondeBorderRadius` for border shape construction
