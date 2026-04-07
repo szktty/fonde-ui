@@ -12,6 +12,7 @@ class FondeAccessibilityConfig {
   /// Enable/disable high contrast mode.
   final bool highContrastMode;
 
+  /// Creates an accessibility configuration with default values.
   const FondeAccessibilityConfig({
     this.fontScale = 1.0,
     this.zoomScale = 1.0,
