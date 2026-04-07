@@ -1,10 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:multi_split_view/multi_split_view.dart';
 import '../../internal.dart';
 
 /// A resizable split pane for use inside content areas.
 ///
-/// Unlike [FondeScaffold] (which uses multi_split_view internally for the
+/// Unlike [FondeScaffold] (which uses a split layout internally for the
 /// top-level sidebar layout), [FondeSplitPane] is designed for arbitrary
 /// splits within content — e.g., editor + preview, master + detail, etc.
 ///
@@ -69,32 +68,81 @@ class FondeSplitPane extends StatefulWidget {
 }
 
 class _FondeSplitPaneState extends State<FondeSplitPane> {
-  late MultiSplitViewController _controller;
+  // Pixel sizes for each pane. Initialized on first layout.
+  late List<double> _sizes;
+  bool _initialized = false;
 
-  @override
-  void initState() {
-    super.initState();
-    _controller = MultiSplitViewController(areas: _buildAreas());
-  }
+  // Which divider index is currently hovered (-1 = none).
+  int _hoveredDivider = -1;
 
-  List<Area> _buildAreas() {
-    final count = widget.children.length;
-    return List.generate(count, (i) {
-      final flex =
-          widget.initialSizes != null ? widget.initialSizes![i] : 1.0 / count;
-      return Area(
-        id: 'pane_$i',
-        flex: flex,
-        min: widget.minSizes != null ? widget.minSizes![i] : null,
-        max: widget.maxSizes != null ? widget.maxSizes![i] : null,
-      );
+  int get _count => widget.children.length;
+
+  double? _minSize(int index) =>
+      widget.minSizes != null ? widget.minSizes![index] : null;
+
+  double? _maxSize(int index) =>
+      widget.maxSizes != null ? widget.maxSizes![index] : null;
+
+  void _initSizes(double totalSize, double dividerThickness) {
+    final totalDividers = _count - 1;
+    final available = totalSize - totalDividers * dividerThickness;
+    _sizes = List.generate(_count, (i) {
+      final fraction =
+          widget.initialSizes != null ? widget.initialSizes![i] : 1.0 / _count;
+      return available * fraction;
     });
+    _initialized = true;
   }
 
-  @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
+  void _onDividerDrag(
+    int dividerIndex,
+    double delta,
+    double totalSize,
+    double dividerThickness,
+  ) {
+    setState(() {
+      final left = dividerIndex;
+      final right = dividerIndex + 1;
+
+      double newLeft = _sizes[left] + delta;
+      double newRight = _sizes[right] - delta;
+
+      // Apply min/max constraints.
+      final minL = _minSize(left) ?? 0.0;
+      final minR = _minSize(right) ?? 0.0;
+      final maxL = _maxSize(left);
+      final maxR = _maxSize(right);
+
+      if (newLeft < minL) {
+        final excess = minL - newLeft;
+        newLeft = minL;
+        newRight -= excess;
+      }
+      if (newRight < minR) {
+        final excess = minR - newRight;
+        newRight = minR;
+        newLeft -= excess;
+      }
+      if (maxL != null && newLeft > maxL) {
+        final excess = newLeft - maxL;
+        newLeft = maxL;
+        newRight += excess;
+      }
+      if (maxR != null && newRight > maxR) {
+        final excess = newRight - maxR;
+        newRight = maxR;
+        newLeft -= excess;
+      }
+
+      _sizes[left] = newLeft;
+      _sizes[right] = newRight;
+    });
+
+    if (widget.onSizesChanged != null) {
+      final total = _sizes.fold(0.0, (a, b) => a + b);
+      final fractions = _sizes.map((s) => s / total).toList();
+      widget.onSizesChanged!(fractions);
+    }
   }
 
   @override
@@ -103,30 +151,169 @@ class _FondeSplitPaneState extends State<FondeSplitPane> {
     final accessibilityConfig = context.fondeAccessibility;
     final borderScale =
         widget.disableZoom ? 1.0 : accessibilityConfig.borderScale;
+    final effectiveThickness = widget.dividerThickness * borderScale;
 
-    return MultiSplitViewTheme(
-      data: MultiSplitViewThemeData(
-        dividerThickness: widget.dividerThickness * borderScale,
-        dividerPainter: DividerPainters.background(
-          color: appColorScheme.base.divider,
-          highlightedColor: appColorScheme.theme.primaryColor,
-          animationDuration: const Duration(milliseconds: 100),
-        ),
-        dividerHandleBuffer: 6,
-      ),
-      child: MultiSplitView(
-        controller: _controller,
-        axis: widget.axis,
-        onDividerDragUpdate: (_) {
-          if (widget.onSizesChanged != null) {
-            final sizes = _controller.areas.map((a) => a.flex ?? 0.0).toList();
-            widget.onSizesChanged!(sizes);
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final totalSize =
+            widget.axis == Axis.horizontal
+                ? constraints.maxWidth
+                : constraints.maxHeight;
+
+        // Layout width of each divider includes the transparent hit buffer.
+        final dividerLayoutSize =
+            effectiveThickness + _SplitDividerState._hitBuffer * 2;
+
+        if (!_initialized || _sizes.length != _count) {
+          _initSizes(totalSize, dividerLayoutSize);
+        }
+
+        final children = <Widget>[];
+        for (int i = 0; i < _count; i++) {
+          // Pane
+          final paneSize = _sizes[i];
+          final pane = SizedBox(
+            width: widget.axis == Axis.horizontal ? paneSize : double.infinity,
+            height: widget.axis == Axis.vertical ? paneSize : double.infinity,
+            child: widget.children[i],
+          );
+          children.add(pane);
+
+          // Divider (between panes)
+          if (i < _count - 1) {
+            final dividerIndex = i;
+            children.add(
+              _SplitDivider(
+                axis: widget.axis,
+                thickness: effectiveThickness,
+                isHovered: _hoveredDivider == dividerIndex,
+                normalColor: appColorScheme.base.divider,
+                highlightColor: appColorScheme.theme.primaryColor,
+                onHoverChanged: (hovered) {
+                  setState(() {
+                    _hoveredDivider = hovered ? dividerIndex : -1;
+                  });
+                },
+                onDragUpdate: (delta) {
+                  _onDividerDrag(
+                    dividerIndex,
+                    delta,
+                    totalSize,
+                    dividerLayoutSize,
+                  );
+                },
+              ),
+            );
           }
-        },
-        builder: (context, area) {
-          final index = int.parse(area.id!.replaceFirst('pane_', ''));
-          return widget.children[index];
-        },
+        }
+
+        if (widget.axis == Axis.horizontal) {
+          return Row(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: children,
+          );
+        } else {
+          return Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: children,
+          );
+        }
+      },
+    );
+  }
+}
+
+class _SplitDivider extends StatefulWidget {
+  const _SplitDivider({
+    required this.axis,
+    required this.thickness,
+    required this.isHovered,
+    required this.normalColor,
+    required this.highlightColor,
+    required this.onHoverChanged,
+    required this.onDragUpdate,
+  });
+
+  final Axis axis;
+  final double thickness;
+  final bool isHovered;
+  final Color normalColor;
+  final Color highlightColor;
+  final void Function(bool hovered) onHoverChanged;
+  final void Function(double delta) onDragUpdate;
+
+  @override
+  State<_SplitDivider> createState() => _SplitDividerState();
+}
+
+class _SplitDividerState extends State<_SplitDivider> {
+  bool _isDragging = false;
+
+  // Extra transparent hit area on each side of the visible line.
+  static const double _hitBuffer = 4.0;
+
+  @override
+  Widget build(BuildContext context) {
+    final isActive = widget.isHovered || _isDragging;
+    final isHorizontal = widget.axis == Axis.horizontal;
+    final cursor =
+        isHorizontal
+            ? SystemMouseCursors.resizeLeftRight
+            : SystemMouseCursors.resizeUpDown;
+
+    final visibleLine = AnimatedContainer(
+      duration: const Duration(milliseconds: 100),
+      width: isHorizontal ? widget.thickness : double.infinity,
+      height: !isHorizontal ? widget.thickness : double.infinity,
+      color: isActive ? widget.highlightColor : widget.normalColor,
+    );
+
+    // Wrap in a wider/taller transparent hit area so the line is easy to grab.
+    final hitArea =
+        isHorizontal
+            ? SizedBox(
+              width: widget.thickness + _hitBuffer * 2,
+              child: Stack(
+                alignment: Alignment.center,
+                children: [
+                  Positioned.fill(
+                    child: const ColoredBox(color: Colors.transparent),
+                  ),
+                  visibleLine,
+                ],
+              ),
+            )
+            : SizedBox(
+              height: widget.thickness + _hitBuffer * 2,
+              child: Stack(
+                alignment: Alignment.center,
+                children: [
+                  Positioned.fill(
+                    child: const ColoredBox(color: Colors.transparent),
+                  ),
+                  visibleLine,
+                ],
+              ),
+            );
+
+    return MouseRegion(
+      cursor: cursor,
+      onEnter: (_) => widget.onHoverChanged(true),
+      onExit: (_) => widget.onHoverChanged(false),
+      child: GestureDetector(
+        onHorizontalDragUpdate:
+            isHorizontal ? (d) => widget.onDragUpdate(d.delta.dx) : null,
+        onVerticalDragUpdate:
+            !isHorizontal ? (d) => widget.onDragUpdate(d.delta.dy) : null,
+        onHorizontalDragStart:
+            isHorizontal ? (_) => setState(() => _isDragging = true) : null,
+        onHorizontalDragEnd:
+            isHorizontal ? (_) => setState(() => _isDragging = false) : null,
+        onVerticalDragStart:
+            !isHorizontal ? (_) => setState(() => _isDragging = true) : null,
+        onVerticalDragEnd:
+            !isHorizontal ? (_) => setState(() => _isDragging = false) : null,
+        child: hitArea,
       ),
     );
   }

@@ -1,6 +1,5 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:multi_split_view/multi_split_view.dart';
 import '../../internal.dart';
 
 import '../toolbar/secondary_sidebar_toolbar.dart';
@@ -228,94 +227,62 @@ class _FondeScaffoldState extends State<FondeScaffold> {
       );
     }
 
-    final primarySidebarTotalWidth = _primaryWidthCtrl.width * zoomScale;
-    final secondarySidebarTotalWidth = _secondaryWidthCtrl.width * zoomScale;
+    final hasSecondarySidebar =
+        widget.secondarySidebar != null &&
+        widget.showSecondarySidebar &&
+        secondarySidebarVisible;
 
-    final areas = <Area>[
-      Area(
-        id: 'primary_sidebar',
-        size: primarySidebarTotalWidth,
-        min: 240.0 * zoomScale,
-        max: 480.0 * zoomScale,
-      ),
-      Area(id: 'main'),
-      if (widget.secondarySidebar != null &&
-          widget.showSecondarySidebar &&
-          secondarySidebarVisible)
-        Area(
-          id: 'secondary_sidebar',
-          size: secondarySidebarTotalWidth,
-          min: 200.0 * zoomScale,
-          max: 400.0 * zoomScale,
-        ),
-    ];
+    Widget? sidebarPane;
+    if (widget.primarySidebar != null) {
+      final sidebarHasToolbar =
+          widget.primarySidebar is FondeSidebar &&
+          (widget.primarySidebar! as FondeSidebar).toolbar != null;
+      sidebarPane =
+          sidebarHasToolbar
+              ? widget.primarySidebar!
+              : FondeSidebarPane(child: widget.primarySidebar!);
+    }
 
-    final controller = MultiSplitViewController(areas: areas);
+    final primaryPane = FondePrimarySide(
+      launchBar: widget.launchBar,
+      sidebar: sidebarPane,
+      showLaunchBar: widget.showLaunchBar,
+      showSidebar: widget.showPrimarySidebar,
+      zoomScale: zoomScale,
+      borderScale: borderScale,
+      disableZoom: widget.disableZoom,
+    );
 
-    return MultiSplitViewTheme(
-      data: MultiSplitViewThemeData(
-        dividerThickness: 2.0 * borderScale,
-        dividerPainter: DividerPainters.background(
-          color: appColorScheme.base.divider,
-          highlightedColor: appColorScheme.theme.primaryColor,
-          animationDuration: const Duration(milliseconds: 100),
-        ),
-        dividerHandleBuffer: 6,
-      ),
-      child: MultiSplitView(
-        controller: controller,
-        onDividerDragUpdate: (dividerIndex) {
-          final areas = controller.areas;
-          if (dividerIndex == 0 && areas.isNotEmpty) {
-            _primaryWidthCtrl.setWidth(areas[0].size! / zoomScale);
-          } else if (dividerIndex == 1 && areas.length > 2) {
-            _secondaryWidthCtrl.setWidth(areas[2].size! / zoomScale);
-          }
-        },
-        builder: (context, area) {
-          switch (area.id) {
-            case 'primary_sidebar':
-              Widget? sidebarPane;
-              if (widget.primarySidebar != null) {
-                final sidebarHasToolbar =
-                    widget.primarySidebar is FondeSidebar &&
-                    (widget.primarySidebar! as FondeSidebar).toolbar != null;
-                sidebarPane =
-                    sidebarHasToolbar
-                        ? widget.primarySidebar!
-                        : FondeSidebarPane(child: widget.primarySidebar!);
-              }
-              return FondePrimarySide(
-                launchBar: widget.launchBar,
-                sidebar: sidebarPane,
-                showLaunchBar: widget.showLaunchBar,
-                showSidebar: widget.showPrimarySidebar,
-                zoomScale: zoomScale,
-                borderScale: borderScale,
-                disableZoom: widget.disableZoom,
-              );
-            case 'main':
-              return Column(
-                children: [
-                  widget.toolbar,
-                  Expanded(child: FondeMainContentArea(child: widget.content)),
-                  if (widget.statusBar != null) widget.statusBar!,
-                ],
-              );
-            case 'secondary_sidebar':
-              return Column(
-                children: [
-                  const FondeSecondarySidebarToolbar(),
-                  Expanded(
-                    child: widget.secondarySidebar ?? const SizedBox.shrink(),
-                  ),
-                ],
-              );
-            default:
-              return const SizedBox.shrink();
-          }
-        },
-      ),
+    final mainPane = Column(
+      children: [
+        widget.toolbar,
+        Expanded(child: FondeMainContentArea(child: widget.content)),
+        if (widget.statusBar != null) widget.statusBar!,
+      ],
+    );
+
+    final secondaryPane =
+        hasSecondarySidebar
+            ? Column(
+              children: [
+                const FondeSecondarySidebarToolbar(),
+                Expanded(
+                  child: widget.secondarySidebar ?? const SizedBox.shrink(),
+                ),
+              ],
+            )
+            : null;
+
+    return _ScaffoldSplitView(
+      primaryPane: primaryPane,
+      mainPane: mainPane,
+      secondaryPane: secondaryPane,
+      primaryWidthCtrl: _primaryWidthCtrl,
+      secondaryWidthCtrl: _secondaryWidthCtrl,
+      zoomScale: zoomScale,
+      borderScale: borderScale,
+      dividerColor: appColorScheme.base.divider,
+      dividerHighlightColor: appColorScheme.theme.primaryColor,
     );
   }
 
@@ -348,6 +315,185 @@ class _FondeScaffoldState extends State<FondeScaffold> {
         ),
         if (widget.statusBar != null) widget.statusBar!,
       ],
+    );
+  }
+}
+
+/// Internal horizontal split layout for [FondeScaffold].
+///
+/// Manages pixel sizes for primary sidebar, main content, and optional
+/// secondary sidebar with min/max constraints and drag-to-resize dividers.
+class _ScaffoldSplitView extends StatefulWidget {
+  const _ScaffoldSplitView({
+    required this.primaryPane,
+    required this.mainPane,
+    required this.secondaryPane,
+    required this.primaryWidthCtrl,
+    required this.secondaryWidthCtrl,
+    required this.zoomScale,
+    required this.borderScale,
+    required this.dividerColor,
+    required this.dividerHighlightColor,
+  });
+
+  final Widget primaryPane;
+  final Widget mainPane;
+  final Widget? secondaryPane;
+  final FondeSidebarWidthController primaryWidthCtrl;
+  final FondeSecondarySidebarWidthController secondaryWidthCtrl;
+  final double zoomScale;
+  final double borderScale;
+  final Color dividerColor;
+  final Color dividerHighlightColor;
+
+  @override
+  State<_ScaffoldSplitView> createState() => _ScaffoldSplitViewState();
+}
+
+class _ScaffoldSplitViewState extends State<_ScaffoldSplitView> {
+  // Pixel widths; initialized from controllers on first layout.
+  double _primaryWidth = 0;
+  double _secondaryWidth = 0;
+  bool _initialized = false;
+
+  // Hovered divider index: 0 = primary divider, 1 = secondary divider, -1 = none.
+  int _hoveredDivider = -1;
+
+  static const double _dividerThickness = 2.0;
+
+  double get _effectiveDividerThickness =>
+      _dividerThickness * widget.borderScale;
+
+  double _primaryMin() => 240.0 * widget.zoomScale;
+  double _primaryMax() => 480.0 * widget.zoomScale;
+  double _secondaryMin() => 200.0 * widget.zoomScale;
+  double _secondaryMax() => 400.0 * widget.zoomScale;
+
+  void _initSizes() {
+    _primaryWidth = (widget.primaryWidthCtrl.width * widget.zoomScale).clamp(
+      _primaryMin(),
+      _primaryMax(),
+    );
+    _secondaryWidth = (widget.secondaryWidthCtrl.width * widget.zoomScale)
+        .clamp(_secondaryMin(), _secondaryMax());
+    _initialized = true;
+  }
+
+  void _onPrimaryDividerDrag(double delta) {
+    setState(() {
+      _primaryWidth = (_primaryWidth + delta).clamp(
+        _primaryMin(),
+        _primaryMax(),
+      );
+    });
+    widget.primaryWidthCtrl.setWidth(_primaryWidth / widget.zoomScale);
+  }
+
+  void _onSecondaryDividerDrag(double delta) {
+    // Secondary divider: dragging right increases secondary width.
+    setState(() {
+      _secondaryWidth = (_secondaryWidth - delta).clamp(
+        _secondaryMin(),
+        _secondaryMax(),
+      );
+    });
+    widget.secondaryWidthCtrl.setWidth(_secondaryWidth / widget.zoomScale);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        if (!_initialized) {
+          _initSizes();
+        }
+
+        final hasSecondary = widget.secondaryPane != null;
+        final dividerThickness = _effectiveDividerThickness;
+
+        return Row(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            // Primary sidebar
+            SizedBox(width: _primaryWidth, child: widget.primaryPane),
+
+            // Primary divider
+            _ScaffoldDivider(
+              thickness: dividerThickness,
+              isHovered: _hoveredDivider == 0,
+              normalColor: widget.dividerColor,
+              highlightColor: widget.dividerHighlightColor,
+              onHoverChanged:
+                  (h) => setState(() => _hoveredDivider = h ? 0 : -1),
+              onDragUpdate: _onPrimaryDividerDrag,
+            ),
+
+            // Main content (flex)
+            Expanded(child: widget.mainPane),
+
+            // Secondary divider + pane
+            if (hasSecondary) ...[
+              _ScaffoldDivider(
+                thickness: dividerThickness,
+                isHovered: _hoveredDivider == 1,
+                normalColor: widget.dividerColor,
+                highlightColor: widget.dividerHighlightColor,
+                onHoverChanged:
+                    (h) => setState(() => _hoveredDivider = h ? 1 : -1),
+                onDragUpdate: _onSecondaryDividerDrag,
+              ),
+              SizedBox(width: _secondaryWidth, child: widget.secondaryPane!),
+            ],
+          ],
+        );
+      },
+    );
+  }
+}
+
+/// Horizontal drag divider used inside [_ScaffoldSplitView].
+class _ScaffoldDivider extends StatefulWidget {
+  const _ScaffoldDivider({
+    required this.thickness,
+    required this.isHovered,
+    required this.normalColor,
+    required this.highlightColor,
+    required this.onHoverChanged,
+    required this.onDragUpdate,
+  });
+
+  final double thickness;
+  final bool isHovered;
+  final Color normalColor;
+  final Color highlightColor;
+  final void Function(bool hovered) onHoverChanged;
+  final void Function(double delta) onDragUpdate;
+
+  @override
+  State<_ScaffoldDivider> createState() => _ScaffoldDividerState();
+}
+
+class _ScaffoldDividerState extends State<_ScaffoldDivider> {
+  bool _isDragging = false;
+
+  @override
+  Widget build(BuildContext context) {
+    final isActive = widget.isHovered || _isDragging;
+
+    return MouseRegion(
+      cursor: SystemMouseCursors.resizeLeftRight,
+      onEnter: (_) => widget.onHoverChanged(true),
+      onExit: (_) => widget.onHoverChanged(false),
+      child: GestureDetector(
+        onHorizontalDragStart: (_) => setState(() => _isDragging = true),
+        onHorizontalDragEnd: (_) => setState(() => _isDragging = false),
+        onHorizontalDragUpdate: (d) => widget.onDragUpdate(d.delta.dx),
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 100),
+          width: widget.thickness,
+          color: isActive ? widget.highlightColor : widget.normalColor,
+        ),
+      ),
     );
   }
 }
