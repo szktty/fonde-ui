@@ -3,6 +3,12 @@ description: Desktop-first Flutter UI utility components with native-like intera
 version: 0.10.0-dev
 
 repository: https://github.com/szktty/fonde-ui
+topics:
+  - widget
+  - user-interface
+  - design
+  - components
+  - desktop
 
 environment:
   sdk: ^3.7.0
