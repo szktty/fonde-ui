@@ -11,6 +11,7 @@
 
 ## develop
 
+- [CHANGE] Remove `multi_split_view` dependency — `FondeSplitPane` and `FondeScaffold` now use self-contained split implementations with transparent hit buffers for easier divider grabbing
 - [CHANGE] Remove `textfield_tags` dependency — `FondeTagsField` now supports desktop-native keyboard navigation (`←`/`→` tag selection, 2-step `Backspace` delete, `Delete`, `Escape`)
 
 ## 0.9.0
