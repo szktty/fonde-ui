@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter/gestures.dart';
 import 'package:figma_squircle/figma_squircle.dart';
 import '../../internal.dart';
+import '../widgets/fonde_rectangle_border.dart';
 import 'dart:ui' as ui;
 import 'focus_ring_painter.dart';
 
@@ -391,10 +392,10 @@ class _FondeTextFieldState extends State<FondeTextField>
                   ? backgroundColor
                   : backgroundColor.withValues(alpha: 0.5),
           shape: SmoothRectangleBorder(
-            borderRadius: SmoothBorderRadius(
-              cornerRadius: widget.radius * zoomScale,
-              cornerSmoothing: 0.6,
-            ),
+            borderRadius:
+                FondeBorderRadius.radius(
+                  widget.radius * zoomScale,
+                ).toSmoothBorderRadius(),
             side: BorderSide(
               color: _isFocused ? Colors.transparent : effectiveBorderColor,
               width: widget.borderWidth * borderScale,

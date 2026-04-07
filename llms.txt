@@ -805,12 +805,14 @@ Menu button that shows overflow items.
 
 ### FondeTextField
 
+Fixed-height (32px) text input field implemented with `EditableText` directly for correct vertical centering at all zoom scales. `errorText` is rendered below the field via a `Column` (not inside `InputDecoration`).
+
 ```dart
 FondeTextField({
   TextEditingController? controller,
   FocusNode? focusNode,
   String? hintText,
-  String? errorText,
+  String? errorText,          // shown below the field
   Widget? prefixIcon,
   Widget? suffixIcon,
   bool enabled = true,
@@ -819,6 +821,12 @@ FondeTextField({
   void Function(String)? onChanged,
   void Function(String)? onSubmitted,
   // ... standard Flutter TextField params
+  Color? backgroundColor,
+  Color? borderColor,
+  Color? activeBorderColor,
+  double borderWidth = 1.5,
+  double radius = 12.0,
+  EdgeInsets contentPadding,  // vertical is ignored; centering is automatic
   bool disableZoom = false,
 })
 ```
