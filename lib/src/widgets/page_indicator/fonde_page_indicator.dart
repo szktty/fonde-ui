@@ -1,12 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:dots_indicator/dots_indicator.dart';
 import '../../internal.dart';
 import '../../core/context_extensions.dart';
 
 /// App-specific page indicator.
 ///
-/// This widget uses the `dots_indicator` package to create a pagination
-/// dot indicator. The app's theme color is automatically applied.
+/// Displays a row (or column) of dots representing pages, with the active dot
+/// highlighted in the theme's primary color.
 class FondePageIndicator extends StatelessWidget {
   /// Constructs the page indicator.
   ///
@@ -21,7 +20,6 @@ class FondePageIndicator extends StatelessWidget {
     this.dotSize = 6.0,
     this.dotSpacing = 15.0,
     this.mainAxisSize = MainAxisSize.min,
-    this.decorator,
   });
 
   /// Total number of dots (number of pages).
@@ -45,31 +43,43 @@ class FondePageIndicator extends StatelessWidget {
   /// Size of the main axis.
   final MainAxisSize mainAxisSize;
 
-  /// Custom dot decorator.
-  final DotsDecorator? decorator;
-
   @override
   Widget build(BuildContext context) {
     final appColorScheme = context.fondeColorScheme;
+    final inactiveColor = appColorScheme.interactive.input.border;
+    final activeColor = appColorScheme.theme.primaryColor;
 
-    // Default dot decorator based on theme
-    final defaultDecorator = DotsDecorator(
-      size: Size.square(dotSize),
-      activeSize: Size.square(dotSize + 2.0),
-      color: appColorScheme.interactive.input.border,
-      activeColor: appColorScheme.theme.primaryColor,
-      spacing: EdgeInsets.all(dotSpacing / 2),
-      activeShape: const CircleBorder(),
-      shape: const CircleBorder(),
-    );
+    final dots = List.generate(dotsCount, (index) {
+      final isActive = index == position.round();
+      final size = isActive ? dotSize + 2.0 : dotSize;
+      Widget dot = GestureDetector(
+        onTap: onDotTapped != null ? () => onDotTapped!(index) : null,
+        child: Container(
+          width: size,
+          height: size,
+          decoration: BoxDecoration(
+            color: isActive ? activeColor : inactiveColor,
+            shape: BoxShape.circle,
+          ),
+        ),
+      );
 
-    return DotsIndicator(
-      dotsCount: dotsCount,
-      position: position,
-      onTap: onDotTapped,
-      axis: axis,
-      mainAxisSize: mainAxisSize,
-      decorator: decorator ?? defaultDecorator,
-    );
+      final padding = dotSpacing / 2;
+      dot = Padding(
+        padding:
+            axis == Axis.horizontal
+                ? EdgeInsets.symmetric(horizontal: padding)
+                : EdgeInsets.symmetric(vertical: padding),
+        child: dot,
+      );
+
+      return dot;
+    });
+
+    if (axis == Axis.horizontal) {
+      return Row(mainAxisSize: mainAxisSize, children: dots);
+    } else {
+      return Column(mainAxisSize: mainAxisSize, children: dots);
+    }
   }
 }

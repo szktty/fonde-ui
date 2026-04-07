@@ -94,6 +94,7 @@ const catalogCategories = [
       CatalogItem(id: 'fonde_toast', label: 'Toast'),
       CatalogItem(id: 'fonde_popover', label: 'Popover'),
       CatalogItem(id: 'fonde_progress_indicator', label: 'Progress Indicator'),
+      CatalogItem(id: 'fonde_page_indicator', label: 'Page Indicator'),
       CatalogItem(
         id: 'fonde_notification_overlay',
         label: 'Notification Overlay',
