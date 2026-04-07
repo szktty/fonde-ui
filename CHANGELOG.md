@@ -9,7 +9,9 @@
 - FIX
   - Bug fixes
 
-## develop
+## 0.9.0
+
+**Release date**: 2026-04-08
 
 - [UPDATE] Raise `multi_split_view` constraint to `^3.3.0` to fix downgrade analysis failure (`dividerHandleBuffer` not available in 3.2.x)
 - [UPDATE] Raise `popover` constraint to `^0.4.0` to support latest stable version
