@@ -8,7 +8,7 @@ import 'package:lucide_icons_flutter/lucide_icons.dart';
 const fondeDefaultIconTheme = FondeIconTheme(
   // Navigation related
   layers: LucideIcons.layers200,
-  share2: LucideIcons.share2200,
+  share2: LucideIcons.share2Weight200,
   search: LucideIcons.search200,
   bookmark: LucideIcons.bookmark200,
   database: LucideIcons.database200,
@@ -17,7 +17,7 @@ const fondeDefaultIconTheme = FondeIconTheme(
   keyboard: LucideIcons.keyboard200,
   // App-specific navigation and function icons
   stacks: LucideIcons.layers200,
-  graphNavigation: LucideIcons.share2200,
+  graphNavigation: LucideIcons.share2Weight200,
   bookmarks: LucideIcons.bookmark200,
   entityEditor: Icons.edit_note,
   metadataEditor: LucideIcons.tag200,
@@ -77,7 +77,7 @@ const fondeDefaultIconTheme = FondeIconTheme(
   // List and display
   list: LucideIcons.list200,
   // Settings and tools
-  settingsAdvanced: LucideIcons.settings2200,
+  settingsAdvanced: LucideIcons.settings2Weight200,
   download: LucideIcons.download200,
   import: LucideIcons.import200,
   appearance: LucideIcons.glasses200,
