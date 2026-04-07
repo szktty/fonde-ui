@@ -1,11 +1,8 @@
 // Tests for FondeSearchField.
 //
-// FondeSearchField wraps the `searchfield` package which uses internal timers.
-// Tests are limited to smoke-testing (render without crash) to avoid
-// flakiness from pending timers. Interaction tests for text input and clear
-// button are deferred until the searchfield dependency can be mocked or
-// replaced.
+// Tests are limited to smoke-testing (render without crash).
 
+import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:fonde_ui/fonde_ui.dart';
 
@@ -31,9 +28,14 @@ void main() {
         expect(find.byType(FondeSearchField), findsOneWidget);
       });
 
-      testWidgets('renders without crashing with suggestions', (tester) async {
+      testWidgets('renders without crashing with suggestionOverlayBuilder', (
+        tester,
+      ) async {
         await tester.pumpTestApp(
-          const FondeSearchField(suggestions: ['Apple', 'Banana', 'Cherry']),
+          FondeSearchField(
+            suggestionOverlayBuilder:
+                (context, controller, close) => const SizedBox(),
+          ),
         );
         expect(find.byType(FondeSearchField), findsOneWidget);
       });

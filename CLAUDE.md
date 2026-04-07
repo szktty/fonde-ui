@@ -34,6 +34,7 @@ Desktop-first Flutter UI optimized for native-quality instant feedback, with acc
 
 ## Before Committing
 
+- Always verify that the current branch is the correct branch for the work before staging or committing
 - Always run `fvm dart format .` before creating a commit
 - Always ask the user for permission before running any destructive git operations, especially commits
 - If a task cannot be completed after 3 attempts, ask the user for alternative approaches or options. Do not change the task requirements just to achieve completion.
@@ -87,3 +88,5 @@ Entries within each version must follow this category order:
 2. UPDATE — backward-compatible changes
 3. ADD — backward-compatible additions
 4. FIX — bug fixes
+
+During development, add entries under a `## develop` section at the top of the changelog. When releasing, replace the `## develop` section with the new version header (e.g. `## 0.9.0`) and add the release date.

@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:figma_squircle/figma_squircle.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import '../../internal.dart';
+import '../text_field/fonde_text_field.dart';
 
 /// Numeric input field with increment/decrement buttons.
 ///
@@ -152,6 +153,37 @@ class _FondeNumberFieldState extends State<FondeNumberField> {
     return (_value ?? (widget.min ?? 0)) < widget.max!;
   }
 
+  Widget _buildEditableText({
+    required Color textColor,
+    required Color hintColor,
+    required double zoomScale,
+    required List<TextInputFormatter> formatters,
+  }) {
+    return FondeTextField(
+      controller: _controller,
+      focusNode: _focusNode,
+      hintText: widget.hintText,
+      enabled: widget.enabled,
+      readOnly: !widget.enabled,
+      style: TextStyle(fontSize: 13.0 * zoomScale, color: textColor),
+      textAlign: TextAlign.center,
+      keyboardType: const TextInputType.numberWithOptions(
+        decimal: true,
+        signed: true,
+      ),
+      inputFormatters: formatters,
+      onSubmitted: _commitText,
+      cursorColor: textColor,
+      cursorWidth: 1.5,
+      // Transparent border/background — FondeNumberField provides its own outer frame
+      backgroundColor: Colors.transparent,
+      borderColor: Colors.transparent,
+      activeBorderColor: Colors.transparent,
+      contentPadding: EdgeInsets.zero,
+      disableZoom: true,
+    );
+  }
+
   bool get _canDecrement {
     if (!widget.enabled) return false;
     if (widget.min == null) return true;
@@ -234,46 +266,30 @@ class _FondeNumberFieldState extends State<FondeNumberField> {
                 color: dividerColor,
               ),
             ),
-            // Text field
+            // Text field — EditableText handles pointer events directly
             Expanded(
-              child: TextField(
-                controller: _controller,
-                focusNode: _focusNode,
-                enabled: widget.enabled,
-                keyboardType: const TextInputType.numberWithOptions(
-                  decimal: true,
-                  signed: true,
+              child: Center(
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Flexible(
+                      child: _buildEditableText(
+                        textColor: textColor,
+                        hintColor: hintColor,
+                        zoomScale: zoomScale,
+                        formatters: formatters,
+                      ),
+                    ),
+                    if (widget.suffix != null)
+                      Text(
+                        widget.suffix!,
+                        style: TextStyle(
+                          fontSize: 12.0 * zoomScale,
+                          color: textColor.withValues(alpha: 0.6),
+                        ),
+                      ),
+                  ],
                 ),
-                inputFormatters: formatters,
-                textAlign: TextAlign.center,
-                textAlignVertical: const TextAlignVertical(y: 0.1),
-                style: TextStyle(
-                  fontSize: 13.0 * zoomScale,
-                  color: textColor,
-                  height: 1.0,
-                ),
-                decoration: InputDecoration(
-                  hintText: widget.hintText,
-                  hintStyle: TextStyle(
-                    fontSize: 13.0 * zoomScale,
-                    color: hintColor,
-                  ),
-                  suffixText: widget.suffix,
-                  suffixStyle: TextStyle(
-                    fontSize: 12.0 * zoomScale,
-                    color: textColor.withValues(alpha: 0.6),
-                  ),
-                  border: InputBorder.none,
-                  enabledBorder: InputBorder.none,
-                  focusedBorder: InputBorder.none,
-                  disabledBorder: InputBorder.none,
-                  isDense: true,
-                  contentPadding: EdgeInsets.symmetric(
-                    horizontal: 4.0 * zoomScale,
-                    vertical: 0,
-                  ),
-                ),
-                onSubmitted: _commitText,
               ),
             ),
             // Divider
