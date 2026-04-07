@@ -147,7 +147,7 @@ Add to your `pubspec.yaml`:
 
 ```yaml
 dependencies:
-  fonde_ui: ^0.7.0
+  fonde_ui: ^0.9.0
 ```
 
 ### Minimal Example
