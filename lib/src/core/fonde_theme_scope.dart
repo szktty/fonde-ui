@@ -121,20 +121,24 @@ class FondeThemeColorController extends ChangeNotifier {
 
 /// Controls [FondeAccessibilityConfig].
 class FondeAccessibilityController extends ChangeNotifier {
+  /// Creates a controller with an optional initial [FondeAccessibilityConfig].
   FondeAccessibilityController({
     FondeAccessibilityConfig initialConfig = const FondeAccessibilityConfig(),
   }) : _config = initialConfig;
 
   FondeAccessibilityConfig _config;
 
+  /// The current accessibility configuration.
   FondeAccessibilityConfig get config => _config;
 
+  /// Replaces the current configuration and notifies listeners.
   void updateConfig(FondeAccessibilityConfig newConfig) {
     if (_config == newConfig) return;
     _config = newConfig;
     notifyListeners();
   }
 
+  /// Returns the [FondeAccessibilityController] from the nearest [FondeApp] ancestor.
   static FondeAccessibilityController of(BuildContext context) {
     final scope =
         context

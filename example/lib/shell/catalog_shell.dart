@@ -1,7 +1,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:fonde_ui/fonde_ui.dart';
-import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 import '../pages/button_page.dart';
 import '../pages/icon_button_page.dart';
@@ -25,6 +24,7 @@ import '../pages/dialog_page.dart';
 import '../pages/toast_page.dart';
 import '../pages/popover_page.dart';
 import '../pages/progress_page.dart';
+import '../pages/page_indicator_page.dart';
 import '../pages/gesture_detector_page.dart';
 import '../pages/selection_decorator_page.dart';
 import '../pages/panel_page.dart';
@@ -118,6 +118,7 @@ class _CatalogShellState extends State<CatalogShell> {
       'fonde_toast' => const ToastPage(),
       'fonde_popover' => const PopoverPage(),
       'fonde_progress_indicator' => const ProgressPage(),
+      'fonde_page_indicator' => const PageIndicatorPage(),
       // Decoration
       'gesture_detector' => const GestureDetectorPage(),
       'selection_decorator' => const SelectionDecoratorPage(),

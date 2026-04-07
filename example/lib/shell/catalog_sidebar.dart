@@ -1,6 +1,5 @@
 import 'package:flutter/widgets.dart';
 import 'package:fonde_ui/fonde_ui.dart';
-import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 /// Catalog category definitions
 class CatalogCategory {
@@ -94,6 +93,7 @@ const catalogCategories = [
       CatalogItem(id: 'fonde_toast', label: 'Toast'),
       CatalogItem(id: 'fonde_popover', label: 'Popover'),
       CatalogItem(id: 'fonde_progress_indicator', label: 'Progress Indicator'),
+      CatalogItem(id: 'fonde_page_indicator', label: 'Page Indicator'),
       CatalogItem(
         id: 'fonde_notification_overlay',
         label: 'Notification Overlay',

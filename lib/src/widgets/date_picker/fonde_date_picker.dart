@@ -3,7 +3,7 @@ import 'package:table_calendar/table_calendar.dart';
 import '../../core/context_extensions.dart';
 import '../../internal.dart';
 import '../styling/fonde_border_radius.dart';
-import 'package:lucide_icons_flutter/lucide_icons.dart';
+import '../icons/lucide_icons.dart';
 
 /// A date picker widget backed by table_calendar.
 ///

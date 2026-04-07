@@ -1,6 +1,5 @@
 import 'package:flutter/widgets.dart';
 import 'package:fonde_ui/fonde_ui.dart';
-import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 /// Placeholder for catalog pages that are not yet implemented
 class PlaceholderPage extends StatelessWidget {

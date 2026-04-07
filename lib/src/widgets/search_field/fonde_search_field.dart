@@ -1,7 +1,6 @@
 import 'package:figma_squircle/figma_squircle.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
-import 'package:flutter/services.dart';
 import '../../internal.dart';
 import '../text_field/focus_ring_painter.dart';
 import '../widgets/fonde_icon_button.dart';

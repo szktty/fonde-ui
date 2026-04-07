@@ -125,6 +125,7 @@ export 'src/widgets/typography/typography_shortcuts.dart';
 
 // ─── Icons ────────────────────────────────────────────────────────────────────
 export 'src/widgets/icons/fonde_icons.dart';
+export 'src/widgets/icons/lucide_icons.dart';
 export 'src/widgets/icons/lucide_icon_theme.dart';
 export 'src/widgets/widgets/fonde_icon.dart';
 

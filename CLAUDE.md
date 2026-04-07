@@ -39,6 +39,16 @@ Desktop-first Flutter UI optimized for native-quality instant feedback, with acc
 - Always ask the user for permission before running any destructive git operations, especially commits
 - If a task cannot be completed after 3 attempts, ask the user for alternative approaches or options. Do not change the task requirements just to achieve completion.
 
+## Localization (l10n)
+
+The l10n files in `lib/src/core/l10n/` are managed **manually** — do not run `flutter gen-l10n` or enable `generate: true` in `pubspec.yaml`. The `intl` package is not used.
+
+When adding or changing localized strings:
+
+1. Edit the `.arb` files in `lib/l10n/` (`fonde_ui_en.arb`, `fonde_ui_ja.arb`)
+2. Update the abstract class in `lib/src/core/l10n/fonde_ui_localizations.dart` — add a getter declaration with a doc comment
+3. Implement the getter in `lib/src/core/l10n/fonde_ui_localizations_en.dart` and `fonde_ui_localizations_ja.dart`
+
 ## Documentation
 
 - Design guidelines: `doc/design/`

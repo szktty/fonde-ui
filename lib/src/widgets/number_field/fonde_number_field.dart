@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:figma_squircle/figma_squircle.dart';
-import 'package:lucide_icons_flutter/lucide_icons.dart';
+import '../icons/lucide_icons.dart';
 import '../../internal.dart';
 import '../text_field/fonde_text_field.dart';
 

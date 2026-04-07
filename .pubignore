@@ -9,9 +9,6 @@ doc/*.md
 # Internal development notes
 private/
 
-# Example app
-example/
-
 # Development tooling
 .fvm/
 .dart_tool/

@@ -9,12 +9,24 @@
 - FIX
   - Bug fixes
 
-## develop
+## 0.9.0
 
+**Release date**: 2026-04-08
+
+- [UPDATE] Raise `multi_split_view` constraint to `^3.3.0` to fix downgrade analysis failure (`dividerHandleBuffer` not available in 3.2.x)
+- [UPDATE] Raise `popover` constraint to `^0.4.0` to support latest stable version
+- [UPDATE] Remove `example/` from `.pubignore` so pub.dev can detect the example app
+- [FIX] Remove leftover `intl` import from `fonde_ui_localizations_en.dart` and `fonde_ui_localizations_ja.dart`
+- [FIX] Remove unnecessary `flutter/services.dart` import from `FondeSearchField`
+- [ADD] Declare supported platforms in `pubspec.yaml` (android, ios, linux, macos, windows)
 - [CHANGE] `FondeTextField`: rewrite with `EditableText` instead of `TextField`/`InputDecoration` — eliminates zoom-scale vertical centering bug; `errorText` is now rendered below the field via a `Column`
+- [CHANGE] Remove `lucide_icons_flutter` dependency — Lucide font (1.7.0, ISC License) is now bundled directly; `LucideIcons` class is provided by fonde_ui with only the icons in use; stroke weight variants removed (all icons use single weight)
+- [CHANGE] Remove `freezed_annotation`, `json_annotation`, `freezed`, `json_serializable`, `build_runner` dependencies — none were in use
+- [CHANGE] Remove `dots_indicator` dependency — `FondePageIndicator` is now self-contained
 - [UPDATE] `FondeTextField`: use `FondeBorderRadius` for border shape construction
 - [UPDATE] `FondeSearchField`: apply `rendererIgnoresPointer` and `TextFieldTapRegion` for correct gesture handling
 - [UPDATE] `FondeNumberField`: use `FondeTextField` internally instead of raw `TextField`
+- [UPDATE] `lucide_icons_flutter`: upgrade to 3.1.12; update renamed icons (`share2Weight200`, `settings2Weight200`)
 - [FIX] `FondeTextField`: fix text vertical centering at non-1.0 zoom scales
 - [FIX] `FondeTextField`: fix text selection highlight and double-tap word selection on desktop
 - [FIX] `FondeTextField`: fix cursor placement on click and keyboard shortcut handling (Cmd+A, Cmd+C/V)

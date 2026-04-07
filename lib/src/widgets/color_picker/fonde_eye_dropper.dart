@@ -3,7 +3,7 @@ import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
-import 'package:lucide_icons_flutter/lucide_icons.dart';
+import '../icons/lucide_icons.dart';
 
 /// Provides eyedropper (color sampling) functionality within the Flutter
 /// window.
