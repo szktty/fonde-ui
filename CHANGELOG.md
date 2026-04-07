@@ -12,9 +12,12 @@
 ## develop
 
 - [CHANGE] `FondeTextField`: rewrite with `EditableText` instead of `TextField`/`InputDecoration` — eliminates zoom-scale vertical centering bug; `errorText` is now rendered below the field via a `Column`
+- [CHANGE] Remove `freezed_annotation`, `json_annotation`, `freezed`, `json_serializable`, `build_runner` dependencies — none were in use
+- [CHANGE] Remove `dots_indicator` dependency — `FondePageIndicator` is now self-contained
 - [UPDATE] `FondeTextField`: use `FondeBorderRadius` for border shape construction
 - [UPDATE] `FondeSearchField`: apply `rendererIgnoresPointer` and `TextFieldTapRegion` for correct gesture handling
 - [UPDATE] `FondeNumberField`: use `FondeTextField` internally instead of raw `TextField`
+- [UPDATE] `lucide_icons_flutter`: upgrade to 3.1.12; update renamed icons (`share2Weight200`, `settings2Weight200`)
 - [FIX] `FondeTextField`: fix text vertical centering at non-1.0 zoom scales
 - [FIX] `FondeTextField`: fix text selection highlight and double-tap word selection on desktop
 - [FIX] `FondeTextField`: fix cursor placement on click and keyboard shortcut handling (Cmd+A, Cmd+C/V)
