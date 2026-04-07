@@ -88,3 +88,5 @@ Entries within each version must follow this category order:
 2. UPDATE — backward-compatible changes
 3. ADD — backward-compatible additions
 4. FIX — bug fixes
+
+During development, add entries under a `## develop` section at the top of the changelog. When releasing, replace the `## develop` section with the new version header (e.g. `## 0.9.0`) and add the release date.

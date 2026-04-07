@@ -9,9 +9,7 @@
 - FIX
   - Bug fixes
 
-## 0.9.0
-
-**Release date**: 2026-04-07
+## develop
 
 - [CHANGE] `FondeTextField`: rewrite with `EditableText` instead of `TextField`/`InputDecoration` — eliminates zoom-scale vertical centering bug; `errorText` is now rendered below the field via a `Column`
 - [UPDATE] `FondeTextField`: use `FondeBorderRadius` for border shape construction
