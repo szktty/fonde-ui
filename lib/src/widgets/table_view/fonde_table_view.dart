@@ -91,6 +91,13 @@ class FondeTableView<T> extends StatefulWidget {
   /// this behavior and show all columns at equal opacity.
   final Set<String>? primaryColumnIds;
 
+  /// When true, the dragged column and its drop target are highlighted during
+  /// column reordering. Defaults to false.
+  final bool highlightHeaderOnDrag;
+
+  /// When true, rows are highlighted when hovered. Defaults to false.
+  final bool highlightRowOnHover;
+
   const FondeTableView({
     super.key,
     required this.data,
@@ -107,6 +114,8 @@ class FondeTableView<T> extends StatefulWidget {
     this.dimHeaders = true,
     this.highlightSortedHeader = true,
     this.primaryColumnIds,
+    this.highlightHeaderOnDrag = false,
+    this.highlightRowOnHover = false,
     this.onColumnReorder,
     this.onColumnResize,
     this.onRowReorder,
@@ -685,10 +694,12 @@ class _FondeTableViewState<T> extends State<FondeTableView<T>> {
         _colDragActive && _dropTargetColumnOrderIndex == orderIndex;
 
     Color bgColor = cs.base.background;
-    if (isDragging) {
-      bgColor = cs.interactive.list.itemBackground.hover;
-    } else if (isDropTarget) {
-      bgColor = cs.interactive.list.itemBackground.active;
+    if (widget.highlightHeaderOnDrag) {
+      if (isDragging) {
+        bgColor = cs.interactive.list.itemBackground.hover;
+      } else if (isDropTarget) {
+        bgColor = cs.interactive.list.itemBackground.active;
+      }
     }
 
     // Determine header text opacity.
@@ -772,7 +783,7 @@ class _FondeTableViewState<T> extends State<FondeTableView<T>> {
       bgColor = cs.interactive.list.selectedBackground;
     } else if (isPressed || isDragTarget) {
       bgColor = cs.interactive.list.itemBackground.active;
-    } else if (isHovered) {
+    } else if (isHovered && widget.highlightRowOnHover) {
       bgColor = cs.interactive.list.itemBackground.hover;
     } else {
       bgColor = cs.base.background;
