@@ -83,6 +83,14 @@ class FondeTableView<T> extends StatefulWidget {
   /// [dimHeaders] is true. Defaults to true.
   final bool highlightSortedHeader;
 
+  /// Column ids whose cell content is shown at full opacity.
+  /// All other columns are dimmed.
+  ///
+  /// Defaults to `null`, which means the leftmost column (in current display
+  /// order) is automatically treated as primary. Pass `const {}` to disable
+  /// this behavior and show all columns at equal opacity.
+  final Set<String>? primaryColumnIds;
+
   const FondeTableView({
     super.key,
     required this.data,
@@ -98,6 +106,7 @@ class FondeTableView<T> extends StatefulWidget {
     this.initialSortDirection = FondeTableSortDirection.ascending,
     this.dimHeaders = true,
     this.highlightSortedHeader = true,
+    this.primaryColumnIds,
     this.onColumnReorder,
     this.onColumnResize,
     this.onRowReorder,
@@ -824,6 +833,15 @@ class _FondeTableViewState<T> extends State<FondeTableView<T>> {
     final col = widget.columns[colOrigIndex];
     final width = _columnWidths[colOrigIndex];
 
+    // When primaryColumnIds is specified, primary columns use full-opacity text
+    // and non-primary columns use dimmed text.
+    // null → leftmost column is primary; {} → all equal; {ids} → specified ids
+    final ids = widget.primaryColumnIds;
+    final isPrimary =
+        ids == null
+            ? _columnOrder.isNotEmpty && _columnOrder[0] == colOrigIndex
+            : ids.isEmpty || ids.contains(col.id);
+
     return SizedBox(
       width: width,
       height: _rowHeight,
@@ -832,7 +850,10 @@ class _FondeTableViewState<T> extends State<FondeTableView<T>> {
           border: Border(bottom: BorderSide(color: cs.base.border, width: 1.0)),
         ),
         padding: const EdgeInsets.symmetric(horizontal: 8),
-        child: col.cellBuilder(item, isSelected),
+        child: Opacity(
+          opacity: isPrimary ? 1.0 : 0.5,
+          child: col.cellBuilder(item, isSelected),
+        ),
       ),
     );
   }

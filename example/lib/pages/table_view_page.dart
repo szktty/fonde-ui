@@ -34,6 +34,7 @@ class _TableViewPageState extends State<TableViewPage> {
                       data: _people,
                       columns: _buildColumns(),
                       keyExtractor: (p) => p.id,
+
                       onRowsSelected:
                           (rows) => setState(() => _selectedSingle = rows),
                     ),
@@ -61,6 +62,7 @@ class _TableViewPageState extends State<TableViewPage> {
                       columns: _buildColumns(),
                       keyExtractor: (p) => p.id,
                       allowMultiSelect: true,
+
                       onRowsSelected:
                           (rows) => setState(() => _selectedMulti = rows),
                     ),
@@ -85,6 +87,7 @@ class _TableViewPageState extends State<TableViewPage> {
                   data: _people,
                   columns: _buildSortableColumns(),
                   keyExtractor: (p) => p.id,
+
                   initialSortColumnId: 'name',
                 ),
               ),
