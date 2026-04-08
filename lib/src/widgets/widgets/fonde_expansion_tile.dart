@@ -1,6 +1,6 @@
-import 'package:figma_squircle/figma_squircle.dart';
 import 'package:flutter/material.dart';
 import '../../internal.dart';
+import 'fonde_rectangle_border.dart';
 import 'fonde_icon.dart';
 import 'fonde_container.dart';
 
@@ -218,9 +218,9 @@ class _AppExpansionTileState extends State<FondeExpansionTile> {
         widget.shape != null ||
         widget.collapsedBackgroundColor != null ||
         widget.collapsedShape != null) {
-      final defaultShape = SmoothRectangleBorder(
-        borderRadius: SmoothBorderRadius(
-          cornerRadius: 12.0,
+      final defaultShape = SquircleBorder(
+        borderRadius: SquircleBorderRadius(
+          cornerRadius: 8.0,
           cornerSmoothing: 0.6,
         ),
         side: BorderSide(

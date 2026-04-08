@@ -1,7 +1,7 @@
-import 'package:figma_squircle/figma_squircle.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import '../../internal.dart';
+import '../widgets/fonde_rectangle_border.dart';
 import '../text_field/focus_ring_painter.dart';
 import '../widgets/fonde_icon_button.dart';
 
@@ -327,8 +327,8 @@ class _FondeSearchFieldState extends State<FondeSearchField>
               : null,
       child: DecoratedBox(
         decoration: ShapeDecoration(
-          shape: SmoothRectangleBorder(
-            borderRadius: SmoothBorderRadius(
+          shape: SquircleBorder(
+            borderRadius: SquircleBorderRadius(
               cornerRadius: 8.0 * zoomScale,
               cornerSmoothing: 0.6,
             ),

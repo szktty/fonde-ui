@@ -9,10 +9,13 @@
 - FIX
   - Bug fixes
 
-## develop
+## 0.10.0
+
+**Release date**: 2026-04-08
 
 - [CHANGE] Remove `multi_split_view` dependency — `FondeSplitPane` and `FondeScaffold` now use self-contained split implementations with transparent hit buffers for easier divider grabbing
 - [CHANGE] Remove `textfield_tags` dependency — `FondeTagsField` now supports desktop-native keyboard navigation (`←`/`→` tag selection, 2-step `Backspace` delete, `Delete`, `Escape`)
+- [CHANGE] Remove `figma_squircle` dependency — squircle algorithm is now implemented in-house in `SquircleBorder` / `SquircleBorderRadius`; default corner radius changed from 12px to 8px
 
 ## 0.9.0
 

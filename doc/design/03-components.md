@@ -12,7 +12,7 @@
 
 **Visual Style**
 - Border: 1.5px
-- Rounded corners: 12px (medium)
+- Rounded corners: 8px (medium)
 - Font: `FondeTextVariant.buttonLabel`
 
 **Role Specifications**
@@ -37,7 +37,7 @@
 - Minimum height: 32px
 - Horizontal padding: 16px (lg)
 - Vertical padding: 6px
-- Rounded corners: 12px
+- Rounded corners: 8px
 
 **Visual Characteristics**
 - **Overlay menu**: Design that completely covers the button when open
@@ -68,7 +68,7 @@
 - Height: 32px (desktop standard)
 - Horizontal padding: 16px (lg)
 - Vertical padding: 6px
-- Rounded corners: 12px (medium)
+- Rounded corners: 8px (medium)
 
 **Visual Style**
 - Normal border: 1.5px
@@ -126,14 +126,14 @@ A container widget that defines a panel area.
 
 ### FondeRectangleBorder
 
-A rounded corner container using Figma Squircle shape.
+A rounded corner container using squircle shape.
 
 **Key Properties**
 
 | Property | Type | Default | Description |
 |---|---|---|---|
-| `cornerRadius` | `double?` | `12.0` | Corner radius |
-| `cornerSmoothing` | `double?` | `0.6` | Corner smoothness (fixed) |
+| `cornerRadius` | `double?` | `8.0` | Corner radius |
+| `cornerSmoothing` | `double?` | `0.6` | Corner smoothness (0 = plain circle, 1 = full squircle) |
 | `side` | `BorderSide?` | standard (1.5px) | Border style |
 | `color` | `Color?` | `null` | Background color |
 | `padding` | `EdgeInsetsGeometry?` | `null` | Inner padding |
@@ -363,8 +363,8 @@ showFondeConfirmationDialog(
 
 | Component | Horizontal | Vertical | Height | Rounded Corners |
 |---|---|---|---|---|
-| `FondeTextField` | 16px (lg) | 6px | 32px | 12px |
-| `FondeDropdownMenu` | 16px (lg) | 6px | 32px | 12px |
+| `FondeTextField` | 16px (lg) | 6px | 32px | 8px |
+| `FondeDropdownMenu` | 16px (lg) | 6px | 32px | 8px |
 | `FondeCheckbox` | — | — | 20px | 4px |
 
 ---

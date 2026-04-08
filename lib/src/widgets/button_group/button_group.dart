@@ -1,6 +1,6 @@
-import 'package:figma_squircle/figma_squircle.dart';
 import 'package:flutter/material.dart';
 import '../../core/context_extensions.dart';
+import '../widgets/fonde_rectangle_border.dart';
 import '../../internal.dart';
 import '../widgets/fonde_gesture_detector.dart';
 
@@ -139,9 +139,9 @@ class _FondeButtonGroupItemState extends State<FondeButtonGroupItem> {
   @override
   Widget build(BuildContext context) {
     final appColorScheme = context.fondeColorScheme;
-    final rectangleBorder = SmoothRectangleBorder(
-      borderRadius: SmoothBorderRadius(
-        cornerRadius: 12.0,
+    final rectangleBorder = SquircleBorder(
+      borderRadius: SquircleBorderRadius(
+        cornerRadius: 8.0,
         cornerSmoothing: 0.6,
       ),
       side: BorderSide(color: appColorScheme.base.border, width: 1.5),

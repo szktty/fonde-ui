@@ -1,6 +1,6 @@
-import 'package:figma_squircle/figma_squircle.dart';
 import 'package:flutter/material.dart';
 import '../../internal.dart';
+import 'fonde_rectangle_border.dart';
 import '../styling/fonde_border.dart';
 
 /// A themed segmented button that automatically applies colors from FondeColorConfig.
@@ -57,9 +57,9 @@ class FondeSegmentedButton<T extends Object> extends StatelessWidget {
         ),
         // Conforms to design guidelines: Build shape from context
         // Prevent animation: Use consistent shape object
-        shape: SmoothRectangleBorder(
-          borderRadius: SmoothBorderRadius(
-            cornerRadius: 12.0,
+        shape: SquircleBorder(
+          borderRadius: SquircleBorderRadius(
+            cornerRadius: 8.0,
             cornerSmoothing: 0.6,
           ),
           side: BorderSide(color: appColorScheme.base.border, width: 1.5),

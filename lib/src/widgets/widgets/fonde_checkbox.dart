@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import '../../internal.dart';
-import 'package:figma_squircle/figma_squircle.dart';
 import 'fonde_rectangle_border.dart';
 
 /// Shape of [FondeCheckbox].
@@ -161,7 +160,7 @@ class _FondeCheckboxState extends State<FondeCheckbox> {
         cornerRadius: 4.0 * zoomScale,
         cornerSmoothing: 0.6,
       );
-      shapeBorder = SmoothRectangleBorder(
+      shapeBorder = SquircleBorder(
         borderRadius: borderRadius.toSmoothBorderRadius(),
         side: BorderSide(color: borderColor, width: 1.5 * borderScale),
       );

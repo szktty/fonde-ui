@@ -306,10 +306,10 @@ Fonde UI uses corner radii according to the **importance and size of the element
 | Size | Value | Purpose | Constant |
 |---|---|---|---|
 | **Small** | 6px | Small elements | `FondeBorderRadius.small` |
-| **Medium** | 12px | Standard elements | `FondeBorderRadius.medium` |
+| **Medium** | 8px | Standard elements | `FondeBorderRadius.medium` |
 | **Large** | 16px | Large elements | `FondeBorderRadius.large` |
 
-> Note: `FondeBorderRadius` uses Figma Squircle shape, which does not directly correspond to `BorderRadius.circular()`.
+> Note: `FondeBorderRadius` uses a squircle shape, which does not directly correspond to `BorderRadius.circular()`.
 
 #### Restriction on Rounded Corner Implementation
 
@@ -325,15 +325,15 @@ Container(
 
 // ✅ Recommended: Using FondeRectangleBorder
 FondeRectangleBorder(
-  cornerRadius: FondeBorderRadiusValues.medium, // 12px
+  cornerRadius: FondeBorderRadiusValues.medium, // 8px
   color: colorScheme.base.background,
   child: content,
 )
 ```
 
 #### Reasons
-- **Consistency**: Unified design using Figma-like squircle shapes
-- **Quality**: High-quality rendering via `figma_squircle`
+- **Consistency**: Unified design using squircle shapes
+- **Quality**: Self-contained squircle rendering (no third-party dependency)
 - **Maintainability**: Centralized management of corner styles
 
 ### Border Width (`FondeBorderSide`)

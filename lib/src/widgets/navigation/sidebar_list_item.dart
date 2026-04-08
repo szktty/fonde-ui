@@ -1,6 +1,6 @@
-import 'package:figma_squircle/figma_squircle.dart';
 import 'package:flutter/material.dart';
 import '../../core/context_extensions.dart';
+import '../widgets/fonde_rectangle_border.dart';
 import '../../internal.dart';
 import '../typography/fonde_text.dart';
 import '../widgets/fonde_gesture_detector.dart';
@@ -186,8 +186,8 @@ class _FondeSidebarListItemState extends State<FondeSidebarListItem> {
               insetColor != null
                   ? ShapeDecoration(
                     color: insetColor,
-                    shape: SmoothRectangleBorder(
-                      borderRadius: SmoothBorderRadius(
+                    shape: SquircleBorder(
+                      borderRadius: SquircleBorderRadius(
                         cornerRadius: 6.0 * zoomScale,
                         cornerSmoothing: 0.6,
                       ),
