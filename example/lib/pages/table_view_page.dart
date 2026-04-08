@@ -132,6 +132,7 @@ class _TableViewPageState extends State<TableViewPage> {
         id: 'name',
         title: 'Name',
         width: 160,
+        fixed: true,
         cellBuilder:
             (p, isSelected) => _Cell(text: p.name, isSelected: isSelected),
       ),

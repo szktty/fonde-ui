@@ -313,6 +313,23 @@ class _FondeTableViewState<T> extends State<FondeTableView<T>> {
     return null;
   }
 
+  /// Returns the insertion order index for dropping a column at [localX].
+  /// Uses column midpoints to decide left vs right insertion.
+  /// The result is clamped to [minDropOrderIndex] so fixed columns are respected.
+  int _dropInsertIndexAt(double localX) {
+    final minDrop = _minDropOrderIndex();
+    double x = 0;
+    for (int i = 0; i < _columnOrder.length; i++) {
+      final w = _columnWidths[_columnOrder[i]];
+      final mid = x + w / 2;
+      if (localX < mid) {
+        return i.clamp(minDrop, _columnOrder.length - 1);
+      }
+      x += w;
+    }
+    return _columnOrder.length - 1;
+  }
+
   /// Left edge of column at [orderIndex] in header-local coordinates.
   double _columnLeft(int orderIndex) {
     double x = 0;
@@ -324,6 +341,20 @@ class _FondeTableViewState<T> extends State<FondeTableView<T>> {
 
   /// Total width of all columns.
   double get _totalWidth => _columnWidths.fold(0.0, (s, w) => s + w);
+
+  /// Returns the minimum order index a dragged column can be dropped at,
+  /// accounting for fixed columns that must stay in place.
+  int _minDropOrderIndex() {
+    int min = 0;
+    for (int i = 0; i < _columnOrder.length; i++) {
+      if (widget.columns[_columnOrder[i]].fixed) {
+        min = i + 1;
+      } else {
+        break;
+      }
+    }
+    return min;
+  }
 
   void _onHeaderPointerDown(PointerDownEvent event) {
     // Resize takes priority.
@@ -345,6 +376,10 @@ class _FondeTableViewState<T> extends State<FondeTableView<T>> {
     if (_draggingColumnOrderIndex == null) return;
     if (!widget.allowColumnReordering) return;
 
+    // Fixed columns cannot be dragged.
+    final dragOrigIndex = _columnOrder[_draggingColumnOrderIndex!];
+    if (widget.columns[dragOrigIndex].fixed) return;
+
     _colDragCurrentX = event.localPosition.dx;
 
     if (!_colDragActive) {
@@ -354,8 +389,8 @@ class _FondeTableViewState<T> extends State<FondeTableView<T>> {
       _showColDragOverlay();
     }
 
-    // Determine drop target from current X.
-    final dropTarget = _columnOrderIndexAt(_colDragCurrentX);
+    // Determine drop target from current X, clamped past fixed columns.
+    final dropTarget = _dropInsertIndexAt(_colDragCurrentX);
     if (dropTarget != _dropTargetColumnOrderIndex) {
       setState(() => _dropTargetColumnOrderIndex = dropTarget);
     }
@@ -405,13 +440,15 @@ class _FondeTableViewState<T> extends State<FondeTableView<T>> {
     final colOrigIndex = _columnOrder[_draggingColumnOrderIndex!];
     final colWidth = _columnWidths[colOrigIndex];
 
-    // Clamp overlay X to table bounds.
+    // Clamp overlay X: left bound is after all fixed columns.
+    final minDrop = _minDropOrderIndex();
+    final minLeft = headerGlobal.dx + _columnLeft(minDrop);
     final rawLeft =
         headerGlobal.dx +
         (_colDragCurrentX - _colDragStartX) +
         _columnLeft(_draggingColumnOrderIndex!);
     final clampedLeft = rawLeft.clamp(
-      headerGlobal.dx,
+      minLeft,
       headerGlobal.dx + _totalWidth - colWidth,
     );
 
@@ -477,7 +514,8 @@ class _FondeTableViewState<T> extends State<FondeTableView<T>> {
     final from = _draggingColumnOrderIndex;
     final to = _dropTargetColumnOrderIndex;
     _cancelColDrag();
-    if (from != null && to != null && from != to) {
+    if (from == null || to == null) return;
+    if (from != to) {
       setState(() {
         final item = _columnOrder.removeAt(from);
         _columnOrder.insert(to, item);
@@ -559,17 +597,12 @@ class _FondeTableViewState<T> extends State<FondeTableView<T>> {
     // 1. During resize → resizeColumn
     // 2. Near resize boundary → resizeColumn
     // 3. Column drag active → grabbing
-    // 4. Draggable column hovered → grab
-    // 5. Otherwise → defer
+    // 4. Otherwise → defer
     MouseCursor cursor = MouseCursor.defer;
     if (_resizingColumnIndex != null || _isNearResizeBoundary) {
       cursor = SystemMouseCursors.resizeColumn;
     } else if (_colDragActive) {
       cursor = SystemMouseCursors.grabbing;
-    } else if (_draggingColumnOrderIndex != null) {
-      cursor = SystemMouseCursors.grab;
-    } else if (widget.allowColumnReordering) {
-      cursor = SystemMouseCursors.grab;
     }
 
     return SizedBox(
@@ -936,6 +969,10 @@ class FondeTableColumn<T> {
   /// Whether this column can be resized.
   final bool resizable;
 
+  /// When true, this column cannot be dragged or receive drops from other
+  /// columns. Fixed columns always stay in their current position.
+  final bool fixed;
+
   /// Extracts a comparable sort key from an item.
   /// Required when [sortable] is true.
   final Comparable Function(T item)? sortKeyBuilder;
@@ -949,6 +986,7 @@ class FondeTableColumn<T> {
     this.maxWidth,
     this.sortable = false,
     this.resizable = true,
+    this.fixed = false,
     this.sortKeyBuilder,
   });
 
@@ -961,6 +999,7 @@ class FondeTableColumn<T> {
     Widget Function(T item, bool isSelected)? cellBuilder,
     bool? sortable,
     bool? resizable,
+    bool? fixed,
     Comparable Function(T item)? sortKeyBuilder,
   }) {
     return FondeTableColumn<T>(
@@ -972,6 +1011,7 @@ class FondeTableColumn<T> {
       cellBuilder: cellBuilder ?? this.cellBuilder,
       sortable: sortable ?? this.sortable,
       resizable: resizable ?? this.resizable,
+      fixed: fixed ?? this.fixed,
       sortKeyBuilder: sortKeyBuilder ?? this.sortKeyBuilder,
     );
   }
