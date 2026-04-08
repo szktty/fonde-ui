@@ -32,9 +32,21 @@ abstract final class LucideIcons {
     fontFamily: 'Lucide',
     fontPackage: 'fonde_ui',
   );
+  // arrow-down
+  static const IconData arrowDown = IconData(
+    58390,
+    fontFamily: 'Lucide',
+    fontPackage: 'fonde_ui',
+  );
   // arrow-right
   static const IconData arrowRight = IconData(
     57417,
+    fontFamily: 'Lucide',
+    fontPackage: 'fonde_ui',
+  );
+  // arrow-up
+  static const IconData arrowUp = IconData(
+    58396,
     fontFamily: 'Lucide',
     fontPackage: 'fonde_ui',
   );
@@ -101,6 +113,12 @@ abstract final class LucideIcons {
   // chevron-right
   static const IconData chevronRight = IconData(
     57455,
+    fontFamily: 'Lucide',
+    fontPackage: 'fonde_ui',
+  );
+  // chevron-up
+  static const IconData chevronUp = IconData(
+    57456,
     fontFamily: 'Lucide',
     fontPackage: 'fonde_ui',
   );

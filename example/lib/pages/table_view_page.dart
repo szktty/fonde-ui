@@ -78,13 +78,14 @@ class _TableViewPageState extends State<TableViewPage> {
             CatalogDemo(
               label: 'Sortable columns',
               description:
-                  'Columns with sortable: true can be sorted by clicking the header',
+                  'Click a header to sort. Active sort column is highlighted.',
               child: SizedBox(
                 height: 240,
                 child: FondeTableView<_Person>(
                   data: _people,
                   columns: _buildSortableColumns(),
                   keyExtractor: (p) => p.id,
+                  initialSortColumnId: 'name',
                 ),
               ),
             ),
@@ -158,7 +159,46 @@ class _TableViewPageState extends State<TableViewPage> {
   }
 
   List<FondeTableColumn<_Person>> _buildSortableColumns() {
-    return _buildColumns().map((c) => c.copyWith(sortable: true)).toList();
+    return [
+      FondeTableColumn(
+        id: 'name',
+        title: 'Name',
+        width: 160,
+        sortable: true,
+        sortKeyBuilder: (p) => p.name,
+        cellBuilder:
+            (p, isSelected) => _Cell(text: p.name, isSelected: isSelected),
+      ),
+      FondeTableColumn(
+        id: 'role',
+        title: 'Role',
+        width: 140,
+        sortable: true,
+        sortKeyBuilder: (p) => p.role,
+        cellBuilder:
+            (p, isSelected) => _Cell(text: p.role, isSelected: isSelected),
+      ),
+      FondeTableColumn(
+        id: 'department',
+        title: 'Department',
+        width: 160,
+        sortable: true,
+        sortKeyBuilder: (p) => p.department,
+        cellBuilder:
+            (p, isSelected) =>
+                _Cell(text: p.department, isSelected: isSelected),
+      ),
+      FondeTableColumn(
+        id: 'status',
+        title: 'Status',
+        width: 100,
+        sortable: true,
+        sortKeyBuilder: (p) => p.status,
+        cellBuilder:
+            (p, isSelected) =>
+                _StatusCell(status: p.status, isSelected: isSelected),
+      ),
+    ];
   }
 }
 
