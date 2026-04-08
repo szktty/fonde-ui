@@ -1,11 +1,10 @@
 import 'package:flutter/material.dart';
 import '../../internal.dart';
-import 'package:pluto_grid/pluto_grid.dart';
-
-import '../typography/fonde_text_style_builder.dart';
+import '../widgets/fonde_gesture_detector.dart';
 import '../typography/fonde_text.dart';
+import '../typography/fonde_text_style_builder.dart';
 
-/// A desktop-optimized table view component based on pluto_grid.
+/// A desktop-optimized table view component.
 ///
 /// Supports column resizing, reordering, sorting, single/multi-row selection,
 /// keyboard navigation, and accessibility zoom scaling.
@@ -74,218 +73,188 @@ class FondeTableView<T> extends StatefulWidget {
   State<FondeTableView<T>> createState() => _FondeTableViewState<T>();
 }
 
-class _FondeTableViewState<T> extends State<FondeTableView<T>> {
-  List<T> _selectedRows = [];
-  PlutoGridStateManager? _stateManager;
-  late List<PlutoColumn> _plutoColumns;
-  late List<PlutoRow> _plutoRows;
+// Sort direction for a column.
+enum _SortDirection { none, ascending, descending }
 
-  // For double-tap detection
-  DateTime? _lastTapTime;
-  static const Duration _doubleTapTimeout = Duration(milliseconds: 300);
+class _FondeTableViewState<T> extends State<FondeTableView<T>> {
+  static const double _rowHeight = 28.0;
+  static const double _headerHeight = 32.0;
+  static const double _resizeHitWidth = 8.0;
+  static const double _minColumnWidth = 50.0;
+
+  late List<double> _columnWidths;
+  late List<int> _columnOrder; // indices into widget.columns
+  Set<String> _selectedKeys = {};
+  int? _hoveredRowIndex;
+
+  // Sort state
+  int? _sortColumnIndex; // index into _columnOrder
+  _SortDirection _sortDirection = _SortDirection.none;
+  late List<T> _sortedData;
+
+  // Column resize state
+  int? _resizingColumnIndex;
+  double _resizeStartX = 0.0;
+  double _resizeStartWidth = 0.0;
+
+  // Column reorder state
+  int? _draggingColumnIndex;
+  int? _dragTargetColumnIndex;
 
   @override
   void initState() {
     super.initState();
-    _buildPlutoData();
+    _initColumns();
+    _sortedData = List.of(widget.data);
   }
 
   @override
   void didUpdateWidget(FondeTableView<T> oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (widget.columns != oldWidget.columns || widget.data != oldWidget.data) {
-      _buildPlutoData();
-      if (mounted) setState(() {});
+    if (widget.columns != oldWidget.columns) {
+      _initColumns();
+    }
+    if (widget.data != oldWidget.data) {
+      _applySortToData();
+      // Clean up selected keys that no longer exist
+      final existingKeys = widget.data.map(widget.keyExtractor).toSet();
+      _selectedKeys = _selectedKeys.intersection(existingKeys);
     }
   }
 
-  void _buildPlutoData() {
-    _plutoColumns =
-        widget.columns.map((col) {
-          return PlutoColumn(
-            title: col.title,
-            field: col.id,
-            type: PlutoColumnType.text(),
-            width: col.width,
-            minWidth: col.minWidth ?? 50.0,
-            enableColumnDrag: widget.allowColumnReordering,
-            enableSorting: col.sortable,
-            enableContextMenu: false,
-            enableDropToResize: widget.allowColumnResizing,
-            renderer: (rendererContext) {
-              final rowIndex = rendererContext.rowIdx;
-              if (rowIndex < widget.data.length) {
-                final item = widget.data[rowIndex];
-                final isSelected = _selectedRows.any(
-                  (s) => widget.keyExtractor(s) == widget.keyExtractor(item),
-                );
-                return col.cellBuilder(item, isSelected);
-              }
-              return const SizedBox.shrink();
-            },
-          );
-        }).toList();
-
-    _plutoRows =
-        widget.data.asMap().entries.map((entry) {
-          final item = entry.value;
-          final key = widget.keyExtractor(item);
-          final cells = <String, PlutoCell>{};
-          for (final col in widget.columns) {
-            cells[col.id] = PlutoCell(value: key);
-          }
-          return PlutoRow(key: ValueKey(key), cells: cells);
-        }).toList();
+  void _initColumns() {
+    _columnWidths = widget.columns.map((c) => c.width).toList();
+    _columnOrder = List.generate(widget.columns.length, (i) => i);
   }
 
-  void _onSelectionChanged(List<T> items) {
-    setState(() => _selectedRows = items);
-    widget.onRowsSelected?.call(items);
-  }
-
-  void _handlePointerDown(PointerDownEvent event) {
-    final rowIndex = _rowIndexFromPosition(event.localPosition);
-    if (rowIndex == null) return;
-
-    final now = DateTime.now();
-    final isDoubleTap =
-        _lastTapTime != null &&
-        now.difference(_lastTapTime!) < _doubleTapTimeout;
-
-    if (isDoubleTap) {
-      _lastTapTime = null;
-      if (rowIndex < widget.data.length) {
-        widget.onRowDoubleTap?.call(widget.data[rowIndex]);
+  void _applySortToData() {
+    _sortedData = List.of(widget.data);
+    if (_sortColumnIndex != null && _sortDirection != _SortDirection.none) {
+      final colOrigIndex = _columnOrder[_sortColumnIndex!];
+      final col = widget.columns[colOrigIndex];
+      if (col.sortKeyBuilder != null) {
+        _sortedData.sort((a, b) {
+          final ka = col.sortKeyBuilder!(a);
+          final kb = col.sortKeyBuilder!(b);
+          final cmp = ka.compareTo(kb);
+          return _sortDirection == _SortDirection.ascending ? cmp : -cmp;
+        });
       }
-      return;
     }
-
-    _lastTapTime = now;
-    _handleRowSelection(rowIndex);
   }
 
-  /// Calculates row index from a tap position, accounting for scroll offset.
-  int? _rowIndexFromPosition(Offset localPosition) {
-    final sm = _stateManager;
-    if (sm == null) return null;
+  void _onSortColumn(int orderIndex) {
+    final colOrigIndex = _columnOrder[orderIndex];
+    final col = widget.columns[colOrigIndex];
+    if (!col.sortable) return;
 
-    final headerHeight = sm.configuration.style.columnHeight;
-    if (localPosition.dy < headerHeight) return null;
-
-    final rowHeight = sm.configuration.style.rowHeight;
-    final scrollOffset = sm.scroll.bodyRowsVertical?.offset ?? 0.0;
-    final contentY = localPosition.dy - headerHeight + scrollOffset;
-    final rowIndex = (contentY / rowHeight).floor();
-
-    if (rowIndex < 0 || rowIndex >= widget.data.length) return null;
-    return rowIndex;
-  }
-
-  void _handleRowSelection(int rowIndex) {
-    final sm = _stateManager;
-    if (sm == null || rowIndex >= _plutoRows.length) return;
-
-    final item = widget.data[rowIndex];
-    final targetRow = _plutoRows[rowIndex];
-
-    if (widget.allowMultiSelect) {
-      if (sm.checkedRows.contains(targetRow)) {
-        sm.setRowChecked(targetRow, false);
+    setState(() {
+      if (_sortColumnIndex == orderIndex) {
+        if (_sortDirection == _SortDirection.ascending) {
+          _sortDirection = _SortDirection.descending;
+        } else if (_sortDirection == _SortDirection.descending) {
+          _sortDirection = _SortDirection.none;
+          _sortColumnIndex = null;
+        } else {
+          _sortDirection = _SortDirection.ascending;
+        }
       } else {
-        sm.setRowChecked(targetRow, true);
+        _sortColumnIndex = orderIndex;
+        _sortDirection = _SortDirection.ascending;
       }
-      final selectedItems =
-          sm.checkedRows
-              .map((row) => _plutoRows.indexOf(row))
-              .where((i) => i >= 0 && i < widget.data.length)
-              .map((i) => widget.data[i])
-              .toList();
-      _onSelectionChanged(selectedItems);
-    } else {
-      for (final row in sm.checkedRows.toList()) {
-        sm.setRowChecked(row, false);
+      _applySortToData();
+    });
+  }
+
+  void _onRowTap(int rowIndex, T item) {
+    final key = widget.keyExtractor(item);
+    setState(() {
+      if (widget.allowMultiSelect) {
+        if (_selectedKeys.contains(key)) {
+          _selectedKeys = Set.of(_selectedKeys)..remove(key);
+        } else {
+          _selectedKeys = Set.of(_selectedKeys)..add(key);
+        }
+      } else {
+        _selectedKeys = {key};
       }
-      sm.setCurrentSelectingPosition(
-        cellPosition: PlutoGridCellPosition(columnIdx: 0, rowIdx: rowIndex),
-      );
-      _onSelectionChanged([item]);
+    });
+    final selected =
+        _sortedData
+            .where((d) => _selectedKeys.contains(widget.keyExtractor(d)))
+            .toList();
+    widget.onRowsSelected?.call(selected);
+  }
+
+  void _onRowDoubleTap(T item) {
+    widget.onRowDoubleTap?.call(item);
+  }
+
+  // --- Column resize ---
+
+  int? _resizeHandleAt(double localX) {
+    double x = 0;
+    for (int i = 0; i < _columnOrder.length; i++) {
+      x += _columnWidths[_columnOrder[i]];
+      if ((localX - x).abs() < _resizeHitWidth) return i;
     }
-
-    sm.notifyListeners();
+    return null;
   }
 
-  void _handleLoaded(PlutoGridOnLoadedEvent event) {
-    _stateManager = event.stateManager;
-    _stateManager!.setConfiguration(
-      _stateManager!.configuration.copyWith(
-        columnFilter: PlutoGridColumnFilterConfig(filters: const []),
-      ),
-    );
-    _stateManager!.setSelectingMode(PlutoGridSelectingMode.row);
+  void _startResize(int orderIndex, double startX) {
+    _resizingColumnIndex = orderIndex;
+    _resizeStartX = startX;
+    _resizeStartWidth = _columnWidths[_columnOrder[orderIndex]];
   }
 
-  PlutoGridConfiguration _buildConfiguration(
-    FondeColorScheme cs,
-    double zoomScale,
-    BuildContext context,
-  ) {
-    final headerStyle = FondeTextStyleBuilder.buildTextStyleWithColor(
-      variant: FondeTextVariant.uiCaption,
-      context: context,
-      color: cs.base.foreground,
-      fontWeight: FontWeight.w500,
-    );
-    final cellStyle = FondeTextStyleBuilder.buildTextStyleWithColor(
-      variant: FondeTextVariant.uiCaption,
-      context: context,
-      color: cs.base.foreground,
-      fontWeight: FontWeight.w400,
-    );
+  void _updateResize(double currentX) {
+    if (_resizingColumnIndex == null) return;
+    final colOrigIndex = _columnOrder[_resizingColumnIndex!];
+    final col = widget.columns[colOrigIndex];
+    final delta = currentX - _resizeStartX;
+    final minW = col.minWidth ?? _minColumnWidth;
+    final maxW = col.maxWidth ?? double.infinity;
+    final newWidth = (_resizeStartWidth + delta).clamp(minW, maxW);
+    setState(() {
+      _columnWidths[colOrigIndex] = newWidth;
+    });
+    widget.onColumnResize?.call(_resizingColumnIndex!, newWidth);
+  }
 
-    return PlutoGridConfiguration(
-      columnSize: PlutoGridColumnSizeConfig(
-        autoSizeMode: PlutoAutoSizeMode.scale,
-        resizeMode:
-            widget.allowColumnResizing
-                ? PlutoResizeMode.pushAndPull
-                : PlutoResizeMode.none,
-      ),
-      enterKeyAction: PlutoGridEnterKeyAction.none,
-      enableMoveDownAfterSelecting: false,
-      enableMoveHorizontalInEditing: false,
-      style: PlutoGridStyleConfig(
-        enableColumnBorderVertical: false,
-        enableColumnBorderHorizontal: true,
-        enableCellBorderVertical: false,
-        enableCellBorderHorizontal: true,
-        enableRowColorAnimation: false,
-        gridBackgroundColor: cs.base.background,
-        rowColor: cs.base.background,
-        oddRowColor: cs.base.background,
-        evenRowColor: cs.interactive.list.itemBackground.hover,
-        activatedColor: cs.interactive.list.selectedBackground,
-        checkedColor: cs.interactive.list.selectedBackground,
-        borderColor: cs.base.border,
-        gridBorderColor: cs.base.border,
-        activatedBorderColor: cs.interactive.input.focusBorder,
-        inactivatedBorderColor: cs.base.border,
-        columnTextStyle: headerStyle,
-        cellTextStyle: cellStyle,
-        columnHeight: 32.0,
-        rowHeight: 28.0,
-      ),
-      scrollbar: PlutoGridScrollbarConfig(
-        isAlwaysShown: true,
-        scrollbarThickness: 8.0 * zoomScale,
-        scrollbarThicknessWhileDragging: 10.0 * zoomScale,
-      ),
-    );
+  void _endResize() {
+    _resizingColumnIndex = null;
+  }
+
+  // --- Column reorder ---
+
+  void _onColumnReorderAccept(int fromOrderIndex, int toOrderIndex) {
+    if (fromOrderIndex == toOrderIndex) return;
+    setState(() {
+      final item = _columnOrder.removeAt(fromOrderIndex);
+      _columnOrder.insert(toOrderIndex, item);
+      // Update sort column index accordingly
+      if (_sortColumnIndex != null) {
+        if (_sortColumnIndex == fromOrderIndex) {
+          _sortColumnIndex = toOrderIndex;
+        } else if (fromOrderIndex < toOrderIndex) {
+          if (_sortColumnIndex! > fromOrderIndex &&
+              _sortColumnIndex! <= toOrderIndex) {
+            _sortColumnIndex = _sortColumnIndex! - 1;
+          }
+        } else {
+          if (_sortColumnIndex! >= toOrderIndex &&
+              _sortColumnIndex! < fromOrderIndex) {
+            _sortColumnIndex = _sortColumnIndex! + 1;
+          }
+        }
+      }
+    });
+    widget.onColumnReorder?.call(fromOrderIndex, toOrderIndex);
   }
 
   @override
   Widget build(BuildContext context) {
     final cs = context.fondeColorScheme;
-    final zoomScale = context.fondeZoomScale;
 
     return Container(
       decoration: BoxDecoration(
@@ -295,21 +264,264 @@ class _FondeTableViewState<T> extends State<FondeTableView<T>> {
           width: 1.0 * context.fondeBorderScale,
         ),
       ),
-      child: Listener(
-        behavior: HitTestBehavior.translucent,
-        onPointerDown: _handlePointerDown,
-        child: PlutoGrid(
-          columns: _plutoColumns,
-          rows: _plutoRows,
-          mode:
-              widget.allowMultiSelect
-                  ? PlutoGridMode.multiSelect
-                  : PlutoGridMode.select,
-          configuration: _buildConfiguration(cs, zoomScale, context),
-          onLoaded: _handleLoaded,
+      child: Column(
+        children: [
+          _buildHeader(context, cs),
+          Expanded(child: _buildBody(context, cs)),
+        ],
+      ),
+    );
+  }
+
+  // --- Header ---
+
+  Widget _buildHeader(BuildContext context, FondeColorScheme cs) {
+    final textStyle = FondeTextStyleBuilder.buildTextStyleWithColor(
+      variant: FondeTextVariant.uiCaption,
+      context: context,
+      color: cs.base.foreground,
+      fontWeight: FontWeight.w500,
+    );
+
+    return SizedBox(
+      height: _headerHeight,
+      child: MouseRegion(
+        cursor:
+            _resizingColumnIndex != null
+                ? SystemMouseCursors.resizeColumn
+                : MouseCursor.defer,
+        child: Listener(
+          behavior: HitTestBehavior.opaque,
+          onPointerDown: (e) {
+            final handle = _resizeHandleAt(e.localPosition.dx);
+            if (handle != null) {
+              _startResize(handle, e.localPosition.dx);
+            }
+          },
+          onPointerMove: (e) {
+            if (_resizingColumnIndex != null) {
+              _updateResize(e.localPosition.dx);
+            }
+          },
+          onPointerUp: (_) => _endResize(),
+          onPointerCancel: (_) => _endResize(),
+          child: Row(
+            children: [
+              for (int i = 0; i < _columnOrder.length; i++)
+                _buildHeaderCell(context, cs, textStyle, i),
+            ],
+          ),
         ),
       ),
     );
+  }
+
+  Widget _buildHeaderCell(
+    BuildContext context,
+    FondeColorScheme cs,
+    TextStyle textStyle,
+    int orderIndex,
+  ) {
+    final colOrigIndex = _columnOrder[orderIndex];
+    final col = widget.columns[colOrigIndex];
+    final width = _columnWidths[colOrigIndex];
+    final isSorted = _sortColumnIndex == orderIndex;
+    final sortDir = isSorted ? _sortDirection : _SortDirection.none;
+
+    final baseCell = SizedBox(
+      width: width,
+      height: _headerHeight,
+      child: Container(
+        decoration: BoxDecoration(
+          color: cs.base.background,
+          border: Border(
+            bottom: BorderSide(color: cs.base.border, width: 1.0),
+            right:
+                orderIndex < _columnOrder.length - 1
+                    ? BorderSide(color: cs.base.border, width: 1.0)
+                    : BorderSide.none,
+          ),
+        ),
+        child: _HeaderCell(
+          col: col,
+          textStyle: textStyle,
+          sortDirection: sortDir,
+          onTap: col.sortable ? () => _onSortColumn(orderIndex) : null,
+          isDragging: _draggingColumnIndex == orderIndex,
+          isDragTarget: _dragTargetColumnIndex == orderIndex,
+        ),
+      ),
+    );
+
+    if (!widget.allowColumnReordering) return baseCell;
+
+    return Draggable<int>(
+      data: orderIndex,
+      feedback: Material(
+        color: Colors.transparent,
+        child: Opacity(
+          opacity: 0.8,
+          child: Container(
+            width: width,
+            height: _headerHeight,
+            color: cs.base.background,
+            alignment: Alignment.centerLeft,
+            padding: const EdgeInsets.symmetric(horizontal: 8),
+            child: Text(col.title, style: textStyle),
+          ),
+        ),
+      ),
+      onDragStarted: () => setState(() => _draggingColumnIndex = orderIndex),
+      onDragEnd:
+          (_) => setState(() {
+            _draggingColumnIndex = null;
+            _dragTargetColumnIndex = null;
+          }),
+      child: DragTarget<int>(
+        onWillAcceptWithDetails: (details) {
+          setState(() => _dragTargetColumnIndex = orderIndex);
+          return details.data != orderIndex;
+        },
+        onLeave: (_) => setState(() => _dragTargetColumnIndex = null),
+        onAcceptWithDetails: (details) {
+          _onColumnReorderAccept(details.data, orderIndex);
+          setState(() {
+            _draggingColumnIndex = null;
+            _dragTargetColumnIndex = null;
+          });
+        },
+        builder: (context, candidateData, rejectedData) => baseCell,
+      ),
+    );
+  }
+
+  // --- Body ---
+
+  Widget _buildBody(BuildContext context, FondeColorScheme cs) {
+    return ListView.builder(
+      itemCount: _sortedData.length,
+      itemExtent: _rowHeight,
+      itemBuilder: (context, index) {
+        final item = _sortedData[index];
+        final key = widget.keyExtractor(item);
+        final isSelected = _selectedKeys.contains(key);
+        final isHovered = _hoveredRowIndex == index;
+        return _buildRow(context, cs, index, item, isSelected, isHovered);
+      },
+    );
+  }
+
+  Widget _buildRow(
+    BuildContext context,
+    FondeColorScheme cs,
+    int index,
+    T item,
+    bool isSelected,
+    bool isHovered,
+  ) {
+    Color bgColor;
+    if (isSelected) {
+      bgColor = cs.interactive.list.selectedBackground;
+    } else if (isHovered) {
+      bgColor = cs.interactive.list.itemBackground.hover;
+    } else {
+      bgColor = cs.base.background;
+    }
+
+    return MouseRegion(
+      onEnter: (_) => setState(() => _hoveredRowIndex = index),
+      onExit:
+          (_) => setState(() {
+            if (_hoveredRowIndex == index) _hoveredRowIndex = null;
+          }),
+      child: FondeGestureDetector(
+        onTap: () => _onRowTap(index, item),
+        onDoubleTap:
+            widget.onRowDoubleTap != null ? () => _onRowDoubleTap(item) : null,
+        child: Container(
+          height: _rowHeight,
+          color: bgColor,
+          child: Row(
+            children: [
+              for (int i = 0; i < _columnOrder.length; i++)
+                _buildBodyCell(context, cs, i, item, isSelected),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildBodyCell(
+    BuildContext context,
+    FondeColorScheme cs,
+    int orderIndex,
+    T item,
+    bool isSelected,
+  ) {
+    final colOrigIndex = _columnOrder[orderIndex];
+    final col = widget.columns[colOrigIndex];
+    final width = _columnWidths[colOrigIndex];
+
+    return SizedBox(
+      width: width,
+      height: _rowHeight,
+      child: Container(
+        decoration: BoxDecoration(
+          border: Border(bottom: BorderSide(color: cs.base.border, width: 1.0)),
+        ),
+        padding: const EdgeInsets.symmetric(horizontal: 8),
+        child: col.cellBuilder(item, isSelected),
+      ),
+    );
+  }
+}
+
+// --- Header cell widget ---
+
+class _HeaderCell<T> extends StatelessWidget {
+  final FondeTableColumn<T> col;
+  final TextStyle textStyle;
+  final _SortDirection sortDirection;
+  final VoidCallback? onTap;
+  final bool isDragging;
+  final bool isDragTarget;
+
+  const _HeaderCell({
+    required this.col,
+    required this.textStyle,
+    required this.sortDirection,
+    this.onTap,
+    this.isDragging = false,
+    this.isDragTarget = false,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    Widget label = Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 8),
+      child: Row(
+        children: [
+          Expanded(
+            child: Text(
+              col.title,
+              style: textStyle,
+              overflow: TextOverflow.ellipsis,
+            ),
+          ),
+          if (sortDirection == _SortDirection.ascending)
+            Icon(Icons.arrow_upward, size: 12, color: textStyle.color),
+          if (sortDirection == _SortDirection.descending)
+            Icon(Icons.arrow_downward, size: 12, color: textStyle.color),
+        ],
+      ),
+    );
+
+    if (onTap != null) {
+      label = GestureDetector(onTap: onTap, child: label);
+    }
+
+    return label;
   }
 }
 
@@ -340,6 +552,10 @@ class FondeTableColumn<T> {
   /// Whether this column can be resized.
   final bool resizable;
 
+  /// Extracts a comparable sort key from an item.
+  /// Required if [sortable] is true.
+  final Comparable Function(T item)? sortKeyBuilder;
+
   const FondeTableColumn({
     required this.id,
     required this.title,
@@ -349,6 +565,7 @@ class FondeTableColumn<T> {
     this.maxWidth,
     this.sortable = false,
     this.resizable = true,
+    this.sortKeyBuilder,
   });
 
   FondeTableColumn<T> copyWith({
@@ -360,6 +577,7 @@ class FondeTableColumn<T> {
     Widget Function(T item, bool isSelected)? cellBuilder,
     bool? sortable,
     bool? resizable,
+    Comparable Function(T item)? sortKeyBuilder,
   }) {
     return FondeTableColumn<T>(
       id: id ?? this.id,
@@ -370,6 +588,7 @@ class FondeTableColumn<T> {
       cellBuilder: cellBuilder ?? this.cellBuilder,
       sortable: sortable ?? this.sortable,
       resizable: resizable ?? this.resizable,
+      sortKeyBuilder: sortKeyBuilder ?? this.sortKeyBuilder,
     );
   }
 }
