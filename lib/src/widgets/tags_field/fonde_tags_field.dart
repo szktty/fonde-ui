@@ -1,8 +1,8 @@
-import 'package:figma_squircle/figma_squircle.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import '../../internal.dart';
 import '../widgets/fonde_gesture_detector.dart';
+import '../widgets/fonde_rectangle_border.dart';
 
 /// Label tag editing field
 ///
@@ -310,8 +310,8 @@ class _FondeTagsFieldState extends State<FondeTagsField> {
       child: Container(
         decoration: ShapeDecoration(
           color: appColorScheme.uiAreas.sideBar.background,
-          shape: SmoothRectangleBorder(
-            borderRadius: SmoothBorderRadius(
+          shape: SquircleBorder(
+            borderRadius: SquircleBorderRadius(
               cornerRadius: 8 * zoomScale,
               cornerSmoothing: 0.6,
             ),
@@ -442,8 +442,8 @@ class _FondeTagsFieldState extends State<FondeTagsField> {
           ),
           decoration: ShapeDecoration(
             color: actualTagColor.withValues(alpha: bgAlpha),
-            shape: SmoothRectangleBorder(
-              borderRadius: SmoothBorderRadius(
+            shape: SquircleBorder(
+              borderRadius: SquircleBorderRadius(
                 cornerRadius: 16 * zoomScale,
                 cornerSmoothing: 0.6,
               ),

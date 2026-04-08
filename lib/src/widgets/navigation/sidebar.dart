@@ -1,6 +1,6 @@
-import 'package:figma_squircle/figma_squircle.dart';
 import 'package:flutter/material.dart';
 import '../../core/context_extensions.dart';
+import '../widgets/fonde_rectangle_border.dart';
 import '../../internal.dart';
 import '../toolbar/primary_sidebar_toolbar.dart';
 
@@ -108,9 +108,9 @@ class FondeSidebar extends StatelessWidget {
         child: Container(
           decoration: ShapeDecoration(
             color: panelBackground,
-            shape: SmoothRectangleBorder(
+            shape: SquircleBorder(
               side: BorderSide(color: borderColor, width: 1.0 * borderScale),
-              borderRadius: SmoothBorderRadius(
+              borderRadius: SquircleBorderRadius(
                 cornerRadius: cornerRadius,
                 cornerSmoothing: 0.6,
               ),

@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/gestures.dart';
-import 'package:figma_squircle/figma_squircle.dart';
 import '../../internal.dart';
 import '../widgets/fonde_rectangle_border.dart';
 import 'dart:ui' as ui;
@@ -391,7 +390,7 @@ class _FondeTextFieldState extends State<FondeTextField>
               _isEnabled
                   ? backgroundColor
                   : backgroundColor.withValues(alpha: 0.5),
-          shape: SmoothRectangleBorder(
+          shape: SquircleBorder(
             borderRadius:
                 FondeBorderRadius.radius(
                   widget.radius * zoomScale,

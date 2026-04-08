@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:figma_squircle/figma_squircle.dart';
+import '../widgets/fonde_rectangle_border.dart';
 
 /// Paints an outer focus ring just outside the widget bounds using a
 /// Figma-style squircle shape.
@@ -33,8 +33,8 @@ class FondeFocusRingPainter extends CustomPainter {
       size.height + borderWidth,
     );
 
-    final path = SmoothRectangleBorder(
-      borderRadius: SmoothBorderRadius(
+    final path = SquircleBorder(
+      borderRadius: SquircleBorderRadius(
         cornerRadius: cornerRadius + expand,
         cornerSmoothing: 0.6,
       ),

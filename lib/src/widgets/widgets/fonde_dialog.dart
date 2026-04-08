@@ -1,6 +1,6 @@
-import 'package:figma_squircle/figma_squircle.dart';
 import 'package:flutter/material.dart';
 import '../../internal.dart';
+import 'fonde_rectangle_border.dart';
 import 'fonde_physical_model.dart';
 import 'fonde_divider.dart';
 import 'fonde_icon_button.dart';
@@ -142,9 +142,9 @@ class FondeDialog extends StatelessWidget {
     final accessibilityConfig = context.fondeAccessibility;
 
     // Build shape from context
-    final shape = SmoothRectangleBorder(
-      borderRadius: SmoothBorderRadius(
-        cornerRadius: 12.0,
+    final shape = SquircleBorder(
+      borderRadius: SquircleBorderRadius(
+        cornerRadius: 8.0,
         cornerSmoothing: 0.6,
       ),
       side: BorderSide(color: appColorScheme.base.border, width: 1.5),
@@ -192,7 +192,7 @@ class FondeDialog extends StatelessWidget {
       shape: shape,
       child: FondePhysicalModelVariants.popover(
         color: effectiveBackgroundColor,
-        borderRadius: shape.borderRadius,
+        borderRadius: shape.borderRadius as BorderRadius,
         disableZoom: disableZoom,
         child: Column(
           mainAxisSize: MainAxisSize.min,

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:figma_squircle/figma_squircle.dart';
 import '../icons/lucide_icons.dart';
+import '../widgets/fonde_rectangle_border.dart';
 import '../../internal.dart';
 import '../text_field/fonde_text_field.dart';
 
@@ -236,9 +236,9 @@ class _FondeNumberFieldState extends State<FondeNumberField> {
       child: DecoratedBox(
         decoration: ShapeDecoration(
           color: backgroundColor,
-          shape: SmoothRectangleBorder(
-            borderRadius: SmoothBorderRadius(
-              cornerRadius: 12.0 * zoomScale,
+          shape: SquircleBorder(
+            borderRadius: SquircleBorderRadius(
+              cornerRadius: 8.0 * zoomScale,
               cornerSmoothing: 0.6,
             ),
             side: BorderSide(color: borderColor, width: 1.5 * borderScale),
