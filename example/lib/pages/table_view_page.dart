@@ -21,7 +21,8 @@ class _TableViewPageState extends State<TableViewPage> {
       children: [
         CatalogSection(
           title: 'FondeTableView',
-          description: 'Desktop-oriented table view based on pluto_grid',
+          description:
+              'Desktop-oriented table view with column reordering, resizing, sorting, and row reordering.',
           children: [
             CatalogDemo(
               label: 'Single selection',
