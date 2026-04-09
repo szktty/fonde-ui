@@ -98,6 +98,14 @@ class FondeTableView<T> extends StatefulWidget {
   /// When true, rows are highlighted when hovered. Defaults to false.
   final bool highlightRowOnHover;
 
+  /// Visual indicator style for the row insertion position during reordering.
+  /// Defaults to [FondeTableRowReorderIndicator.line].
+  final FondeTableRowReorderIndicator rowReorderIndicator;
+
+  /// Controls what is shown as the drag overlay during row reordering.
+  /// Defaults to [FondeTableRowDragStyle.fullRow].
+  final FondeTableRowDragStyle rowDragStyle;
+
   const FondeTableView({
     super.key,
     required this.data,
@@ -116,6 +124,8 @@ class FondeTableView<T> extends StatefulWidget {
     this.primaryColumnIds,
     this.highlightHeaderOnDrag = false,
     this.highlightRowOnHover = false,
+    this.rowReorderIndicator = FondeTableRowReorderIndicator.line,
+    this.rowDragStyle = FondeTableRowDragStyle.fullRow,
     this.onColumnReorder,
     this.onColumnResize,
     this.onRowReorder,
@@ -124,6 +134,24 @@ class FondeTableView<T> extends StatefulWidget {
 
   @override
   State<FondeTableView<T>> createState() => _FondeTableViewState<T>();
+}
+
+/// Controls what is shown as the drag overlay during row reordering.
+enum FondeTableRowDragStyle {
+  /// The entire row is shown as the drag overlay. (default)
+  fullRow,
+
+  /// Only the cell that was pressed is shown as the drag overlay.
+  cellOnly,
+}
+
+/// Controls the visual indicator shown at the drop position during row reordering.
+enum FondeTableRowReorderIndicator {
+  /// A simple horizontal line at the insertion position. (default)
+  line,
+
+  /// A horizontal line with a small circle at the left end.
+  lineWithDot,
 }
 
 /// Sort direction for [FondeTableView].
@@ -165,8 +193,15 @@ class _FondeTableViewState<T> extends State<FondeTableView<T>> {
   OverlayEntry? _colDragOverlay;
   final _headerKey = GlobalKey();
 
-  // Row reorder state
-  int? _dragTargetRowIndex;
+  // Row reorder state (Overlay-based)
+  int? _draggingRowIndex;
+  int? _draggingRowCellOrderIndex; // for cellOnly drag style
+  int? _dropTargetRowIndex;
+  double _rowDragStartY = 0.0;
+  double _rowDragCurrentY = 0.0;
+  bool _rowDragActive = false;
+  OverlayEntry? _rowDragOverlay;
+  final _bodyKey = GlobalKey();
 
   @override
   void initState() {
@@ -207,6 +242,7 @@ class _FondeTableViewState<T> extends State<FondeTableView<T>> {
   @override
   void dispose() {
     _removeColDragOverlay();
+    _removeRowDragOverlay();
     super.dispose();
   }
 
@@ -557,12 +593,143 @@ class _FondeTableViewState<T> extends State<FondeTableView<T>> {
   }
 
   // ---------------------------------------------------------------------------
-  // Row reorder
+  // Row reorder (Overlay-based)
   // ---------------------------------------------------------------------------
 
-  void _onRowReorderAccept(int fromIndex, int toIndex) {
-    if (fromIndex == toIndex) return;
-    widget.onRowReorder?.call(fromIndex, toIndex);
+  static const double _rowDragThreshold = 4.0;
+
+  void _onRowPointerDown(PointerDownEvent event, int rowIndex, double localX) {
+    if (!widget.allowRowReordering) return;
+    _draggingRowIndex = rowIndex;
+    _draggingRowCellOrderIndex = _columnOrderIndexAt(localX);
+    _rowDragStartY = event.position.dy;
+    _rowDragCurrentY = event.position.dy;
+    _rowDragActive = false;
+    _dropTargetRowIndex = null;
+  }
+
+  void _onRowPointerMove(PointerMoveEvent event) {
+    if (_draggingRowIndex == null) return;
+    _rowDragCurrentY = event.position.dy;
+
+    if (!_rowDragActive) {
+      if ((_rowDragCurrentY - _rowDragStartY).abs() < _rowDragThreshold) return;
+      _rowDragActive = true;
+      _showRowDragOverlay();
+    }
+
+    final dropTarget = _rowDropIndexAt(_rowDragCurrentY);
+    if (dropTarget != _dropTargetRowIndex) {
+      setState(() => _dropTargetRowIndex = dropTarget);
+    }
+    _rowDragOverlay?.markNeedsBuild();
+  }
+
+  void _onRowPointerUp(PointerUpEvent event) {
+    if (!_rowDragActive) {
+      _cancelRowDrag();
+      return;
+    }
+    _commitRowDrag();
+  }
+
+  void _onRowPointerCancel(PointerCancelEvent event) => _cancelRowDrag();
+
+  /// Returns the insertion position (0..length) before which to insert the
+  /// dragged row, based on the midpoint of each row.
+  int _rowDropIndexAt(double globalY) {
+    final box = _bodyKey.currentContext?.findRenderObject() as RenderBox?;
+    if (box == null) return _draggingRowIndex!;
+    final localY = box.globalToLocal(Offset(0, globalY)).dy;
+    // Use midpoint of each row: if cursor is in the upper half → insert before,
+    // lower half → insert after.
+    final rowIndex = (localY / _rowHeight).floor().clamp(
+      0,
+      _sortedData.length - 1,
+    );
+    final rowMid = rowIndex * _rowHeight + _rowHeight / 2;
+    final insertAt = localY < rowMid ? rowIndex : rowIndex + 1;
+    return insertAt.clamp(0, _sortedData.length);
+  }
+
+  void _showRowDragOverlay() {
+    _removeRowDragOverlay();
+    _rowDragOverlay = OverlayEntry(builder: _buildRowDragOverlay);
+    Overlay.of(context).insert(_rowDragOverlay!);
+    setState(() {});
+  }
+
+  void _removeRowDragOverlay() {
+    _rowDragOverlay?.remove();
+    _rowDragOverlay = null;
+  }
+
+  Widget _buildRowDragOverlay(BuildContext context) {
+    final box = _bodyKey.currentContext?.findRenderObject() as RenderBox?;
+    if (box == null || _draggingRowIndex == null)
+      return const SizedBox.shrink();
+
+    final bodyGlobal = box.localToGlobal(Offset.zero);
+    final item = _sortedData[_draggingRowIndex!];
+    final cs = context.fondeColorScheme;
+
+    final rawTop = _rowDragCurrentY - _rowHeight / 2;
+    final clampedTop = rawTop.clamp(
+      bodyGlobal.dy,
+      bodyGlobal.dy + box.size.height - _rowHeight,
+    );
+
+    final isCellOnly = widget.rowDragStyle == FondeTableRowDragStyle.cellOnly;
+    final cellOrderIndex = _draggingRowCellOrderIndex;
+
+    double overlayLeft = bodyGlobal.dx;
+    double overlayWidth = _totalWidth;
+    if (isCellOnly && cellOrderIndex != null) {
+      overlayLeft = bodyGlobal.dx + _columnLeft(cellOrderIndex);
+      overlayWidth = _columnWidths[_columnOrder[cellOrderIndex]];
+    }
+
+    return Positioned(
+      left: overlayLeft,
+      top: clampedTop,
+      width: overlayWidth,
+      height: _rowHeight,
+      child: IgnorePointer(
+        child: Opacity(
+          opacity: 0.85,
+          child: Container(
+            color: cs.interactive.list.selectedBackground,
+            child:
+                isCellOnly && cellOrderIndex != null
+                    ? _buildBodyCell(context, cs, cellOrderIndex, item, true)
+                    : Row(
+                      children: [
+                        for (int i = 0; i < _columnOrder.length; i++)
+                          _buildBodyCell(context, cs, i, item, true),
+                      ],
+                    ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  void _commitRowDrag() {
+    final from = _draggingRowIndex;
+    final to = _dropTargetRowIndex;
+    _cancelRowDrag();
+    if (from == null || to == null || from == to) return;
+    widget.onRowReorder?.call(from, to);
+  }
+
+  void _cancelRowDrag() {
+    _removeRowDragOverlay();
+    setState(() {
+      _draggingRowIndex = null;
+      _draggingRowCellOrderIndex = null;
+      _dropTargetRowIndex = null;
+      _rowDragActive = false;
+    });
   }
 
   // ---------------------------------------------------------------------------
@@ -744,27 +911,53 @@ class _FondeTableViewState<T> extends State<FondeTableView<T>> {
   // ---------------------------------------------------------------------------
 
   Widget _buildBody(BuildContext context, FondeColorScheme cs) {
-    return ListView.builder(
-      itemCount: _sortedData.length,
-      itemExtent: _rowHeight,
-      itemBuilder: (context, index) {
-        final item = _sortedData[index];
-        final key = widget.keyExtractor(item);
-        final isSelected = _selectedKeys.contains(key);
-        final isHovered = _hoveredRowIndex == index;
-        final isPressed = _pressedRowIndex == index;
-        final isDragTarget = _dragTargetRowIndex == index;
-        return _buildRow(
-          context,
-          cs,
-          index,
-          item,
-          isSelected,
-          isHovered,
-          isPressed,
-          isDragTarget,
-        );
-      },
+    return Listener(
+      key: _bodyKey,
+      behavior: HitTestBehavior.translucent,
+      onPointerDown:
+          widget.allowRowReordering
+              ? (e) {
+                final index = (e.localPosition.dy / _rowHeight).floor().clamp(
+                  0,
+                  _sortedData.length - 1,
+                );
+                _onRowPointerDown(e, index, e.localPosition.dx);
+              }
+              : null,
+      onPointerMove: widget.allowRowReordering ? _onRowPointerMove : null,
+      onPointerUp: widget.allowRowReordering ? _onRowPointerUp : null,
+      onPointerCancel: widget.allowRowReordering ? _onRowPointerCancel : null,
+      child: ListView.builder(
+        itemCount: _sortedData.length,
+        itemExtent: _rowHeight,
+        itemBuilder: (context, index) {
+          final item = _sortedData[index];
+          final key = widget.keyExtractor(item);
+          final isSelected = _selectedKeys.contains(key);
+          final isHovered = _hoveredRowIndex == index;
+          final isPressed = _pressedRowIndex == index;
+          final isDragging = _rowDragActive && _draggingRowIndex == index;
+          // Show insert line above row[index] when dropTarget == index,
+          // or below the last row when dropTarget == length.
+          final showLineAbove = _rowDragActive && _dropTargetRowIndex == index;
+          final showLineBelow =
+              _rowDragActive &&
+              index == _sortedData.length - 1 &&
+              _dropTargetRowIndex == _sortedData.length;
+          return _buildRow(
+            context,
+            cs,
+            index,
+            item,
+            isSelected,
+            isHovered,
+            isPressed,
+            isDragging,
+            showLineAbove,
+            showLineBelow,
+          );
+        },
+      ),
     );
   }
 
@@ -776,12 +969,14 @@ class _FondeTableViewState<T> extends State<FondeTableView<T>> {
     bool isSelected,
     bool isHovered,
     bool isPressed,
-    bool isDragTarget,
+    bool isDragging,
+    bool showLineAbove,
+    bool showLineBelow,
   ) {
     Color bgColor;
     if (isSelected) {
       bgColor = cs.interactive.list.selectedBackground;
-    } else if (isPressed || isDragTarget) {
+    } else if (isPressed) {
       bgColor = cs.interactive.list.itemBackground.active;
     } else if (isHovered && widget.highlightRowOnHover) {
       bgColor = cs.interactive.list.itemBackground.hover;
@@ -789,80 +984,104 @@ class _FondeTableViewState<T> extends State<FondeTableView<T>> {
       bgColor = cs.base.background;
     }
 
-    Widget row = MouseRegion(
+    const lineThickness = 2.0;
+    const dotDiameter = 6.0;
+    const dotOverhang = 4.0; // how far the dot extends beyond the left edge
+    final lineColor = cs.interactive.input.focusBorder;
+
+    return MouseRegion(
+      cursor:
+          widget.allowRowReordering
+              ? (_rowDragActive
+                  ? SystemMouseCursors.grabbing
+                  : SystemMouseCursors.grab)
+              : MouseCursor.defer,
       onEnter: (_) => setState(() => _hoveredRowIndex = index),
       onExit:
           (_) => setState(() {
             if (_hoveredRowIndex == index) _hoveredRowIndex = null;
           }),
-      child: FondeGestureDetector(
-        behavior: HitTestBehavior.opaque,
-        onTapDown: (_) => setState(() => _pressedRowIndex = index),
-        onTapUp: (_) => setState(() => _pressedRowIndex = null),
-        onTapCancel: () => setState(() => _pressedRowIndex = null),
-        onTap: () => _onRowTap(item),
-        onDoubleTap:
-            widget.onRowDoubleTap != null
-                ? () => widget.onRowDoubleTap!(item)
-                : null,
-        child: Container(
-          height: _rowHeight,
-          color: bgColor,
-          child: Row(
-            children: [
-              for (int i = 0; i < _columnOrder.length; i++)
-                _buildBodyCell(context, cs, i, item, isSelected),
-            ],
-          ),
-        ),
-      ),
-    );
-
-    if (!widget.allowRowReordering) return row;
-
-    final totalWidth = _totalWidth;
-
-    return MouseRegion(
-      cursor: SystemMouseCursors.grab,
-      child: Draggable<int>(
-        data: index,
-        feedback: Material(
-          color: Colors.transparent,
-          child: Opacity(
-            opacity: 0.85,
+      child: Stack(
+        clipBehavior: Clip.none,
+        children: [
+          FondeGestureDetector(
+            behavior: HitTestBehavior.opaque,
+            onTapDown: (_) => setState(() => _pressedRowIndex = index),
+            onTapUp: (_) => setState(() => _pressedRowIndex = null),
+            onTapCancel: () => setState(() => _pressedRowIndex = null),
+            onTap: () => _onRowTap(item),
+            onDoubleTap:
+                widget.onRowDoubleTap != null
+                    ? () => widget.onRowDoubleTap!(item)
+                    : null,
             child: Container(
               height: _rowHeight,
-              width: totalWidth,
-              color: cs.interactive.list.selectedBackground,
+              color: bgColor,
               child: Row(
                 children: [
                   for (int i = 0; i < _columnOrder.length; i++)
-                    _buildBodyCell(context, cs, i, item, true),
+                    _buildBodyCell(context, cs, i, item, isSelected),
                 ],
               ),
             ),
           ),
-        ),
-        onDragEnd: (_) => setState(() => _dragTargetRowIndex = null),
-        child: DragTarget<int>(
-          onWillAcceptWithDetails: (details) {
-            final allowed =
-                widget.onRowReorderWillAccept?.call(details.data, index) ??
-                true;
-            if (allowed) setState(() => _dragTargetRowIndex = index);
-            return allowed && details.data != index;
-          },
-          onLeave:
-              (_) => setState(() {
-                if (_dragTargetRowIndex == index) _dragTargetRowIndex = null;
-              }),
-          onAcceptWithDetails: (details) {
-            _onRowReorderAccept(details.data, index);
-            setState(() => _dragTargetRowIndex = null);
-          },
-          builder: (context, candidateData, rejectedData) => row,
-        ),
+          if (showLineAbove)
+            _buildInsertLine(
+              lineColor,
+              lineThickness,
+              dotDiameter,
+              dotOverhang,
+              above: true,
+            ),
+          if (showLineBelow)
+            _buildInsertLine(
+              lineColor,
+              lineThickness,
+              dotDiameter,
+              dotOverhang,
+              above: false,
+            ),
+        ],
       ),
+    );
+  }
+
+  Widget _buildInsertLine(
+    Color color,
+    double lineThickness,
+    double dotDiameter,
+    double dotOverhang, {
+    required bool above,
+  }) {
+    final offset = -lineThickness / 2;
+    final useDot =
+        widget.rowReorderIndicator == FondeTableRowReorderIndicator.lineWithDot;
+
+    return Positioned(
+      top: above ? offset : null,
+      bottom: above ? null : offset,
+      left: useDot ? -dotOverhang : 0,
+      right: 0,
+      height: useDot ? dotDiameter : lineThickness,
+      child:
+          useDot
+              ? Row(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  Container(
+                    width: dotDiameter,
+                    height: dotDiameter,
+                    decoration: BoxDecoration(
+                      color: color,
+                      shape: BoxShape.circle,
+                    ),
+                  ),
+                  Expanded(
+                    child: Container(height: lineThickness, color: color),
+                  ),
+                ],
+              )
+              : ColoredBox(color: color),
     );
   }
 

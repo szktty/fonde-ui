@@ -13,6 +13,7 @@ class TableViewPage extends StatefulWidget {
 class _TableViewPageState extends State<TableViewPage> {
   List<_Person> _selectedSingle = [];
   List<_Person> _selectedMulti = [];
+  List<_Person> _reorderablePeople = List.of(_people);
 
   @override
   Widget build(BuildContext context) {
@@ -104,6 +105,28 @@ class _TableViewPageState extends State<TableViewPage> {
                   keyExtractor: (p) => p.id,
                   allowColumnResizing: false,
                   allowColumnReordering: false,
+                ),
+              ),
+            ),
+            CatalogDemo(
+              label: 'Row reordering',
+              description: 'allowRowReordering: true. Drag rows to reorder.',
+              child: SizedBox(
+                height: 240,
+                child: FondeTableView<_Person>(
+                  data: _reorderablePeople,
+                  columns: _buildColumns(),
+                  keyExtractor: (p) => p.id,
+                  allowRowReordering: true,
+                  rowDragStyle: FondeTableRowDragStyle.cellOnly,
+                  onRowReorder: (oldIndex, newIndex) {
+                    setState(() {
+                      final list = List.of(_reorderablePeople);
+                      final item = list.removeAt(oldIndex);
+                      list.insert(newIndex, item);
+                      _reorderablePeople = list;
+                    });
+                  },
                 ),
               ),
             ),
