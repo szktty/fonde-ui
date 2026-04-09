@@ -912,25 +912,37 @@ class _FondeTableViewState<T> extends State<FondeTableView<T>> {
             ? textStyle.copyWith(color: textStyle.color?.withAlpha(128))
             : textStyle;
 
+    const dividerInset = 5.0;
+    final showDivider = orderIndex < _columnOrder.length - 1;
+
     return SizedBox(
       width: width,
       height: _headerHeight,
-      child: Container(
+      child: DecoratedBox(
         decoration: BoxDecoration(
           color: bgColor,
-          border: Border(
-            bottom: BorderSide(color: cs.base.border, width: 1.0),
-            right:
-                orderIndex < _columnOrder.length - 1
-                    ? BorderSide(color: cs.base.border, width: 1.0)
-                    : BorderSide.none,
-          ),
+          border: Border(bottom: BorderSide(color: cs.base.border, width: 1.0)),
         ),
-        child: _HeaderCell(
-          col: col,
-          textStyle: cellTextStyle,
-          sortDirection: sortDir,
-          onTap: null,
+        child: Row(
+          children: [
+            Expanded(
+              child: _HeaderCell(
+                col: col,
+                textStyle: cellTextStyle,
+                sortDirection: sortDir,
+                onTap: null,
+              ),
+            ),
+            if (showDivider)
+              Padding(
+                padding: EdgeInsets.symmetric(vertical: dividerInset),
+                child: VerticalDivider(
+                  width: 1.0,
+                  thickness: 1.0,
+                  color: cs.base.border,
+                ),
+              ),
+          ],
         ),
       ),
     );
