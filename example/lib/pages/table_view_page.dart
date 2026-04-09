@@ -35,7 +35,6 @@ class _TableViewPageState extends State<TableViewPage> {
                       data: _people,
                       columns: _buildColumns(),
                       keyExtractor: (p) => p.id,
-
                       onRowsSelected:
                           (rows) => setState(() => _selectedSingle = rows),
                     ),

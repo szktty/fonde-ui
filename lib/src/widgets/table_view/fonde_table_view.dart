@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../internal.dart';
 import '../widgets/fonde_gesture_detector.dart';
+import '../widgets/fonde_rectangle_border.dart';
 import '../icons/lucide_icons.dart';
 import '../typography/fonde_text.dart';
 import '../typography/fonde_text_style_builder.dart';
@@ -106,6 +107,20 @@ class FondeTableView<T> extends StatefulWidget {
   /// Defaults to [FondeTableRowDragStyle.fullRow].
   final FondeTableRowDragStyle rowDragStyle;
 
+  /// Builds a widget shown to the left of the header row.
+  /// The widget is not part of any column and sits outside the column area.
+  final Widget Function()? headerLeadingBuilder;
+
+  /// Builds a widget shown to the left of each data row.
+  /// The widget is not part of any column and sits outside the column area.
+  final Widget Function(T item)? rowLeadingBuilder;
+
+  /// Builds a widget shown to the right of the header row.
+  final Widget Function()? headerTrailingBuilder;
+
+  /// Builds a widget shown to the right of each data row.
+  final Widget Function(T item)? rowTrailingBuilder;
+
   const FondeTableView({
     super.key,
     required this.data,
@@ -126,6 +141,10 @@ class FondeTableView<T> extends StatefulWidget {
     this.highlightRowOnHover = false,
     this.rowReorderIndicator = FondeTableRowReorderIndicator.line,
     this.rowDragStyle = FondeTableRowDragStyle.fullRow,
+    this.headerLeadingBuilder,
+    this.rowLeadingBuilder,
+    this.headerTrailingBuilder,
+    this.rowTrailingBuilder,
     this.onColumnReorder,
     this.onColumnResize,
     this.onRowReorder,
@@ -166,6 +185,7 @@ class _FondeTableViewState<T> extends State<FondeTableView<T>> {
   static const double _minColumnWidth = 50.0;
   // Minimum pointer travel before column drag starts.
   static const double _columnDragThreshold = 4.0;
+  static const double _edgeWidgetDefaultWidth = 8.0;
 
   late List<double> _columnWidths;
   late List<int> _columnOrder; // indices into widget.columns
@@ -781,7 +801,7 @@ class _FondeTableViewState<T> extends State<FondeTableView<T>> {
       cursor = SystemMouseCursors.grabbing;
     }
 
-    return SizedBox(
+    final header = SizedBox(
       key: _headerKey,
       height: _headerHeight,
       child: MouseRegion(
@@ -841,6 +861,16 @@ class _FondeTableViewState<T> extends State<FondeTableView<T>> {
           ),
         ),
       ),
+    );
+
+    return Row(
+      children: [
+        widget.headerLeadingBuilder?.call() ??
+            const SizedBox(width: _edgeWidgetDefaultWidth),
+        Expanded(child: header),
+        widget.headerTrailingBuilder?.call() ??
+            const SizedBox(width: _edgeWidgetDefaultWidth),
+      ],
     );
   }
 
@@ -989,6 +1019,41 @@ class _FondeTableViewState<T> extends State<FondeTableView<T>> {
     const dotOverhang = 4.0; // how far the dot extends beyond the left edge
     final lineColor = cs.interactive.input.focusBorder;
 
+    const highlightRadius = 6.0;
+
+    // Always squircle since leading/trailing always provide visual margin.
+    final highlightDecoration = ShapeDecoration(
+      color: bgColor,
+      shape: SquircleBorder(
+        borderRadius: SquircleBorderRadius(
+          cornerRadius: highlightRadius,
+          cornerSmoothing: 0.6,
+        ),
+      ),
+    );
+
+    final cellArea = FondeGestureDetector(
+      behavior: HitTestBehavior.opaque,
+      onTapDown: (_) => setState(() => _pressedRowIndex = index),
+      onTapUp: (_) => setState(() => _pressedRowIndex = null),
+      onTapCancel: () => setState(() => _pressedRowIndex = null),
+      onTap: () => _onRowTap(item),
+      onDoubleTap:
+          widget.onRowDoubleTap != null
+              ? () => widget.onRowDoubleTap!(item)
+              : null,
+      child: Container(
+        height: _rowHeight,
+        decoration: highlightDecoration,
+        child: Row(
+          children: [
+            for (int i = 0; i < _columnOrder.length; i++)
+              _buildBodyCell(context, cs, i, item, isSelected),
+          ],
+        ),
+      ),
+    );
+
     return MouseRegion(
       cursor:
           widget.allowRowReordering
@@ -1004,25 +1069,16 @@ class _FondeTableViewState<T> extends State<FondeTableView<T>> {
       child: Stack(
         clipBehavior: Clip.none,
         children: [
-          FondeGestureDetector(
-            behavior: HitTestBehavior.opaque,
-            onTapDown: (_) => setState(() => _pressedRowIndex = index),
-            onTapUp: (_) => setState(() => _pressedRowIndex = null),
-            onTapCancel: () => setState(() => _pressedRowIndex = null),
-            onTap: () => _onRowTap(item),
-            onDoubleTap:
-                widget.onRowDoubleTap != null
-                    ? () => widget.onRowDoubleTap!(item)
-                    : null,
-            child: Container(
-              height: _rowHeight,
-              color: bgColor,
-              child: Row(
-                children: [
-                  for (int i = 0; i < _columnOrder.length; i++)
-                    _buildBodyCell(context, cs, i, item, isSelected),
-                ],
-              ),
+          SizedBox(
+            height: _rowHeight,
+            child: Row(
+              children: [
+                widget.rowLeadingBuilder?.call(item) ??
+                    const SizedBox(width: _edgeWidgetDefaultWidth),
+                Expanded(child: cellArea),
+                widget.rowTrailingBuilder?.call(item) ??
+                    const SizedBox(width: _edgeWidgetDefaultWidth),
+              ],
             ),
           ),
           if (showLineAbove)
