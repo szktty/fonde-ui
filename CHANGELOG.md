@@ -9,7 +9,9 @@
 - FIX
   - Bug fixes
 
-## develop
+## 0.11.0
+
+**Release date**: 2026-04-11
 
 - [CHANGE] Remove `pluto_grid` dependency — `FondeTableView` is now a self-contained implementation with column reordering, resizing, sorting, fixed columns, and row reordering
 - [ADD] `FondeTableView`: add `showHeaderDivider` and `headerDividerThickness` parameters
