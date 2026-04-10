@@ -9,6 +9,13 @@
 - FIX
   - Bug fixes
 
+## develop
+
+- [CHANGE] Remove `pluto_grid` dependency — `FondeTableView` is now a self-contained implementation with column reordering, resizing, sorting, fixed columns, and row reordering
+- [ADD] `FondeTableView`: add `showHeaderDivider` and `headerDividerThickness` parameters
+- [ADD] `FondeTableView`: add `columnStyle` (`FondeTableColumnStyle.divider` / `stripe` / `none`) and `stripeColor` parameters
+- [ADD] `FondeListColors`: add `stripeBackground` color token for theme-based stripe row background
+
 ## 0.10.0
 
 **Release date**: 2026-04-08

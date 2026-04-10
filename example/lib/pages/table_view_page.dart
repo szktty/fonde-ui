@@ -13,6 +13,7 @@ class TableViewPage extends StatefulWidget {
 class _TableViewPageState extends State<TableViewPage> {
   List<_Person> _selectedSingle = [];
   List<_Person> _selectedMulti = [];
+  List<_Person> _reorderablePeople = List.of(_people);
 
   @override
   Widget build(BuildContext context) {
@@ -20,7 +21,8 @@ class _TableViewPageState extends State<TableViewPage> {
       children: [
         CatalogSection(
           title: 'FondeTableView',
-          description: 'Desktop-oriented table view based on pluto_grid',
+          description:
+              'Desktop-oriented table view with column reordering, resizing, sorting, and row reordering.',
           children: [
             CatalogDemo(
               label: 'Single selection',
@@ -61,6 +63,7 @@ class _TableViewPageState extends State<TableViewPage> {
                       columns: _buildColumns(),
                       keyExtractor: (p) => p.id,
                       allowMultiSelect: true,
+
                       onRowsSelected:
                           (rows) => setState(() => _selectedMulti = rows),
                     ),
@@ -78,13 +81,15 @@ class _TableViewPageState extends State<TableViewPage> {
             CatalogDemo(
               label: 'Sortable columns',
               description:
-                  'Columns with sortable: true can be sorted by clicking the header',
+                  'Click a header to sort. Active sort column is highlighted.',
               child: SizedBox(
                 height: 240,
                 child: FondeTableView<_Person>(
                   data: _people,
                   columns: _buildSortableColumns(),
                   keyExtractor: (p) => p.id,
+
+                  initialSortColumnId: 'name',
                 ),
               ),
             ),
@@ -104,6 +109,28 @@ class _TableViewPageState extends State<TableViewPage> {
               ),
             ),
             CatalogDemo(
+              label: 'Row reordering',
+              description: 'allowRowReordering: true. Drag rows to reorder.',
+              child: SizedBox(
+                height: 240,
+                child: FondeTableView<_Person>(
+                  data: _reorderablePeople,
+                  columns: _buildColumns(),
+                  keyExtractor: (p) => p.id,
+                  allowRowReordering: true,
+                  rowDragStyle: FondeTableRowDragStyle.cellOnly,
+                  onRowReorder: (oldIndex, newIndex) {
+                    setState(() {
+                      final list = List.of(_reorderablePeople);
+                      final item = list.removeAt(oldIndex);
+                      list.insert(newIndex, item);
+                      _reorderablePeople = list;
+                    });
+                  },
+                ),
+              ),
+            ),
+            CatalogDemo(
               label: 'Large data (virtualized)',
               description:
                   'Smooth scrolling with virtualization even for 100 rows',
@@ -113,6 +140,62 @@ class _TableViewPageState extends State<TableViewPage> {
                   data: _generatePeople(100),
                   columns: _buildColumns(),
                   keyExtractor: (p) => p.id,
+                ),
+              ),
+            ),
+            CatalogDemo(
+              label: 'Header divider',
+              description:
+                  'showHeaderDivider: true, headerDividerThickness: 2.0 (default)',
+              child: SizedBox(
+                height: 240,
+                child: FondeTableView<_Person>(
+                  data: _people,
+                  columns: _buildColumns(),
+                  keyExtractor: (p) => p.id,
+                  showHeaderDivider: true,
+                  headerDividerThickness: 2.0,
+                ),
+              ),
+            ),
+            CatalogDemo(
+              label: 'No header divider',
+              description: 'showHeaderDivider: false',
+              child: SizedBox(
+                height: 240,
+                child: FondeTableView<_Person>(
+                  data: _people,
+                  columns: _buildColumns(),
+                  keyExtractor: (p) => p.id,
+                  showHeaderDivider: false,
+                ),
+              ),
+            ),
+            CatalogDemo(
+              label: 'Column style: none',
+              description:
+                  'columnStyle: FondeTableColumnStyle.none — no dividers, no stripe',
+              child: SizedBox(
+                height: 240,
+                child: FondeTableView<_Person>(
+                  data: _people,
+                  columns: _buildColumns(),
+                  keyExtractor: (p) => p.id,
+                  columnStyle: FondeTableColumnStyle.none,
+                ),
+              ),
+            ),
+            CatalogDemo(
+              label: 'Column style: stripe rows',
+              description:
+                  'columnStyle: FondeTableColumnStyle.stripe — alternating row background',
+              child: SizedBox(
+                height: 240,
+                child: FondeTableView<_Person>(
+                  data: _people,
+                  columns: _buildColumns(),
+                  keyExtractor: (p) => p.id,
+                  columnStyle: FondeTableColumnStyle.stripe,
                 ),
               ),
             ),
@@ -128,6 +211,7 @@ class _TableViewPageState extends State<TableViewPage> {
         id: 'name',
         title: 'Name',
         width: 160,
+        fixed: true,
         cellBuilder:
             (p, isSelected) => _Cell(text: p.name, isSelected: isSelected),
       ),
@@ -158,7 +242,46 @@ class _TableViewPageState extends State<TableViewPage> {
   }
 
   List<FondeTableColumn<_Person>> _buildSortableColumns() {
-    return _buildColumns().map((c) => c.copyWith(sortable: true)).toList();
+    return [
+      FondeTableColumn(
+        id: 'name',
+        title: 'Name',
+        width: 160,
+        sortable: true,
+        sortKeyBuilder: (p) => p.name,
+        cellBuilder:
+            (p, isSelected) => _Cell(text: p.name, isSelected: isSelected),
+      ),
+      FondeTableColumn(
+        id: 'role',
+        title: 'Role',
+        width: 140,
+        sortable: true,
+        sortKeyBuilder: (p) => p.role,
+        cellBuilder:
+            (p, isSelected) => _Cell(text: p.role, isSelected: isSelected),
+      ),
+      FondeTableColumn(
+        id: 'department',
+        title: 'Department',
+        width: 160,
+        sortable: true,
+        sortKeyBuilder: (p) => p.department,
+        cellBuilder:
+            (p, isSelected) =>
+                _Cell(text: p.department, isSelected: isSelected),
+      ),
+      FondeTableColumn(
+        id: 'status',
+        title: 'Status',
+        width: 100,
+        sortable: true,
+        sortKeyBuilder: (p) => p.status,
+        cellBuilder:
+            (p, isSelected) =>
+                _StatusCell(status: p.status, isSelected: isSelected),
+      ),
+    ];
   }
 }
 

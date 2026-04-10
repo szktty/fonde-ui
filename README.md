@@ -55,7 +55,7 @@ Fonde UI's goal is to provide **operational and visual comfort** in desktop apps
 
 ### Data View
 
-- Table View — sortable columns, row selection, keyboard navigation
+- Table View — sortable/resizable/reorderable columns, single/multi-row selection, row reordering, leading/trailing row widgets, and visual customization (header divider, column dividers, stripe rows)
 - Outline View — collapsible tree-style list
 - List Tile — single/double-tap aware, hover highlight
 

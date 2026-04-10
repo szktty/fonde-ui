@@ -13,7 +13,6 @@ Developed for [RinneGraph](https://github.com/szktty/rinne-graph). Currently pro
 
 ## Key dependencies
 
-- pluto_grid: ^8.1.0 (FondeTableView)
 - popover: ^0.4.0 (FondePopover)
 - table_calendar: ^3.2.0 (FondeDatePicker)
 
@@ -1388,7 +1387,73 @@ Individual tree item with expand/collapse.
 
 ### FondeTableView
 
-Table display using pluto_grid package.
+Virtualized table view with sortable, resizable, and reorderable columns; single/multi-row selection; drag-to-reorder rows; and visual customization (header divider, column dividers, stripe rows).
+
+```dart
+FondeTableView<T>({
+  required List<T> data,
+  required List<FondeTableColumn<T>> columns,
+  required String Function(T) keyExtractor,
+  void Function(List<T>)? onRowsSelected,
+  void Function(T)? onRowDoubleTap,
+  bool allowMultiSelect = false,
+  bool allowColumnReordering = true,
+  bool allowColumnResizing = true,
+  bool allowRowReordering = false,
+  void Function(int oldIndex, int newIndex)? onColumnReorder,
+  void Function(int index, double newWidth)? onColumnResize,
+  void Function(int oldIndex, int newIndex)? onRowReorder,
+  bool Function(int draggedIndex, int targetIndex)? onRowReorderWillAccept,
+  String? initialSortColumnId,
+  FondeTableSortDirection initialSortDirection = ascending,
+  bool dimHeaders = true,
+  bool highlightSortedHeader = true,
+  Set<String>? primaryColumnIds,
+  bool highlightHeaderOnDrag = false,
+  bool highlightRowOnHover = false,
+  FondeTableRowReorderIndicator rowReorderIndicator = line,
+  FondeTableRowDragStyle rowDragStyle = fullRow,
+  Widget Function()? headerLeadingBuilder,
+  Widget Function(T item)? rowLeadingBuilder,
+  Widget Function()? headerTrailingBuilder,
+  Widget Function(T item)? rowTrailingBuilder,
+  bool showHeaderDivider = true,
+  double headerDividerThickness = 2.0,
+  FondeTableColumnStyle columnStyle = divider,
+  Color? stripeColor,                // null = use theme stripeBackground
+})
+```
+
+### FondeTableColumn
+
+```dart
+FondeTableColumn<T>({
+  required String id,
+  required String title,
+  required double width,
+  required Widget Function(T item, bool isSelected) cellBuilder,
+  bool sortable = false,
+  bool resizable = true,
+  bool fixed = false,
+  Comparable Function(T)? sortKeyBuilder,
+})
+```
+
+### FondeTableColumnStyle (enum)
+
+- `divider` — vertical dividers between columns and horizontal row borders (default)
+- `stripe` — alternating row background, no dividers
+- `none` — no dividers, no stripe
+
+### FondeTableRowReorderIndicator (enum)
+
+- `line` — simple horizontal line
+- `lineWithDot` — line with a leading dot
+
+### FondeTableRowDragStyle (enum)
+
+- `fullRow` — full row shown as drag overlay
+- `cellOnly` — only the cell area shown as drag overlay
 
 ---
 
