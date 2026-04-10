@@ -26,6 +26,7 @@ Desktop-first Flutter UI component library.
 
 ## References
 
+- Implemented components: `README.md`
 - Design policy and implementation guidelines: `doc/design-policy.md`
 - Localization: `doc/localization.md`
 - Release procedure (versioning, CHANGELOG, branch strategy, pub.dev): `doc/release.md`
