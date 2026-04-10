@@ -335,6 +335,10 @@ class FondeColorScheme {
       itemText: createStatefulColors(baseColors.foreground),
       selectedBackground: sideBarColors.activeItemBackground,
       selectedText: sideBarColors.activeItemText,
+      stripeBackground:
+          isDark
+              ? Colors.white.withAlpha(_AppColorConstants.alpha13)
+              : Colors.black.withAlpha(_AppColorConstants.alpha13),
     );
 
     // Define dropdown colors
