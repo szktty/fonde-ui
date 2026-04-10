@@ -1,10 +1,14 @@
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import '../../internal.dart';
-import '../widgets/fonde_gesture_detector.dart';
-import '../widgets/fonde_rectangle_border.dart';
-import '../icons/lucide_icons.dart';
-import '../typography/fonde_text.dart';
-import '../typography/fonde_text_style_builder.dart';
+import 'fonde_table_column.dart';
+import 'table_view_body.dart';
+import 'table_view_col_drag_overlay.dart';
+import 'table_view_header.dart';
+import 'table_view_header_cell.dart';
+import 'table_view_row_drag_overlay.dart';
+
+export 'fonde_table_column.dart';
 
 /// A desktop-optimized table view component.
 ///
@@ -176,46 +180,48 @@ enum FondeTableRowReorderIndicator {
 /// Sort direction for [FondeTableView].
 enum FondeTableSortDirection { ascending, descending }
 
-enum _SortDirection { none, ascending, descending }
+// ---------------------------------------------------------------------------
+// State
+// ---------------------------------------------------------------------------
 
 class _FondeTableViewState<T> extends State<FondeTableView<T>> {
   static const double _rowHeight = 28.0;
   static const double _headerHeight = 32.0;
   static const double _resizeHitWidth = 6.0;
   static const double _minColumnWidth = 50.0;
-  // Minimum pointer travel before column drag starts.
   static const double _columnDragThreshold = 4.0;
+  static const double _rowDragThreshold = 4.0;
   static const double _edgeWidgetDefaultWidth = 8.0;
 
   late List<double> _columnWidths;
-  late List<int> _columnOrder; // indices into widget.columns
+  late List<int> _columnOrder;
   Set<String> _selectedKeys = {};
   int? _hoveredRowIndex;
   int? _pressedRowIndex;
 
   // Sort state
   int? _sortColumnOrderIndex;
-  _SortDirection _sortDirection = _SortDirection.none;
+  TableViewSortDirection _sortDirection = TableViewSortDirection.none;
   late List<T> _sortedData;
 
   // Column resize state
-  int? _resizingColumnIndex; // order index
+  int? _resizingColumnIndex;
   double _resizeStartX = 0.0;
   double _resizeStartWidth = 0.0;
   bool _isNearResizeBoundary = false;
 
-  // Column reorder state (Overlay-based)
+  // Column reorder state
   int? _draggingColumnOrderIndex;
   int? _dropTargetColumnOrderIndex;
-  double _colDragStartX = 0.0; // pointer-down X in header local coords
-  double _colDragCurrentX = 0.0; // current pointer X in header local coords
-  bool _colDragActive = false; // true once drag threshold is exceeded
+  double _colDragStartX = 0.0;
+  double _colDragCurrentX = 0.0;
+  bool _colDragActive = false;
   OverlayEntry? _colDragOverlay;
   final _headerKey = GlobalKey();
 
-  // Row reorder state (Overlay-based)
+  // Row reorder state
   int? _draggingRowIndex;
-  int? _draggingRowCellOrderIndex; // for cellOnly drag style
+  int? _draggingRowCellOrderIndex;
   int? _dropTargetRowIndex;
   double _rowDragStartY = 0.0;
   double _rowDragCurrentY = 0.0;
@@ -230,20 +236,6 @@ class _FondeTableViewState<T> extends State<FondeTableView<T>> {
     _applyInitialSort();
     _sortedData = List.of(widget.data);
     _applySortToData();
-  }
-
-  void _applyInitialSort() {
-    final id = widget.initialSortColumnId;
-    if (id == null) return;
-    final origIndex = widget.columns.indexWhere((c) => c.id == id);
-    if (origIndex == -1) return;
-    final orderIndex = _columnOrder.indexOf(origIndex);
-    if (orderIndex == -1) return;
-    _sortColumnOrderIndex = orderIndex;
-    _sortDirection =
-        widget.initialSortDirection == FondeTableSortDirection.ascending
-            ? _SortDirection.ascending
-            : _SortDirection.descending;
   }
 
   @override
@@ -271,10 +263,24 @@ class _FondeTableViewState<T> extends State<FondeTableView<T>> {
     _columnOrder = List.generate(widget.columns.length, (i) => i);
   }
 
+  void _applyInitialSort() {
+    final id = widget.initialSortColumnId;
+    if (id == null) return;
+    final origIndex = widget.columns.indexWhere((c) => c.id == id);
+    if (origIndex == -1) return;
+    final orderIndex = _columnOrder.indexOf(origIndex);
+    if (orderIndex == -1) return;
+    _sortColumnOrderIndex = orderIndex;
+    _sortDirection =
+        widget.initialSortDirection == FondeTableSortDirection.ascending
+            ? TableViewSortDirection.ascending
+            : TableViewSortDirection.descending;
+  }
+
   void _applySortToData() {
     _sortedData = List.of(widget.data);
     if (_sortColumnOrderIndex != null &&
-        _sortDirection != _SortDirection.none) {
+        _sortDirection != TableViewSortDirection.none) {
       final colOrigIndex = _columnOrder[_sortColumnOrderIndex!];
       final col = widget.columns[colOrigIndex];
       if (col.sortKeyBuilder != null) {
@@ -282,7 +288,9 @@ class _FondeTableViewState<T> extends State<FondeTableView<T>> {
           final ka = col.sortKeyBuilder!(a);
           final kb = col.sortKeyBuilder!(b);
           final cmp = ka.compareTo(kb);
-          return _sortDirection == _SortDirection.ascending ? cmp : -cmp;
+          return _sortDirection == TableViewSortDirection.ascending
+              ? cmp
+              : -cmp;
         });
       }
     }
@@ -295,17 +303,17 @@ class _FondeTableViewState<T> extends State<FondeTableView<T>> {
 
     setState(() {
       if (_sortColumnOrderIndex == orderIndex) {
-        if (_sortDirection == _SortDirection.ascending) {
-          _sortDirection = _SortDirection.descending;
-        } else if (_sortDirection == _SortDirection.descending) {
-          _sortDirection = _SortDirection.none;
+        if (_sortDirection == TableViewSortDirection.ascending) {
+          _sortDirection = TableViewSortDirection.descending;
+        } else if (_sortDirection == TableViewSortDirection.descending) {
+          _sortDirection = TableViewSortDirection.none;
           _sortColumnOrderIndex = null;
         } else {
-          _sortDirection = _SortDirection.ascending;
+          _sortDirection = TableViewSortDirection.ascending;
         }
       } else {
         _sortColumnOrderIndex = orderIndex;
-        _sortDirection = _SortDirection.ascending;
+        _sortDirection = TableViewSortDirection.ascending;
       }
       _applySortToData();
     });
@@ -365,10 +373,9 @@ class _FondeTableViewState<T> extends State<FondeTableView<T>> {
   void _endResize() => setState(() => _resizingColumnIndex = null);
 
   // ---------------------------------------------------------------------------
-  // Column reorder (Overlay-based)
+  // Column reorder
   // ---------------------------------------------------------------------------
 
-  /// Returns the order index of the column whose header contains [localX].
   int? _columnOrderIndexAt(double localX) {
     double x = 0;
     for (int i = 0; i < _columnOrder.length; i++) {
@@ -378,9 +385,6 @@ class _FondeTableViewState<T> extends State<FondeTableView<T>> {
     return null;
   }
 
-  /// Returns the insertion order index for dropping a column at [localX].
-  /// Uses column midpoints to decide left vs right insertion.
-  /// The result is clamped to [minDropOrderIndex] so fixed columns are respected.
   int _dropInsertIndexAt(double localX) {
     final minDrop = _minDropOrderIndex();
     double x = 0;
@@ -395,7 +399,6 @@ class _FondeTableViewState<T> extends State<FondeTableView<T>> {
     return _columnOrder.length - 1;
   }
 
-  /// Left edge of column at [orderIndex] in header-local coordinates.
   double _columnLeft(int orderIndex) {
     double x = 0;
     for (int i = 0; i < orderIndex; i++) {
@@ -404,11 +407,8 @@ class _FondeTableViewState<T> extends State<FondeTableView<T>> {
     return x;
   }
 
-  /// Total width of all columns.
   double get _totalWidth => _columnWidths.fold(0.0, (s, w) => s + w);
 
-  /// Returns the minimum order index a dragged column can be dropped at,
-  /// accounting for fixed columns that must stay in place.
   int _minDropOrderIndex() {
     int min = 0;
     for (int i = 0; i < _columnOrder.length; i++) {
@@ -422,14 +422,12 @@ class _FondeTableViewState<T> extends State<FondeTableView<T>> {
   }
 
   void _onHeaderPointerDown(PointerDownEvent event) {
-    // Resize takes priority.
     if (_resizingColumnIndex != null) return;
     if (_resizeHandleAt(event.localPosition.dx) != null) return;
 
     final orderIndex = _columnOrderIndexAt(event.localPosition.dx);
     if (orderIndex == null) return;
 
-    // Track the column for both sort (tap) and drag (reorder).
     _draggingColumnOrderIndex = orderIndex;
     _colDragStartX = event.localPosition.dx;
     _colDragCurrentX = event.localPosition.dx;
@@ -441,7 +439,6 @@ class _FondeTableViewState<T> extends State<FondeTableView<T>> {
     if (_draggingColumnOrderIndex == null) return;
     if (!widget.allowColumnReordering) return;
 
-    // Fixed columns cannot be dragged.
     final dragOrigIndex = _columnOrder[_draggingColumnOrderIndex!];
     if (widget.columns[dragOrigIndex].fixed) return;
 
@@ -454,19 +451,16 @@ class _FondeTableViewState<T> extends State<FondeTableView<T>> {
       _showColDragOverlay();
     }
 
-    // Determine drop target from current X, clamped past fixed columns.
     final dropTarget = _dropInsertIndexAt(_colDragCurrentX);
     if (dropTarget != _dropTargetColumnOrderIndex) {
       setState(() => _dropTargetColumnOrderIndex = dropTarget);
     }
 
-    // Update overlay position.
     _colDragOverlay?.markNeedsBuild();
   }
 
   void _onHeaderPointerUp(PointerUpEvent event) {
     if (!_colDragActive) {
-      // No drag happened — treat as tap for sort.
       final orderIndex = _draggingColumnOrderIndex;
       _cancelColDrag();
       if (orderIndex != null) _onSortColumn(orderIndex);
@@ -495,83 +489,22 @@ class _FondeTableViewState<T> extends State<FondeTableView<T>> {
   }
 
   Widget _buildColDragOverlay(BuildContext context) {
-    final box = _headerKey.currentContext?.findRenderObject() as RenderBox?;
-    if (box == null || _draggingColumnOrderIndex == null) {
-      return const SizedBox.shrink();
-    }
-
-    final headerGlobal = box.localToGlobal(Offset.zero);
-    final tableHeight = box.size.height + _rowHeight * _sortedData.length;
-    final colOrigIndex = _columnOrder[_draggingColumnOrderIndex!];
-    final colWidth = _columnWidths[colOrigIndex];
-
-    // Clamp overlay X: left bound is after all fixed columns.
-    final minDrop = _minDropOrderIndex();
-    final minLeft = headerGlobal.dx + _columnLeft(minDrop);
-    final rawLeft =
-        headerGlobal.dx +
-        (_colDragCurrentX - _colDragStartX) +
-        _columnLeft(_draggingColumnOrderIndex!);
-    final clampedLeft = rawLeft.clamp(
-      minLeft,
-      headerGlobal.dx + _totalWidth - colWidth,
-    );
-
-    final cs = context.fondeColorScheme;
-    final textStyle = FondeTextStyleBuilder.buildTextStyleWithColor(
-      variant: FondeTextVariant.uiCaption,
-      context: context,
-      color: cs.base.foreground,
-      fontWeight: FontWeight.w500,
-    );
-    final col = widget.columns[colOrigIndex];
-
-    return Positioned(
-      left: clampedLeft,
-      top: headerGlobal.dy,
-      width: colWidth,
-      height: tableHeight,
-      child: IgnorePointer(
-        child: Opacity(
-          opacity: 0.7,
-          child: Container(
-            decoration: BoxDecoration(
-              color: cs.base.background,
-              border: Border.symmetric(
-                vertical: BorderSide(
-                  color: cs.interactive.input.focusBorder,
-                  width: 1.5,
-                ),
-              ),
-            ),
-            child: Column(
-              children: [
-                // Header cell
-                Container(
-                  height: _headerHeight,
-                  decoration: BoxDecoration(
-                    color: cs.base.background,
-                    border: Border(bottom: BorderSide(color: cs.base.border)),
-                  ),
-                  alignment: Alignment.centerLeft,
-                  padding: const EdgeInsets.symmetric(horizontal: 8),
-                  child: Text(col.title, style: textStyle),
-                ),
-                // Body cells
-                for (final item in _sortedData)
-                  Container(
-                    height: _rowHeight,
-                    decoration: BoxDecoration(
-                      border: Border(bottom: BorderSide(color: cs.base.border)),
-                    ),
-                    padding: const EdgeInsets.symmetric(horizontal: 8),
-                    child: col.cellBuilder(item, false),
-                  ),
-              ],
-            ),
-          ),
-        ),
-      ),
+    final idx = _draggingColumnOrderIndex;
+    if (idx == null) return const SizedBox.shrink();
+    return TableViewColDragOverlay<T>(
+      headerKey: _headerKey,
+      columns: widget.columns,
+      columnOrder: _columnOrder,
+      columnWidths: _columnWidths,
+      sortedData: _sortedData,
+      draggingColumnOrderIndex: idx,
+      colDragCurrentX: _colDragCurrentX,
+      colDragStartX: _colDragStartX,
+      rowHeight: _rowHeight,
+      headerHeight: _headerHeight,
+      columnLeft: _columnLeft,
+      totalWidth: _totalWidth,
+      minDropOrderIndex: _minDropOrderIndex(),
     );
   }
 
@@ -584,7 +517,6 @@ class _FondeTableViewState<T> extends State<FondeTableView<T>> {
       setState(() {
         final item = _columnOrder.removeAt(from);
         _columnOrder.insert(to, item);
-        // Update sort column index.
         if (_sortColumnOrderIndex != null) {
           if (_sortColumnOrderIndex == from) {
             _sortColumnOrderIndex = to;
@@ -613,10 +545,8 @@ class _FondeTableViewState<T> extends State<FondeTableView<T>> {
   }
 
   // ---------------------------------------------------------------------------
-  // Row reorder (Overlay-based)
+  // Row reorder
   // ---------------------------------------------------------------------------
-
-  static const double _rowDragThreshold = 4.0;
 
   void _onRowPointerDown(PointerDownEvent event, int rowIndex, double localX) {
     if (!widget.allowRowReordering) return;
@@ -633,7 +563,9 @@ class _FondeTableViewState<T> extends State<FondeTableView<T>> {
     _rowDragCurrentY = event.position.dy;
 
     if (!_rowDragActive) {
-      if ((_rowDragCurrentY - _rowDragStartY).abs() < _rowDragThreshold) return;
+      if ((_rowDragCurrentY - _rowDragStartY).abs() < _rowDragThreshold) {
+        return;
+      }
       _rowDragActive = true;
       _showRowDragOverlay();
     }
@@ -655,14 +587,10 @@ class _FondeTableViewState<T> extends State<FondeTableView<T>> {
 
   void _onRowPointerCancel(PointerCancelEvent event) => _cancelRowDrag();
 
-  /// Returns the insertion position (0..length) before which to insert the
-  /// dragged row, based on the midpoint of each row.
   int _rowDropIndexAt(double globalY) {
     final box = _bodyKey.currentContext?.findRenderObject() as RenderBox?;
     if (box == null) return _draggingRowIndex!;
     final localY = box.globalToLocal(Offset(0, globalY)).dy;
-    // Use midpoint of each row: if cursor is in the upper half → insert before,
-    // lower half → insert after.
     final rowIndex = (localY / _rowHeight).floor().clamp(
       0,
       _sortedData.length - 1,
@@ -685,52 +613,22 @@ class _FondeTableViewState<T> extends State<FondeTableView<T>> {
   }
 
   Widget _buildRowDragOverlay(BuildContext context) {
-    final box = _bodyKey.currentContext?.findRenderObject() as RenderBox?;
-    if (box == null || _draggingRowIndex == null)
-      return const SizedBox.shrink();
-
-    final bodyGlobal = box.localToGlobal(Offset.zero);
-    final item = _sortedData[_draggingRowIndex!];
-    final cs = context.fondeColorScheme;
-
-    final rawTop = _rowDragCurrentY - _rowHeight / 2;
-    final clampedTop = rawTop.clamp(
-      bodyGlobal.dy,
-      bodyGlobal.dy + box.size.height - _rowHeight,
-    );
-
-    final isCellOnly = widget.rowDragStyle == FondeTableRowDragStyle.cellOnly;
-    final cellOrderIndex = _draggingRowCellOrderIndex;
-
-    double overlayLeft = bodyGlobal.dx;
-    double overlayWidth = _totalWidth;
-    if (isCellOnly && cellOrderIndex != null) {
-      overlayLeft = bodyGlobal.dx + _columnLeft(cellOrderIndex);
-      overlayWidth = _columnWidths[_columnOrder[cellOrderIndex]];
-    }
-
-    return Positioned(
-      left: overlayLeft,
-      top: clampedTop,
-      width: overlayWidth,
-      height: _rowHeight,
-      child: IgnorePointer(
-        child: Opacity(
-          opacity: 0.85,
-          child: Container(
-            color: cs.interactive.list.selectedBackground,
-            child:
-                isCellOnly && cellOrderIndex != null
-                    ? _buildBodyCell(context, cs, cellOrderIndex, item, true)
-                    : Row(
-                      children: [
-                        for (int i = 0; i < _columnOrder.length; i++)
-                          _buildBodyCell(context, cs, i, item, true),
-                      ],
-                    ),
-          ),
-        ),
-      ),
+    final idx = _draggingRowIndex;
+    if (idx == null) return const SizedBox.shrink();
+    return TableViewRowDragOverlay<T>(
+      bodyKey: _bodyKey,
+      columns: widget.columns,
+      columnOrder: _columnOrder,
+      columnWidths: _columnWidths,
+      sortedData: _sortedData,
+      draggingRowIndex: idx,
+      draggingRowCellOrderIndex: _draggingRowCellOrderIndex,
+      rowDragCurrentY: _rowDragCurrentY,
+      rowHeight: _rowHeight,
+      isCellOnly: widget.rowDragStyle == FondeTableRowDragStyle.cellOnly,
+      primaryColumnIds: widget.primaryColumnIds,
+      columnLeft: _columnLeft,
+      totalWidth: _totalWidth,
     );
   }
 
@@ -753,6 +651,60 @@ class _FondeTableViewState<T> extends State<FondeTableView<T>> {
   }
 
   // ---------------------------------------------------------------------------
+  // Header pointer dispatch (resize takes priority over reorder)
+  // ---------------------------------------------------------------------------
+
+  void _handleHeaderPointerDown(PointerDownEvent e) {
+    if (widget.allowColumnResizing) {
+      final handle = _resizeHandleAt(e.localPosition.dx);
+      if (handle != null) {
+        _startResize(handle, e.localPosition.dx);
+        return;
+      }
+    }
+    _onHeaderPointerDown(e);
+  }
+
+  void _handleHeaderPointerMove(PointerMoveEvent e) {
+    if (_resizingColumnIndex != null) {
+      _updateResize(e.localPosition.dx);
+    } else {
+      _onHeaderPointerMove(e);
+    }
+  }
+
+  void _handleHeaderPointerUp(PointerUpEvent e) {
+    if (_resizingColumnIndex != null) {
+      _endResize();
+    } else {
+      _onHeaderPointerUp(e);
+    }
+  }
+
+  void _handleHeaderPointerCancel(PointerCancelEvent e) {
+    if (_resizingColumnIndex != null) {
+      _endResize();
+    } else {
+      _onHeaderPointerCancel(e);
+    }
+  }
+
+  void _handleHeaderHover(PointerHoverEvent event) {
+    if (!widget.allowColumnResizing) return;
+    final handle = _resizeHandleAt(event.localPosition.dx);
+    final near = handle != null;
+    if (near != _isNearResizeBoundary) {
+      setState(() => _isNearResizeBoundary = near);
+    }
+  }
+
+  void _handleHeaderExit(PointerExitEvent _) {
+    if (_isNearResizeBoundary) {
+      setState(() => _isNearResizeBoundary = false);
+    }
+  }
+
+  // ---------------------------------------------------------------------------
   // Build
   // ---------------------------------------------------------------------------
 
@@ -770,547 +722,73 @@ class _FondeTableViewState<T> extends State<FondeTableView<T>> {
       ),
       child: Column(
         children: [
-          _buildHeader(context, cs),
-          Expanded(child: _buildBody(context, cs)),
-        ],
-      ),
-    );
-  }
-
-  // ---------------------------------------------------------------------------
-  // Header
-  // ---------------------------------------------------------------------------
-
-  Widget _buildHeader(BuildContext context, FondeColorScheme cs) {
-    final textStyle = FondeTextStyleBuilder.buildTextStyleWithColor(
-      variant: FondeTextVariant.uiCaption,
-      context: context,
-      color: cs.base.foreground,
-      fontWeight: FontWeight.w500,
-    );
-
-    // Determine cursor:
-    // 1. During resize → resizeColumn
-    // 2. Near resize boundary → resizeColumn
-    // 3. Column drag active → grabbing
-    // 4. Otherwise → defer
-    MouseCursor cursor = MouseCursor.defer;
-    if (_resizingColumnIndex != null || _isNearResizeBoundary) {
-      cursor = SystemMouseCursors.resizeColumn;
-    } else if (_colDragActive) {
-      cursor = SystemMouseCursors.grabbing;
-    }
-
-    final header = SizedBox(
-      key: _headerKey,
-      height: _headerHeight,
-      child: MouseRegion(
-        cursor: cursor,
-        onHover: (event) {
-          if (!widget.allowColumnResizing) return;
-          final handle = _resizeHandleAt(event.localPosition.dx);
-          final near = handle != null;
-          if (near != _isNearResizeBoundary) {
-            setState(() => _isNearResizeBoundary = near);
-          }
-        },
-        onExit: (_) {
-          if (_isNearResizeBoundary) {
-            setState(() => _isNearResizeBoundary = false);
-          }
-        },
-        child: Listener(
-          behavior: HitTestBehavior.opaque,
-          onPointerDown: (e) {
-            // Resize check first.
-            if (widget.allowColumnResizing) {
-              final handle = _resizeHandleAt(e.localPosition.dx);
-              if (handle != null) {
-                _startResize(handle, e.localPosition.dx);
-                return;
-              }
-            }
-            _onHeaderPointerDown(e);
-          },
-          onPointerMove: (e) {
-            if (_resizingColumnIndex != null) {
-              _updateResize(e.localPosition.dx);
-            } else {
-              _onHeaderPointerMove(e);
-            }
-          },
-          onPointerUp: (e) {
-            if (_resizingColumnIndex != null) {
-              _endResize();
-            } else {
-              _onHeaderPointerUp(e);
-            }
-          },
-          onPointerCancel: (e) {
-            if (_resizingColumnIndex != null) {
-              _endResize();
-            } else {
-              _onHeaderPointerCancel(e);
-            }
-          },
-          child: Row(
-            children: [
-              for (int i = 0; i < _columnOrder.length; i++)
-                _buildHeaderCell(context, cs, textStyle, i),
-            ],
+          TableViewHeader<T>(
+            columns: widget.columns,
+            columnOrder: _columnOrder,
+            columnWidths: _columnWidths,
+            sortColumnOrderIndex: _sortColumnOrderIndex,
+            sortDirection: _sortDirection,
+            dimHeaders: widget.dimHeaders,
+            highlightSortedHeader: widget.highlightSortedHeader,
+            highlightHeaderOnDrag: widget.highlightHeaderOnDrag,
+            allowColumnResizing: widget.allowColumnResizing,
+            isResizing: _resizingColumnIndex != null,
+            isNearResizeBoundary: _isNearResizeBoundary,
+            colDragActive: _colDragActive,
+            draggingColumnOrderIndex: _draggingColumnOrderIndex,
+            dropTargetColumnOrderIndex: _dropTargetColumnOrderIndex,
+            leadingBuilder: widget.headerLeadingBuilder,
+            trailingBuilder: widget.headerTrailingBuilder,
+            headerKey: _headerKey,
+            headerHeight: _headerHeight,
+            edgeWidgetDefaultWidth: _edgeWidgetDefaultWidth,
+            onPointerDown: _handleHeaderPointerDown,
+            onPointerMove: _handleHeaderPointerMove,
+            onPointerUp: _handleHeaderPointerUp,
+            onPointerCancel: _handleHeaderPointerCancel,
+            onHover: _handleHeaderHover,
+            onExit: _handleHeaderExit,
           ),
-        ),
-      ),
-    );
-
-    return Row(
-      children: [
-        widget.headerLeadingBuilder?.call() ??
-            const SizedBox(width: _edgeWidgetDefaultWidth),
-        Expanded(child: header),
-        widget.headerTrailingBuilder?.call() ??
-            const SizedBox(width: _edgeWidgetDefaultWidth),
-      ],
-    );
-  }
-
-  Widget _buildHeaderCell(
-    BuildContext context,
-    FondeColorScheme cs,
-    TextStyle textStyle,
-    int orderIndex,
-  ) {
-    final colOrigIndex = _columnOrder[orderIndex];
-    final col = widget.columns[colOrigIndex];
-    final width = _columnWidths[colOrigIndex];
-    final isSorted = _sortColumnOrderIndex == orderIndex;
-    final sortDir = isSorted ? _sortDirection : _SortDirection.none;
-    final isDragging =
-        _colDragActive && _draggingColumnOrderIndex == orderIndex;
-    final isDropTarget =
-        _colDragActive && _dropTargetColumnOrderIndex == orderIndex;
-
-    Color bgColor = cs.base.background;
-    if (widget.highlightHeaderOnDrag) {
-      if (isDragging) {
-        bgColor = cs.interactive.list.itemBackground.hover;
-      } else if (isDropTarget) {
-        bgColor = cs.interactive.list.itemBackground.active;
-      }
-    }
-
-    // Determine header text opacity.
-    // - dimHeaders: true → all headers dimmed by default
-    // - highlightSortedHeader: true → sorted column restored to full opacity
-    final bool sortActive =
-        _sortColumnOrderIndex != null && _sortDirection != _SortDirection.none;
-    final bool shouldDim =
-        widget.dimHeaders &&
-        !(widget.highlightSortedHeader && sortActive && isSorted);
-    final TextStyle cellTextStyle =
-        shouldDim
-            ? textStyle.copyWith(color: textStyle.color?.withAlpha(128))
-            : textStyle;
-
-    const dividerInset = 5.0;
-    final showDivider = orderIndex < _columnOrder.length - 1;
-
-    return SizedBox(
-      width: width,
-      height: _headerHeight,
-      child: DecoratedBox(
-        decoration: BoxDecoration(
-          color: bgColor,
-          border: Border(bottom: BorderSide(color: cs.base.border, width: 1.0)),
-        ),
-        child: Row(
-          children: [
-            Expanded(
-              child: _HeaderCell(
-                col: col,
-                textStyle: cellTextStyle,
-                sortDirection: sortDir,
-                onTap: null,
-              ),
-            ),
-            if (showDivider)
-              Padding(
-                padding: EdgeInsets.symmetric(vertical: dividerInset),
-                child: VerticalDivider(
-                  width: 1.0,
-                  thickness: 1.0,
-                  color: cs.base.border,
-                ),
-              ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  // ---------------------------------------------------------------------------
-  // Body
-  // ---------------------------------------------------------------------------
-
-  Widget _buildBody(BuildContext context, FondeColorScheme cs) {
-    return Listener(
-      key: _bodyKey,
-      behavior: HitTestBehavior.translucent,
-      onPointerDown:
-          widget.allowRowReordering
-              ? (e) {
-                final index = (e.localPosition.dy / _rowHeight).floor().clamp(
-                  0,
-                  _sortedData.length - 1,
-                );
-                _onRowPointerDown(e, index, e.localPosition.dx);
-              }
-              : null,
-      onPointerMove: widget.allowRowReordering ? _onRowPointerMove : null,
-      onPointerUp: widget.allowRowReordering ? _onRowPointerUp : null,
-      onPointerCancel: widget.allowRowReordering ? _onRowPointerCancel : null,
-      child: ListView.builder(
-        itemCount: _sortedData.length,
-        itemExtent: _rowHeight,
-        itemBuilder: (context, index) {
-          final item = _sortedData[index];
-          final key = widget.keyExtractor(item);
-          final isSelected = _selectedKeys.contains(key);
-          final isHovered = _hoveredRowIndex == index;
-          final isPressed = _pressedRowIndex == index;
-          final isDragging = _rowDragActive && _draggingRowIndex == index;
-          // Show insert line above row[index] when dropTarget == index,
-          // or below the last row when dropTarget == length.
-          final showLineAbove = _rowDragActive && _dropTargetRowIndex == index;
-          final showLineBelow =
-              _rowDragActive &&
-              index == _sortedData.length - 1 &&
-              _dropTargetRowIndex == _sortedData.length;
-          return _buildRow(
-            context,
-            cs,
-            index,
-            item,
-            isSelected,
-            isHovered,
-            isPressed,
-            isDragging,
-            showLineAbove,
-            showLineBelow,
-          );
-        },
-      ),
-    );
-  }
-
-  Widget _buildRow(
-    BuildContext context,
-    FondeColorScheme cs,
-    int index,
-    T item,
-    bool isSelected,
-    bool isHovered,
-    bool isPressed,
-    bool isDragging,
-    bool showLineAbove,
-    bool showLineBelow,
-  ) {
-    Color bgColor;
-    if (isSelected) {
-      bgColor = cs.interactive.list.selectedBackground;
-    } else if (isPressed) {
-      bgColor = cs.interactive.list.itemBackground.active;
-    } else if (isHovered && widget.highlightRowOnHover) {
-      bgColor = cs.interactive.list.itemBackground.hover;
-    } else {
-      bgColor = cs.base.background;
-    }
-
-    const lineThickness = 2.0;
-    const dotDiameter = 6.0;
-    const dotOverhang = 4.0; // how far the dot extends beyond the left edge
-    final lineColor = cs.interactive.input.focusBorder;
-
-    const highlightRadius = 6.0;
-
-    // Always squircle since leading/trailing always provide visual margin.
-    final highlightDecoration = ShapeDecoration(
-      color: bgColor,
-      shape: SquircleBorder(
-        borderRadius: SquircleBorderRadius(
-          cornerRadius: highlightRadius,
-          cornerSmoothing: 0.6,
-        ),
-      ),
-    );
-
-    final cellArea = FondeGestureDetector(
-      behavior: HitTestBehavior.opaque,
-      onTapDown: (_) => setState(() => _pressedRowIndex = index),
-      onTapUp: (_) => setState(() => _pressedRowIndex = null),
-      onTapCancel: () => setState(() => _pressedRowIndex = null),
-      onTap: () => _onRowTap(item),
-      onDoubleTap:
-          widget.onRowDoubleTap != null
-              ? () => widget.onRowDoubleTap!(item)
-              : null,
-      child: Container(
-        height: _rowHeight,
-        decoration: highlightDecoration,
-        child: Row(
-          children: [
-            for (int i = 0; i < _columnOrder.length; i++)
-              _buildBodyCell(context, cs, i, item, isSelected),
-          ],
-        ),
-      ),
-    );
-
-    return MouseRegion(
-      cursor:
-          widget.allowRowReordering
-              ? (_rowDragActive
-                  ? SystemMouseCursors.grabbing
-                  : SystemMouseCursors.grab)
-              : MouseCursor.defer,
-      onEnter: (_) => setState(() => _hoveredRowIndex = index),
-      onExit:
-          (_) => setState(() {
-            if (_hoveredRowIndex == index) _hoveredRowIndex = null;
-          }),
-      child: Stack(
-        clipBehavior: Clip.none,
-        children: [
-          SizedBox(
-            height: _rowHeight,
-            child: Row(
-              children: [
-                widget.rowLeadingBuilder?.call(item) ??
-                    const SizedBox(width: _edgeWidgetDefaultWidth),
-                Expanded(child: cellArea),
-                widget.rowTrailingBuilder?.call(item) ??
-                    const SizedBox(width: _edgeWidgetDefaultWidth),
-              ],
-            ),
-          ),
-          if (showLineAbove)
-            _buildInsertLine(
-              lineColor,
-              lineThickness,
-              dotDiameter,
-              dotOverhang,
-              above: true,
-            ),
-          if (showLineBelow)
-            _buildInsertLine(
-              lineColor,
-              lineThickness,
-              dotDiameter,
-              dotOverhang,
-              above: false,
-            ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildInsertLine(
-    Color color,
-    double lineThickness,
-    double dotDiameter,
-    double dotOverhang, {
-    required bool above,
-  }) {
-    final offset = -lineThickness / 2;
-    final useDot =
-        widget.rowReorderIndicator == FondeTableRowReorderIndicator.lineWithDot;
-
-    return Positioned(
-      top: above ? offset : null,
-      bottom: above ? null : offset,
-      left: useDot ? -dotOverhang : 0,
-      right: 0,
-      height: useDot ? dotDiameter : lineThickness,
-      child:
-          useDot
-              ? Row(
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  Container(
-                    width: dotDiameter,
-                    height: dotDiameter,
-                    decoration: BoxDecoration(
-                      color: color,
-                      shape: BoxShape.circle,
-                    ),
-                  ),
-                  Expanded(
-                    child: Container(height: lineThickness, color: color),
-                  ),
-                ],
-              )
-              : ColoredBox(color: color),
-    );
-  }
-
-  Widget _buildBodyCell(
-    BuildContext context,
-    FondeColorScheme cs,
-    int orderIndex,
-    T item,
-    bool isSelected,
-  ) {
-    final colOrigIndex = _columnOrder[orderIndex];
-    final col = widget.columns[colOrigIndex];
-    final width = _columnWidths[colOrigIndex];
-
-    // When primaryColumnIds is specified, primary columns use full-opacity text
-    // and non-primary columns use dimmed text.
-    // null → leftmost column is primary; {} → all equal; {ids} → specified ids
-    final ids = widget.primaryColumnIds;
-    final isPrimary =
-        ids == null
-            ? _columnOrder.isNotEmpty && _columnOrder[0] == colOrigIndex
-            : ids.isEmpty || ids.contains(col.id);
-
-    return SizedBox(
-      width: width,
-      height: _rowHeight,
-      child: Container(
-        decoration: BoxDecoration(
-          border: Border(bottom: BorderSide(color: cs.base.border, width: 1.0)),
-        ),
-        padding: const EdgeInsets.symmetric(horizontal: 8),
-        child: Opacity(
-          opacity: isPrimary ? 1.0 : 0.5,
-          child: col.cellBuilder(item, isSelected),
-        ),
-      ),
-    );
-  }
-}
-
-// ---------------------------------------------------------------------------
-// Header cell widget
-// ---------------------------------------------------------------------------
-
-class _HeaderCell<T> extends StatelessWidget {
-  final FondeTableColumn<T> col;
-  final TextStyle textStyle;
-  final _SortDirection sortDirection;
-  final VoidCallback? onTap;
-
-  const _HeaderCell({
-    required this.col,
-    required this.textStyle,
-    required this.sortDirection,
-    this.onTap,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    Widget label = Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 8),
-      child: Row(
-        children: [
           Expanded(
-            child: Text(
-              col.title,
-              style: textStyle,
-              overflow: TextOverflow.ellipsis,
+            child: TableViewBody<T>(
+              sortedData: _sortedData,
+              keyExtractor: widget.keyExtractor,
+              columns: widget.columns,
+              columnOrder: _columnOrder,
+              columnWidths: _columnWidths,
+              selectedKeys: _selectedKeys,
+              primaryColumnIds: widget.primaryColumnIds,
+              hoveredRowIndex: _hoveredRowIndex,
+              pressedRowIndex: _pressedRowIndex,
+              rowDragActive: _rowDragActive,
+              draggingRowIndex: _draggingRowIndex,
+              dropTargetRowIndex: _dropTargetRowIndex,
+              allowRowReordering: widget.allowRowReordering,
+              highlightRowOnHover: widget.highlightRowOnHover,
+              rowReorderIndicator: widget.rowReorderIndicator,
+              rowHeight: _rowHeight,
+              edgeWidgetDefaultWidth: _edgeWidgetDefaultWidth,
+              bodyKey: _bodyKey,
+              rowLeadingBuilder: widget.rowLeadingBuilder,
+              rowTrailingBuilder: widget.rowTrailingBuilder,
+              onPointerDown: _onRowPointerDown,
+              onPointerMove: _onRowPointerMove,
+              onPointerUp: _onRowPointerUp,
+              onPointerCancel: _onRowPointerCancel,
+              onRowTap: _onRowTap,
+              onRowDoubleTap: widget.onRowDoubleTap,
+              onTapDown: (index) => setState(() => _pressedRowIndex = index),
+              onTapUp: () => setState(() => _pressedRowIndex = null),
+              onTapCancel: () => setState(() => _pressedRowIndex = null),
+              onEnter: (index) => setState(() => _hoveredRowIndex = index),
+              onExit:
+                  (index) => setState(() {
+                    if (_hoveredRowIndex == index) _hoveredRowIndex = null;
+                  }),
             ),
           ),
-          if (sortDirection == _SortDirection.ascending)
-            Icon(LucideIcons.chevronUp, size: 12, color: textStyle.color),
-          if (sortDirection == _SortDirection.descending)
-            Icon(LucideIcons.chevronDown, size: 12, color: textStyle.color),
         ],
       ),
-    );
-
-    if (onTap != null) {
-      label = GestureDetector(onTap: onTap, child: label);
-    }
-
-    return label;
-  }
-}
-
-// ---------------------------------------------------------------------------
-// Column definition
-// ---------------------------------------------------------------------------
-
-/// Column definition for [FondeTableView].
-class FondeTableColumn<T> {
-  /// Unique column identifier.
-  final String id;
-
-  /// Column header label.
-  final String title;
-
-  /// Initial column width in logical pixels.
-  final double width;
-
-  /// Minimum column width. Defaults to 50px.
-  final double? minWidth;
-
-  /// Maximum column width. Unlimited by default.
-  final double? maxWidth;
-
-  /// Builds the cell widget for the given [item].
-  /// [isSelected] is true when the row is currently selected.
-  final Widget Function(T item, bool isSelected) cellBuilder;
-
-  /// Whether this column supports sorting.
-  final bool sortable;
-
-  /// Whether this column can be resized.
-  final bool resizable;
-
-  /// When true, this column cannot be dragged or receive drops from other
-  /// columns. Fixed columns always stay in their current position.
-  final bool fixed;
-
-  /// Extracts a comparable sort key from an item.
-  /// Required when [sortable] is true.
-  final Comparable Function(T item)? sortKeyBuilder;
-
-  const FondeTableColumn({
-    required this.id,
-    required this.title,
-    required this.width,
-    required this.cellBuilder,
-    this.minWidth,
-    this.maxWidth,
-    this.sortable = false,
-    this.resizable = true,
-    this.fixed = false,
-    this.sortKeyBuilder,
-  });
-
-  FondeTableColumn<T> copyWith({
-    String? id,
-    String? title,
-    double? width,
-    double? minWidth,
-    double? maxWidth,
-    Widget Function(T item, bool isSelected)? cellBuilder,
-    bool? sortable,
-    bool? resizable,
-    bool? fixed,
-    Comparable Function(T item)? sortKeyBuilder,
-  }) {
-    return FondeTableColumn<T>(
-      id: id ?? this.id,
-      title: title ?? this.title,
-      width: width ?? this.width,
-      minWidth: minWidth ?? this.minWidth,
-      maxWidth: maxWidth ?? this.maxWidth,
-      cellBuilder: cellBuilder ?? this.cellBuilder,
-      sortable: sortable ?? this.sortable,
-      resizable: resizable ?? this.resizable,
-      fixed: fixed ?? this.fixed,
-      sortKeyBuilder: sortKeyBuilder ?? this.sortKeyBuilder,
     );
   }
 }
