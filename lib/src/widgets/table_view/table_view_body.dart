@@ -20,6 +20,8 @@ class TableViewBody<T> extends StatelessWidget {
   final bool allowRowReordering;
   final bool highlightRowOnHover;
   final FondeTableRowReorderIndicator rowReorderIndicator;
+  final FondeTableColumnStyle columnStyle;
+  final Color? stripeColor;
   final double rowHeight;
   final double edgeWidgetDefaultWidth;
   final GlobalKey bodyKey;
@@ -56,6 +58,8 @@ class TableViewBody<T> extends StatelessWidget {
     required this.allowRowReordering,
     required this.highlightRowOnHover,
     required this.rowReorderIndicator,
+    required this.columnStyle,
+    required this.stripeColor,
     required this.rowHeight,
     required this.edgeWidgetDefaultWidth,
     required this.bodyKey,
@@ -77,6 +81,8 @@ class TableViewBody<T> extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final cs = context.fondeColorScheme;
+    final resolvedStripeColor =
+        stripeColor ?? cs.interactive.list.stripeBackground;
 
     return Listener(
       key: bodyKey,
@@ -109,6 +115,8 @@ class TableViewBody<T> extends StatelessWidget {
               rowDragActive &&
               index == sortedData.length - 1 &&
               dropTargetRowIndex == sortedData.length;
+          final isStripeRow =
+              columnStyle == FondeTableColumnStyle.stripe && index.isOdd;
 
           return TableViewRow<T>(
             item: item,
@@ -126,6 +134,8 @@ class TableViewBody<T> extends StatelessWidget {
             allowRowReordering: allowRowReordering,
             rowDragActive: rowDragActive,
             rowReorderIndicator: rowReorderIndicator,
+            columnStyle: columnStyle,
+            stripeRowBackground: isStripeRow ? resolvedStripeColor : null,
             rowHeight: rowHeight,
             edgeWidgetDefaultWidth: edgeWidgetDefaultWidth,
             insertLineColor: cs.interactive.input.focusBorder,

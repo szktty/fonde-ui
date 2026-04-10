@@ -143,6 +143,62 @@ class _TableViewPageState extends State<TableViewPage> {
                 ),
               ),
             ),
+            CatalogDemo(
+              label: 'Header divider',
+              description:
+                  'showHeaderDivider: true, headerDividerThickness: 2.0 (default)',
+              child: SizedBox(
+                height: 240,
+                child: FondeTableView<_Person>(
+                  data: _people,
+                  columns: _buildColumns(),
+                  keyExtractor: (p) => p.id,
+                  showHeaderDivider: true,
+                  headerDividerThickness: 2.0,
+                ),
+              ),
+            ),
+            CatalogDemo(
+              label: 'No header divider',
+              description: 'showHeaderDivider: false',
+              child: SizedBox(
+                height: 240,
+                child: FondeTableView<_Person>(
+                  data: _people,
+                  columns: _buildColumns(),
+                  keyExtractor: (p) => p.id,
+                  showHeaderDivider: false,
+                ),
+              ),
+            ),
+            CatalogDemo(
+              label: 'Column style: none',
+              description:
+                  'columnStyle: FondeTableColumnStyle.none — no dividers, no stripe',
+              child: SizedBox(
+                height: 240,
+                child: FondeTableView<_Person>(
+                  data: _people,
+                  columns: _buildColumns(),
+                  keyExtractor: (p) => p.id,
+                  columnStyle: FondeTableColumnStyle.none,
+                ),
+              ),
+            ),
+            CatalogDemo(
+              label: 'Column style: stripe rows',
+              description:
+                  'columnStyle: FondeTableColumnStyle.stripe — alternating row background',
+              child: SizedBox(
+                height: 240,
+                child: FondeTableView<_Person>(
+                  data: _people,
+                  columns: _buildColumns(),
+                  keyExtractor: (p) => p.id,
+                  columnStyle: FondeTableColumnStyle.stripe,
+                ),
+              ),
+            ),
           ],
         ),
       ],

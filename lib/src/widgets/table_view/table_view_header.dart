@@ -26,6 +26,7 @@ class TableViewHeader<T> extends StatelessWidget {
   final GlobalKey headerKey;
   final double headerHeight;
   final double edgeWidgetDefaultWidth;
+  final FondeTableColumnStyle columnStyle;
 
   // Pointer callbacks (forwarded to state)
   final void Function(PointerDownEvent) onPointerDown;
@@ -56,6 +57,7 @@ class TableViewHeader<T> extends StatelessWidget {
     required this.headerKey,
     required this.headerHeight,
     required this.edgeWidgetDefaultWidth,
+    required this.columnStyle,
     required this.onPointerDown,
     required this.onPointerMove,
     required this.onPointerUp,
@@ -148,16 +150,15 @@ class TableViewHeader<T> extends StatelessWidget {
             : textStyle;
 
     const dividerInset = 5.0;
-    final showDivider = orderIndex < columnOrder.length - 1;
+    final showColumnDivider =
+        columnStyle == FondeTableColumnStyle.divider &&
+        orderIndex < columnOrder.length - 1;
 
     return SizedBox(
       width: width,
       height: headerHeight,
-      child: DecoratedBox(
-        decoration: BoxDecoration(
-          color: bgColor,
-          border: Border(bottom: BorderSide(color: cs.base.border, width: 1.0)),
-        ),
+      child: ColoredBox(
+        color: bgColor,
         child: Row(
           children: [
             Expanded(
@@ -168,9 +169,9 @@ class TableViewHeader<T> extends StatelessWidget {
                 onTap: null,
               ),
             ),
-            if (showDivider)
+            if (showColumnDivider)
               Padding(
-                padding: EdgeInsets.symmetric(vertical: dividerInset),
+                padding: const EdgeInsets.symmetric(vertical: dividerInset),
                 child: VerticalDivider(
                   width: 1.0,
                   thickness: 1.0,

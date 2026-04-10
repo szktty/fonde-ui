@@ -901,11 +901,15 @@ class FondeListColors {
   /// Selected state text color
   final Color selectedText;
 
+  /// Stripe row background color (used when columnStyle is stripe)
+  final Color stripeBackground;
+
   const FondeListColors({
     required this.itemBackground,
     required this.itemText,
     required this.selectedBackground,
     required this.selectedText,
+    required this.stripeBackground,
   });
 
   FondeListColors copyWith({
@@ -913,12 +917,14 @@ class FondeListColors {
     FondeStatefulColors? itemText,
     Color? selectedBackground,
     Color? selectedText,
+    Color? stripeBackground,
   }) {
     return FondeListColors(
       itemBackground: itemBackground ?? this.itemBackground,
       itemText: itemText ?? this.itemText,
       selectedBackground: selectedBackground ?? this.selectedBackground,
       selectedText: selectedText ?? this.selectedText,
+      stripeBackground: stripeBackground ?? this.stripeBackground,
     );
   }
 
@@ -929,7 +935,8 @@ class FondeListColors {
         other.itemBackground == itemBackground &&
         other.itemText == itemText &&
         other.selectedBackground == selectedBackground &&
-        other.selectedText == selectedText;
+        other.selectedText == selectedText &&
+        other.stripeBackground == stripeBackground;
   }
 
   @override
@@ -939,6 +946,7 @@ class FondeListColors {
       itemText,
       selectedBackground,
       selectedText,
+      stripeBackground,
     );
   }
 }

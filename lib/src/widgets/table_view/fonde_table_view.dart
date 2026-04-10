@@ -125,6 +125,23 @@ class FondeTableView<T> extends StatefulWidget {
   /// Builds a widget shown to the right of each data row.
   final Widget Function(T item)? rowTrailingBuilder;
 
+  /// Controls whether a horizontal divider is shown below the header row.
+  /// Defaults to true.
+  final bool showHeaderDivider;
+
+  /// Thickness of the header bottom divider in logical pixels.
+  /// Only meaningful when [showHeaderDivider] is true. Defaults to 2.0.
+  final double headerDividerThickness;
+
+  /// Controls the column separator style.
+  /// Defaults to [FondeTableColumnStyle.divider].
+  final FondeTableColumnStyle columnStyle;
+
+  /// Background color for alternating rows when [columnStyle] is
+  /// [FondeTableColumnStyle.stripe]. When null, a subtle tint derived from
+  /// the theme's base background is used.
+  final Color? stripeColor;
+
   const FondeTableView({
     super.key,
     required this.data,
@@ -145,6 +162,10 @@ class FondeTableView<T> extends StatefulWidget {
     this.highlightRowOnHover = false,
     this.rowReorderIndicator = FondeTableRowReorderIndicator.line,
     this.rowDragStyle = FondeTableRowDragStyle.fullRow,
+    this.showHeaderDivider = true,
+    this.headerDividerThickness = 2.0,
+    this.columnStyle = FondeTableColumnStyle.divider,
+    this.stripeColor,
     this.headerLeadingBuilder,
     this.rowLeadingBuilder,
     this.headerTrailingBuilder,
@@ -179,6 +200,18 @@ enum FondeTableRowReorderIndicator {
 
 /// Sort direction for [FondeTableView].
 enum FondeTableSortDirection { ascending, descending }
+
+/// Controls the column separator style in [FondeTableView].
+enum FondeTableColumnStyle {
+  /// Shows a vertical divider between columns. (default)
+  divider,
+
+  /// Alternates row background colors (stripe rows). No column dividers.
+  stripe,
+
+  /// No column dividers and no stripe. Plain background for all rows.
+  none,
+}
 
 // ---------------------------------------------------------------------------
 // State
@@ -722,32 +755,46 @@ class _FondeTableViewState<T> extends State<FondeTableView<T>> {
       ),
       child: Column(
         children: [
-          TableViewHeader<T>(
-            columns: widget.columns,
-            columnOrder: _columnOrder,
-            columnWidths: _columnWidths,
-            sortColumnOrderIndex: _sortColumnOrderIndex,
-            sortDirection: _sortDirection,
-            dimHeaders: widget.dimHeaders,
-            highlightSortedHeader: widget.highlightSortedHeader,
-            highlightHeaderOnDrag: widget.highlightHeaderOnDrag,
-            allowColumnResizing: widget.allowColumnResizing,
-            isResizing: _resizingColumnIndex != null,
-            isNearResizeBoundary: _isNearResizeBoundary,
-            colDragActive: _colDragActive,
-            draggingColumnOrderIndex: _draggingColumnOrderIndex,
-            dropTargetColumnOrderIndex: _dropTargetColumnOrderIndex,
-            leadingBuilder: widget.headerLeadingBuilder,
-            trailingBuilder: widget.headerTrailingBuilder,
-            headerKey: _headerKey,
-            headerHeight: _headerHeight,
-            edgeWidgetDefaultWidth: _edgeWidgetDefaultWidth,
-            onPointerDown: _handleHeaderPointerDown,
-            onPointerMove: _handleHeaderPointerMove,
-            onPointerUp: _handleHeaderPointerUp,
-            onPointerCancel: _handleHeaderPointerCancel,
-            onHover: _handleHeaderHover,
-            onExit: _handleHeaderExit,
+          Container(
+            decoration: BoxDecoration(
+              border:
+                  widget.showHeaderDivider
+                      ? Border(
+                        bottom: BorderSide(
+                          color: cs.base.border,
+                          width: widget.headerDividerThickness,
+                        ),
+                      )
+                      : null,
+            ),
+            child: TableViewHeader<T>(
+              columns: widget.columns,
+              columnOrder: _columnOrder,
+              columnWidths: _columnWidths,
+              sortColumnOrderIndex: _sortColumnOrderIndex,
+              sortDirection: _sortDirection,
+              dimHeaders: widget.dimHeaders,
+              highlightSortedHeader: widget.highlightSortedHeader,
+              highlightHeaderOnDrag: widget.highlightHeaderOnDrag,
+              allowColumnResizing: widget.allowColumnResizing,
+              isResizing: _resizingColumnIndex != null,
+              isNearResizeBoundary: _isNearResizeBoundary,
+              colDragActive: _colDragActive,
+              draggingColumnOrderIndex: _draggingColumnOrderIndex,
+              dropTargetColumnOrderIndex: _dropTargetColumnOrderIndex,
+              leadingBuilder: widget.headerLeadingBuilder,
+              trailingBuilder: widget.headerTrailingBuilder,
+              headerKey: _headerKey,
+              headerHeight: _headerHeight,
+              edgeWidgetDefaultWidth: _edgeWidgetDefaultWidth,
+              columnStyle: widget.columnStyle,
+              onPointerDown: _handleHeaderPointerDown,
+              onPointerMove: _handleHeaderPointerMove,
+              onPointerUp: _handleHeaderPointerUp,
+              onPointerCancel: _handleHeaderPointerCancel,
+              onHover: _handleHeaderHover,
+              onExit: _handleHeaderExit,
+            ),
           ),
           Expanded(
             child: TableViewBody<T>(
@@ -766,6 +813,8 @@ class _FondeTableViewState<T> extends State<FondeTableView<T>> {
               allowRowReordering: widget.allowRowReordering,
               highlightRowOnHover: widget.highlightRowOnHover,
               rowReorderIndicator: widget.rowReorderIndicator,
+              columnStyle: widget.columnStyle,
+              stripeColor: widget.stripeColor,
               rowHeight: _rowHeight,
               edgeWidgetDefaultWidth: _edgeWidgetDefaultWidth,
               bodyKey: _bodyKey,

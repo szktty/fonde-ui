@@ -21,6 +21,11 @@ class TableViewRow<T> extends StatelessWidget {
   final bool allowRowReordering;
   final bool rowDragActive;
   final FondeTableRowReorderIndicator rowReorderIndicator;
+  final FondeTableColumnStyle columnStyle;
+
+  /// Non-null when this row is an odd-indexed stripe row.
+  final Color? stripeRowBackground;
+
   final double rowHeight;
   final double edgeWidgetDefaultWidth;
   final Color insertLineColor;
@@ -52,6 +57,8 @@ class TableViewRow<T> extends StatelessWidget {
     required this.allowRowReordering,
     required this.rowDragActive,
     required this.rowReorderIndicator,
+    required this.columnStyle,
+    required this.stripeRowBackground,
     required this.rowHeight,
     required this.edgeWidgetDefaultWidth,
     required this.insertLineColor,
@@ -77,6 +84,8 @@ class TableViewRow<T> extends StatelessWidget {
       bgColor = cs.interactive.list.itemBackground.active;
     } else if (isHovered) {
       bgColor = cs.interactive.list.itemBackground.hover;
+    } else if (stripeRowBackground != null) {
+      bgColor = stripeRowBackground!;
     } else {
       bgColor = cs.base.background;
     }
@@ -173,18 +182,39 @@ class TableViewRow<T> extends StatelessWidget {
             ? columnOrder.isNotEmpty && columnOrder[0] == colOrigIndex
             : ids.isEmpty || ids.contains(col.id);
 
+    final showColumnDivider =
+        columnStyle == FondeTableColumnStyle.divider &&
+        orderIndex < columnOrder.length - 1;
+
     return SizedBox(
       width: width,
       height: rowHeight,
-      child: Container(
-        decoration: BoxDecoration(
-          border: Border(bottom: BorderSide(color: cs.base.border, width: 1.0)),
-        ),
-        padding: const EdgeInsets.symmetric(horizontal: 8),
-        child: Opacity(
-          opacity: isPrimary ? 1.0 : 0.5,
-          child: col.cellBuilder(item, isSelected),
-        ),
+      child: Row(
+        children: [
+          Expanded(
+            child: Container(
+              decoration:
+                  columnStyle != FondeTableColumnStyle.none
+                      ? BoxDecoration(
+                        border: Border(
+                          bottom: BorderSide(color: cs.base.border, width: 1.0),
+                        ),
+                      )
+                      : null,
+              padding: const EdgeInsets.symmetric(horizontal: 8),
+              child: Opacity(
+                opacity: isPrimary ? 1.0 : 0.5,
+                child: col.cellBuilder(item, isSelected),
+              ),
+            ),
+          ),
+          if (showColumnDivider)
+            SizedBox(
+              width: 1.0,
+              height: rowHeight,
+              child: ColoredBox(color: cs.base.border),
+            ),
+        ],
       ),
     );
   }
