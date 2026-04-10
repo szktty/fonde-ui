@@ -71,10 +71,18 @@ cd example && fvm flutter build macos  # verify build
 git add -p && git commit -m "Release version <version>"
 git flow release finish <version>      # merges to main + develop, creates tag v<version>
 git push origin main develop --tags
+fvm dart pub publish --dry-run         # verify published files before publishing
+fvm dart pub publish                   # publish to pub.dev
 ```
 
 - The `-dev` suffix is removed from the version on release
 - After release, bump version to next `-dev` on `develop`
+
+## pub.dev Publishing
+
+- Run `fvm dart pub publish --dry-run` first to verify the list of files to be published
+- `CLAUDE.md` is intentionally included in the published package — do **not** add it to `.pubignore`
+- After publishing, bump the version to the next `-dev` on `develop` and add a `## develop` section to `CHANGELOG.md`
 
 ## Versioning
 
