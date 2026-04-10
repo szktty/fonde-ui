@@ -439,7 +439,7 @@ FondeSearchController.maybeOf(context)  // FondeSearchController?
 
 ### FondeScaffold
 
-Top-level app layout. Uses multi_split_view for resizable panes.
+Top-level app layout. Uses a custom in-house implementation for resizable panes.
 
 ```dart
 FondeScaffold({
