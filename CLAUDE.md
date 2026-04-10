@@ -2,7 +2,7 @@
 
 ## Project Overview
 
-Desktop-first Flutter UI optimized for native-quality instant feedback, with accessibility built in.
+Desktop-first Flutter UI component library.
 
 ## Directory Structure
 
