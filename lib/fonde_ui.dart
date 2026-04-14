@@ -92,7 +92,6 @@ export 'src/widgets/widgets/fonde_expansion_tile.dart';
 
 // ─── Date Picker ──────────────────────────────────────────────────────────────
 export 'src/widgets/date_picker/fonde_date_picker.dart';
-export 'package:table_calendar/table_calendar.dart' show StartingDayOfWeek;
 
 // ─── Dialogs & Overlays ───────────────────────────────────────────────────────
 export 'src/widgets/widgets/fonde_dialog.dart';
