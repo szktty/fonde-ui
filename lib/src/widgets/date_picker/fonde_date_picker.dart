@@ -1,11 +1,47 @@
 import 'package:flutter/material.dart';
-import 'package:table_calendar/table_calendar.dart';
 import '../../core/context_extensions.dart';
 import '../../internal.dart';
 import '../styling/fonde_border_radius.dart';
 import '../icons/lucide_icons.dart';
 
-/// A date picker widget backed by table_calendar.
+/// First day of the week.
+enum FondeDayOfWeek {
+  monday,
+  tuesday,
+  wednesday,
+  thursday,
+  friday,
+  saturday,
+  sunday;
+
+  /// Converts to ISO weekday (1 = Monday, 7 = Sunday).
+  int get isoWeekday {
+    switch (this) {
+      case FondeDayOfWeek.monday:
+        return 1;
+      case FondeDayOfWeek.tuesday:
+        return 2;
+      case FondeDayOfWeek.wednesday:
+        return 3;
+      case FondeDayOfWeek.thursday:
+        return 4;
+      case FondeDayOfWeek.friday:
+        return 5;
+      case FondeDayOfWeek.saturday:
+        return 6;
+      case FondeDayOfWeek.sunday:
+        return 7;
+    }
+  }
+}
+
+/// Returns true if [a] and [b] fall on the same calendar day.
+bool fondeSameDay(DateTime? a, DateTime? b) {
+  if (a == null || b == null) return false;
+  return a.year == b.year && a.month == b.month && a.day == b.day;
+}
+
+/// A date picker widget with a monthly calendar grid.
 ///
 /// Displays a monthly calendar grid. Supports single-day and range selection.
 /// Styling is automatically derived from the active fonde-ui theme.
@@ -55,7 +91,7 @@ class FondeDatePicker extends StatefulWidget {
   final dynamic locale;
 
   /// First day of the week (defaults to Monday).
-  final StartingDayOfWeek startingDayOfWeek;
+  final FondeDayOfWeek startingDayOfWeek;
 
   /// Whether to disable zoom scaling.
   final bool disableZoom;
@@ -74,7 +110,7 @@ class FondeDatePicker extends StatefulWidget {
     this.eventLoader,
     this.enabledDayPredicate,
     this.locale,
-    this.startingDayOfWeek = StartingDayOfWeek.monday,
+    this.startingDayOfWeek = FondeDayOfWeek.monday,
     this.disableZoom = false,
   });
 
@@ -83,7 +119,7 @@ class FondeDatePicker extends StatefulWidget {
 }
 
 class _FondeDatePickerState extends State<FondeDatePicker> {
-  late DateTime _focusedDay;
+  late DateTime _focusedMonth;
   DateTime? _selectedDay;
   DateTime? _rangeStart;
   DateTime? _rangeEnd;
@@ -92,10 +128,89 @@ class _FondeDatePickerState extends State<FondeDatePicker> {
   void initState() {
     super.initState();
     final today = DateTime.now();
-    _focusedDay = widget.initialDate ?? today;
+    final initial = widget.initialDate ?? today;
+    _focusedMonth = DateTime(initial.year, initial.month);
     _selectedDay = widget.selectedDate;
     _rangeStart = widget.rangeStart;
     _rangeEnd = widget.rangeEnd;
+  }
+
+  void _prevMonth() {
+    setState(() {
+      _focusedMonth = DateTime(_focusedMonth.year, _focusedMonth.month - 1);
+    });
+  }
+
+  void _nextMonth() {
+    setState(() {
+      _focusedMonth = DateTime(_focusedMonth.year, _focusedMonth.month + 1);
+    });
+  }
+
+  bool _canGoPrev() {
+    final prev = DateTime(_focusedMonth.year, _focusedMonth.month - 1);
+    final firstMonth = DateTime(widget.firstDate.year, widget.firstDate.month);
+    return !prev.isBefore(firstMonth);
+  }
+
+  bool _canGoNext() {
+    final next = DateTime(_focusedMonth.year, _focusedMonth.month + 1);
+    final lastMonth = DateTime(widget.lastDate.year, widget.lastDate.month);
+    return !next.isAfter(lastMonth);
+  }
+
+  void _onDayTapped(DateTime day) {
+    if (widget.rangeSelectionMode) {
+      setState(() {
+        if (_rangeStart == null || (_rangeStart != null && _rangeEnd != null)) {
+          _rangeStart = day;
+          _rangeEnd = null;
+        } else {
+          if (day.isBefore(_rangeStart!)) {
+            _rangeEnd = _rangeStart;
+            _rangeStart = day;
+          } else {
+            _rangeEnd = day;
+          }
+        }
+      });
+      widget.onRangeSelected?.call(_rangeStart, _rangeEnd);
+    } else {
+      setState(() => _selectedDay = day);
+      widget.onDaySelected?.call(day);
+    }
+  }
+
+  /// Returns the days to display in the calendar grid (42 cells = 6 rows × 7 cols).
+  List<DateTime?> _buildCalendarDays() {
+    final firstOfMonth = _focusedMonth;
+    final daysInMonth =
+        DateTime(firstOfMonth.year, firstOfMonth.month + 1, 0).day;
+
+    // Offset: how many blank cells before the 1st
+    final firstWeekday = firstOfMonth.weekday; // 1=Mon, 7=Sun
+    final startOffset =
+        (firstWeekday - widget.startingDayOfWeek.isoWeekday + 7) % 7;
+
+    final days = <DateTime?>[];
+    // Leading blanks from previous month
+    final prevMonth = DateTime(firstOfMonth.year, firstOfMonth.month - 1);
+    final daysInPrevMonth =
+        DateTime(prevMonth.year, prevMonth.month + 1, 0).day;
+    for (int i = startOffset - 1; i >= 0; i--) {
+      days.add(DateTime(prevMonth.year, prevMonth.month, daysInPrevMonth - i));
+    }
+    // Current month
+    for (int d = 1; d <= daysInMonth; d++) {
+      days.add(DateTime(firstOfMonth.year, firstOfMonth.month, d));
+    }
+    // Trailing days from next month to fill the grid
+    final nextMonth = DateTime(firstOfMonth.year, firstOfMonth.month + 1);
+    int nextDay = 1;
+    while (days.length < 42) {
+      days.add(DateTime(nextMonth.year, nextMonth.month, nextDay++));
+    }
+    return days;
   }
 
   @override
@@ -131,10 +246,6 @@ class _FondeDatePickerState extends State<FondeDatePicker> {
       fontWeight: FontWeight.w500,
     );
 
-    final cellDecoration = BoxDecoration(
-      color: Colors.transparent,
-      borderRadius: FondeBorderRadiusValues.smallRadius,
-    );
     final selectedDecoration = BoxDecoration(
       color: selectedBg,
       borderRadius: FondeBorderRadiusValues.smallRadius,
@@ -143,6 +254,18 @@ class _FondeDatePickerState extends State<FondeDatePicker> {
       color: todayBg,
       borderRadius: FondeBorderRadiusValues.smallRadius,
     );
+    final rangeDecoration = BoxDecoration(
+      color: rangeHighlight,
+      borderRadius: FondeBorderRadiusValues.smallRadius,
+    );
+
+    final calendarDays = _buildCalendarDays();
+    final today = DateTime.now();
+    final todayNormalized = DateTime(today.year, today.month, today.day);
+    final currentMonth = _focusedMonth.month;
+
+    // Day-of-week header labels, ordered by startingDayOfWeek
+    final dowLabels = _buildDowLabels(context);
 
     return Container(
       decoration: BoxDecoration(
@@ -150,152 +273,249 @@ class _FondeDatePickerState extends State<FondeDatePicker> {
         borderRadius: FondeBorderRadiusValues.mediumRadius,
         border: Border.all(color: borderColor),
       ),
-      child: TableCalendar(
-        firstDay: widget.firstDate,
-        lastDay: widget.lastDate,
-        focusedDay: _focusedDay,
-        locale: widget.locale,
-        startingDayOfWeek: widget.startingDayOfWeek,
-        rowHeight: rowHeight,
-        daysOfWeekHeight: dowHeight,
-        pageAnimationEnabled: false,
-        // pageAnimationEnabled: false alone does not suppress the chevron-button
-        // month transition animation. As a workaround, set duration to 1 ms
-        // (Duration.zero triggers an assertion in Flutter's scroll internals).
-        pageAnimationDuration: const Duration(milliseconds: 1),
-        availableGestures: AvailableGestures.none,
-        headerStyle: HeaderStyle(
-          titleCentered: true,
-          formatButtonVisible: false,
-          titleTextStyle: TextStyle(
-            fontSize: 13.0 * zoomScale,
-            fontWeight: FontWeight.w600,
-            color: fg,
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          // Header
+          _buildHeader(context, zoomScale, fg, muted, textStyle),
+          // Day-of-week row
+          SizedBox(
+            height: dowHeight,
+            child: Row(
+              children: List.generate(7, (i) {
+                return Expanded(
+                  child: Center(child: Text(dowLabels[i], style: dowStyle)),
+                );
+              }),
+            ),
           ),
-          leftChevronIcon: Icon(
-            LucideIcons.chevronLeft,
+          // Calendar grid (6 rows)
+          for (int row = 0; row < 6; row++)
+            SizedBox(
+              height: rowHeight,
+              child: Row(
+                children: List.generate(7, (col) {
+                  final day = calendarDays[row * 7 + col];
+                  if (day == null) return const Expanded(child: SizedBox());
+                  final isCurrentMonth = day.month == currentMonth;
+                  final dayNormalized = DateTime(day.year, day.month, day.day);
+                  final isToday = fondeSameDay(dayNormalized, todayNormalized);
+                  final isSelected =
+                      !widget.rangeSelectionMode &&
+                      fondeSameDay(day, _selectedDay);
+                  final isRangeStart =
+                      widget.rangeSelectionMode &&
+                      fondeSameDay(day, _rangeStart);
+                  final isRangeEnd =
+                      widget.rangeSelectionMode && fondeSameDay(day, _rangeEnd);
+                  final isInRange =
+                      widget.rangeSelectionMode &&
+                      _rangeStart != null &&
+                      _rangeEnd != null &&
+                      dayNormalized.isAfter(_rangeStart!) &&
+                      dayNormalized.isBefore(_rangeEnd!);
+                  final isBeforeFirst = day.isBefore(widget.firstDate);
+                  final isAfterLast = day.isAfter(widget.lastDate);
+                  final isDisabledByPredicate =
+                      widget.enabledDayPredicate != null &&
+                      !widget.enabledDayPredicate!(day);
+                  final isDisabled =
+                      isBeforeFirst || isAfterLast || isDisabledByPredicate;
+
+                  BoxDecoration? decoration;
+                  TextStyle style;
+
+                  if (isSelected || isRangeStart || isRangeEnd) {
+                    decoration = selectedDecoration;
+                    style = selectedStyle;
+                  } else if (isInRange) {
+                    decoration = rangeDecoration;
+                    style = textStyle.copyWith(color: accent);
+                  } else if (isToday) {
+                    decoration = todayDecoration;
+                    style = todayStyle;
+                  } else if (isDisabled || !isCurrentMonth) {
+                    style =
+                        isDisabled
+                            ? mutedStyle.copyWith(
+                              color: muted.withValues(alpha: 0.3),
+                            )
+                            : mutedStyle;
+                    decoration = null;
+                  } else {
+                    style = textStyle;
+                    decoration = null;
+                  }
+
+                  final events = widget.eventLoader?.call(day) ?? [];
+                  final hasEvents = events.isNotEmpty;
+
+                  Widget cell = Container(
+                    margin: EdgeInsets.all(2.0 * zoomScale),
+                    decoration: decoration,
+                    alignment: Alignment.center,
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text('${day.day}', style: style),
+                        if (hasEvents)
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              for (int i = 0; i < events.length && i < 3; i++)
+                                Container(
+                                  width: 4.0 * zoomScale,
+                                  height: 4.0 * zoomScale,
+                                  margin: EdgeInsets.symmetric(
+                                    horizontal: 1.0 * zoomScale,
+                                  ),
+                                  decoration: BoxDecoration(
+                                    color: accent,
+                                    shape: BoxShape.circle,
+                                  ),
+                                ),
+                            ],
+                          ),
+                      ],
+                    ),
+                  );
+
+                  if (!isDisabled) {
+                    cell = GestureDetector(
+                      onTap: () => _onDayTapped(day),
+                      child: MouseRegion(
+                        cursor: SystemMouseCursors.click,
+                        child: cell,
+                      ),
+                    );
+                  }
+
+                  return Expanded(child: cell);
+                }),
+              ),
+            ),
+          SizedBox(height: 4.0 * zoomScale),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildHeader(
+    BuildContext context,
+    double zoomScale,
+    Color fg,
+    Color muted,
+    TextStyle textStyle,
+  ) {
+    final titleStyle = TextStyle(
+      fontSize: 13.0 * zoomScale,
+      fontWeight: FontWeight.w600,
+      color: fg,
+    );
+    final title = _formatMonthYear(context, _focusedMonth);
+
+    return Padding(
+      padding: EdgeInsets.symmetric(
+        vertical: 8.0 * zoomScale,
+        horizontal: 4.0 * zoomScale,
+      ),
+      child: Row(
+        children: [
+          _ChevronButton(
+            icon: LucideIcons.chevronLeft,
             size: 16.0 * zoomScale,
             color: muted,
+            padding: EdgeInsets.all(6.0 * zoomScale),
+            margin: EdgeInsets.only(left: 4.0 * zoomScale),
+            enabled: _canGoPrev(),
+            onTap: _prevMonth,
           ),
-          rightChevronIcon: Icon(
-            LucideIcons.chevronRight,
+          Expanded(child: Center(child: Text(title, style: titleStyle))),
+          _ChevronButton(
+            icon: LucideIcons.chevronRight,
             size: 16.0 * zoomScale,
             color: muted,
+            padding: EdgeInsets.all(6.0 * zoomScale),
+            margin: EdgeInsets.only(right: 4.0 * zoomScale),
+            enabled: _canGoNext(),
+            onTap: _nextMonth,
           ),
-          leftChevronPadding: EdgeInsets.all(6.0 * zoomScale),
-          rightChevronPadding: EdgeInsets.all(6.0 * zoomScale),
-          leftChevronMargin: EdgeInsets.only(left: 4.0 * zoomScale),
-          rightChevronMargin: EdgeInsets.only(right: 4.0 * zoomScale),
-          headerPadding: EdgeInsets.symmetric(vertical: 8.0 * zoomScale),
-        ),
-        daysOfWeekStyle: DaysOfWeekStyle(
-          weekdayStyle: dowStyle,
-          weekendStyle: dowStyle,
-        ),
-        calendarStyle: CalendarStyle(
-          outsideDaysVisible: true,
-          defaultDecoration: cellDecoration,
-          weekendDecoration: cellDecoration,
-          outsideDecoration: cellDecoration,
-          todayDecoration: todayDecoration,
-          selectedDecoration: selectedDecoration,
-          rangeStartDecoration: selectedDecoration,
-          rangeEndDecoration: selectedDecoration,
-          withinRangeDecoration: BoxDecoration(
-            color: rangeHighlight,
-            borderRadius: FondeBorderRadiusValues.smallRadius,
+        ],
+      ),
+    );
+  }
+
+  /// Returns 7 day-of-week abbreviations starting from [startingDayOfWeek].
+  List<String> _buildDowLabels(BuildContext context) {
+    // ISO weekday names Mon..Sun
+    final all = ['Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa', 'Su'];
+    final start = widget.startingDayOfWeek.isoWeekday - 1; // 0-based index
+    return List.generate(7, (i) => all[(start + i) % 7]);
+  }
+
+  /// Formats "April 2025" / "2025年4月" etc. using MaterialLocalizations.
+  String _formatMonthYear(BuildContext context, DateTime date) {
+    try {
+      final loc = MaterialLocalizations.of(context);
+      // formatMonthYear returns locale-appropriate string
+      return loc.formatMonthYear(date);
+    } catch (_) {
+      // Fallback: English
+      const months = [
+        'January',
+        'February',
+        'March',
+        'April',
+        'May',
+        'June',
+        'July',
+        'August',
+        'September',
+        'October',
+        'November',
+        'December',
+      ];
+      return '${months[date.month - 1]} ${date.year}';
+    }
+  }
+}
+
+class _ChevronButton extends StatelessWidget {
+  final IconData icon;
+  final double size;
+  final Color color;
+  final EdgeInsets padding;
+  final EdgeInsets margin;
+  final bool enabled;
+  final VoidCallback onTap;
+
+  const _ChevronButton({
+    required this.icon,
+    required this.size,
+    required this.color,
+    required this.padding,
+    required this.margin,
+    required this.enabled,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: enabled ? onTap : null,
+      child: MouseRegion(
+        cursor:
+            enabled ? SystemMouseCursors.click : SystemMouseCursors.forbidden,
+        child: Container(
+          margin: margin,
+          padding: padding,
+          child: Icon(
+            icon,
+            size: size,
+            color: enabled ? color : color.withValues(alpha: 0.3),
           ),
-          rangeHighlightColor: rangeHighlight,
-          defaultTextStyle: textStyle,
-          weekendTextStyle: textStyle,
-          outsideTextStyle: mutedStyle,
-          disabledTextStyle: mutedStyle.copyWith(
-            color: muted.withValues(alpha: 0.3),
-          ),
-          todayTextStyle: todayStyle,
-          selectedTextStyle: selectedStyle,
-          rangeStartTextStyle: selectedStyle,
-          rangeEndTextStyle: selectedStyle,
-          withinRangeTextStyle: textStyle.copyWith(color: accent),
-          markerDecoration: BoxDecoration(
-            color: accent,
-            shape: BoxShape.circle,
-          ),
-          markerSize: 4.0 * zoomScale,
-          markersMaxCount: 3,
-          cellPadding: EdgeInsets.all(2.0 * zoomScale),
         ),
-        calendarBuilders: CalendarBuilders(
-          // Use plain Container instead of AnimatedContainer to remove selection animation
-          selectedBuilder: (context, day, focusedDay) {
-            return Container(
-              margin: EdgeInsets.all(2.0 * zoomScale),
-              decoration: selectedDecoration,
-              alignment: Alignment.center,
-              child: Text('${day.day}', style: selectedStyle),
-            );
-          },
-          todayBuilder: (context, day, focusedDay) {
-            return Container(
-              margin: EdgeInsets.all(2.0 * zoomScale),
-              decoration: todayDecoration,
-              alignment: Alignment.center,
-              child: Text('${day.day}', style: todayStyle),
-            );
-          },
-          rangeStartBuilder: (context, day, focusedDay) {
-            return Container(
-              margin: EdgeInsets.all(2.0 * zoomScale),
-              decoration: selectedDecoration,
-              alignment: Alignment.center,
-              child: Text('${day.day}', style: selectedStyle),
-            );
-          },
-          rangeEndBuilder: (context, day, focusedDay) {
-            return Container(
-              margin: EdgeInsets.all(2.0 * zoomScale),
-              decoration: selectedDecoration,
-              alignment: Alignment.center,
-              child: Text('${day.day}', style: selectedStyle),
-            );
-          },
-        ),
-        selectedDayPredicate:
-            widget.rangeSelectionMode
-                ? null
-                : (day) => _selectedDay != null && isSameDay(_selectedDay, day),
-        rangeStartDay: widget.rangeSelectionMode ? _rangeStart : null,
-        rangeEndDay: widget.rangeSelectionMode ? _rangeEnd : null,
-        rangeSelectionMode:
-            widget.rangeSelectionMode
-                ? RangeSelectionMode.enforced
-                : RangeSelectionMode.disabled,
-        eventLoader: widget.eventLoader,
-        enabledDayPredicate: widget.enabledDayPredicate,
-        onDaySelected:
-            widget.rangeSelectionMode
-                ? null
-                : (selected, focused) {
-                  setState(() {
-                    _selectedDay = selected;
-                    _focusedDay = focused;
-                  });
-                  widget.onDaySelected?.call(selected);
-                },
-        onRangeSelected:
-            widget.rangeSelectionMode
-                ? (start, end, focused) {
-                  setState(() {
-                    _rangeStart = start;
-                    _rangeEnd = end;
-                    _focusedDay = focused;
-                  });
-                  widget.onRangeSelected?.call(start, end);
-                }
-                : null,
-        onPageChanged: (focused) {
-          setState(() => _focusedDay = focused);
-        },
       ),
     );
   }
@@ -311,7 +531,7 @@ Future<DateTime?> showFondeDatePickerDialog({
   DateTime? initialDate,
   DateTime? selectedDate,
   dynamic locale,
-  StartingDayOfWeek startingDayOfWeek = StartingDayOfWeek.monday,
+  FondeDayOfWeek startingDayOfWeek = FondeDayOfWeek.monday,
   bool Function(DateTime)? enabledDayPredicate,
   List<Object?> Function(DateTime)? eventLoader,
 }) async {
@@ -319,7 +539,6 @@ Future<DateTime?> showFondeDatePickerDialog({
   await showDialog<void>(
     context: context,
     builder: (ctx) {
-      DateTime? picked = selectedDate;
       return Dialog(
         backgroundColor: Colors.transparent,
         elevation: 0,
@@ -335,8 +554,7 @@ Future<DateTime?> showFondeDatePickerDialog({
             enabledDayPredicate: enabledDayPredicate,
             eventLoader: eventLoader,
             onDaySelected: (date) {
-              picked = date;
-              result = picked;
+              result = date;
               Navigator.of(ctx).pop();
             },
           ),
