@@ -11,9 +11,9 @@
 
 ## develop
 
-## 0.12.0-dev
+## 0.12.0
 
-**Release date**: TBD
+**Release date**: 2026-04-15
 
 - [CHANGE] Remove `table_calendar` dependency — `FondeDatePicker` is now a self-contained monthly grid implementation
 - [CHANGE] `FondeDatePicker`: replace `StartingDayOfWeek` (from `table_calendar`) with `FondeDayOfWeek` enum
