@@ -7,14 +7,13 @@ Developed for [RinneGraph](https://github.com/szktty/rinne-graph). Currently pro
 ## Package info
 
 - name: fonde_ui
-- version: 0.11.0
+- version: 0.12.0-dev
 - Dart SDK: ^3.7.0
 - Flutter: >=3.41.2
 
 ## Key dependencies
 
 - popover: ^0.4.0 (FondePopover)
-- table_calendar: ^3.2.0 (FondeDatePicker)
 
 ## Imports
 
@@ -943,7 +942,7 @@ Default height: 32px. On focus-lost or Enter, text is parsed and clamped to [min
 
 ### FondeDatePicker
 
-Monthly calendar widget for single-day or range selection. Backed by `table_calendar`.
+Monthly calendar widget for single-day or range selection. Self-contained implementation with no external dependencies.
 
 ```dart
 FondeDatePicker({
@@ -959,9 +958,14 @@ FondeDatePicker({
   List<Object?> Function(DateTime day)? eventLoader,
   bool Function(DateTime day)? enabledDayPredicate,
   dynamic locale,                     // e.g. 'ja', 'en_US'
-  StartingDayOfWeek startingDayOfWeek = StartingDayOfWeek.monday,
+  FondeDayOfWeek startingDayOfWeek = FondeDayOfWeek.monday,
   bool disableZoom = false,
 })
+```
+
+`FondeDayOfWeek` enum: `monday`, `tuesday`, `wednesday`, `thursday`, `friday`, `saturday`, `sunday`. Each value exposes an `isoWeekday` getter (1 = Monday … 7 = Sunday).
+
+Top-level utility: `fondeSameDay(DateTime? a, DateTime? b)` — returns `true` when both dates fall on the same calendar day.
 ```
 
 Helper to show in a dialog:
