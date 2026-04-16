@@ -131,7 +131,7 @@ export 'src/widgets/widgets/fonde_icon.dart';
 export 'src/widgets/widgets/fonde_container.dart';
 export 'src/widgets/widgets/fonde_divider.dart';
 export 'src/widgets/widgets/fonde_physical_model.dart';
-export 'src/widgets/widgets/fonde_rectangle_border.dart';
+export 'src/widgets/widgets/fonde_rectangle_border.dart' hide buildSquirclePath;
 export 'src/widgets/widgets/tag.dart';
 
 // ─── Progress ─────────────────────────────────────────────────────────────────

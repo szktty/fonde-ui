@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 
 import '../../internal.dart';
+import 'fonde_rectangle_border.dart';
 
 // ---------------------------------------------------------------------------
 // Direction
@@ -18,13 +19,7 @@ enum FondePopoverDirection { top, bottom, left, right }
 // ---------------------------------------------------------------------------
 
 /// Animation type for [FondePopover].
-enum FondePopoverAnimation {
-  scaleAndFade,
-  slideAndFade,
-  elastic,
-  fade,
-  none,
-}
+enum FondePopoverAnimation { scaleAndFade, slideAndFade, elastic, fade, none }
 
 // ---------------------------------------------------------------------------
 // State tracker
@@ -87,10 +82,9 @@ class FondePopover {
     switch (type) {
       case FondePopoverAnimation.scaleAndFade:
         return ScaleTransition(
-          scale: Tween<double>(
-            begin: 0.8,
-            end: 1.0,
-          ).animate(CurvedAnimation(parent: animation, curve: Curves.easeOutCubic)),
+          scale: Tween<double>(begin: 0.8, end: 1.0).animate(
+            CurvedAnimation(parent: animation, curve: Curves.easeOutCubic),
+          ),
           child: FadeTransition(
             opacity: Tween<double>(begin: 0.0, end: 1.0).animate(
               CurvedAnimation(
@@ -114,10 +108,9 @@ class FondePopover {
             slideOffset = const Offset(-0.3, 0.0);
         }
         return SlideTransition(
-          position: Tween<Offset>(
-            begin: slideOffset,
-            end: Offset.zero,
-          ).animate(CurvedAnimation(parent: animation, curve: Curves.easeOutCubic)),
+          position: Tween<Offset>(begin: slideOffset, end: Offset.zero).animate(
+            CurvedAnimation(parent: animation, curve: Curves.easeOutCubic),
+          ),
           child: FadeTransition(
             opacity: Tween<double>(begin: 0.0, end: 1.0).animate(
               CurvedAnimation(
@@ -130,10 +123,9 @@ class FondePopover {
         );
       case FondePopoverAnimation.elastic:
         return ScaleTransition(
-          scale: Tween<double>(
-            begin: 0.7,
-            end: 1.0,
-          ).animate(CurvedAnimation(parent: animation, curve: Curves.elasticOut)),
+          scale: Tween<double>(begin: 0.7, end: 1.0).animate(
+            CurvedAnimation(parent: animation, curve: Curves.elasticOut),
+          ),
           child: FadeTransition(
             opacity: Tween<double>(begin: 0.0, end: 1.0).animate(
               CurvedAnimation(
@@ -212,8 +204,9 @@ class FondePopover {
           barrierColor: effectiveBarrier,
           barrierDismissible: barrierDismissible,
           transitionDuration: animDuration,
-          transitionBuilder: (anim, child) =>
-              _buildTransition(anim, child, animation, direction),
+          transitionBuilder:
+              (anim, child) =>
+                  _buildTransition(anim, child, animation, direction),
           onPop: () {
             state.markAsClosed();
             onPop?.call();
@@ -222,16 +215,18 @@ class FondePopover {
       );
 
       if (duration != null) {
-        state.setAutoCloseTimer(Timer(duration, () {
-          if (context.mounted && state.isShowing) {
-            try {
-              Navigator.of(context, rootNavigator: false).pop();
-              state.markAsClosed();
-            } catch (_) {
-              state.markAsClosed();
+        state.setAutoCloseTimer(
+          Timer(duration, () {
+            if (context.mounted && state.isShowing) {
+              try {
+                Navigator.of(context, rootNavigator: false).pop();
+                state.markAsClosed();
+              } catch (_) {
+                state.markAsClosed();
+              }
             }
-          }
-        }));
+          }),
+        );
       }
     }
 
@@ -249,10 +244,8 @@ class FondePopover {
 // Route
 // ---------------------------------------------------------------------------
 
-typedef _TransitionBuilder = Widget Function(
-  Animation<double> animation,
-  Widget child,
-);
+typedef _TransitionBuilder =
+    Widget Function(Animation<double> animation, Widget child);
 
 class _PopoverRoute extends PopupRoute<void> {
   _PopoverRoute({
@@ -383,15 +376,15 @@ class _PopoverLayoutState extends State<_PopoverLayout> {
   }
 
   void _updateAttachRect() {
-    final renderBox =
-        widget.attachContext.findRenderObject() as RenderBox?;
+    final renderBox = widget.attachContext.findRenderObject() as RenderBox?;
     if (renderBox == null || !renderBox.attached) return;
     final offset = renderBox.localToGlobal(Offset.zero);
     _attachRect = offset & renderBox.size;
   }
 
   FondePopoverDirection _resolveDirection(Size popoverSize) {
-    final screen = ui.PlatformDispatcher.instance.views.first.physicalSize /
+    final screen =
+        ui.PlatformDispatcher.instance.views.first.physicalSize /
         ui.PlatformDispatcher.instance.views.first.devicePixelRatio;
     switch (widget.direction) {
       case FondePopoverDirection.top:
@@ -428,16 +421,18 @@ class _PopoverLayoutState extends State<_PopoverLayout> {
       // Horizontal centering, clamped to screen
       dx = _attachRect.left + _attachRect.width / 2 - popoverSize.width / 2;
       dx = dx.clamp(arrow, screenSize.width - popoverSize.width - arrow);
-      dy = resolved == FondePopoverDirection.bottom
-          ? _attachRect.bottom
-          : _attachRect.top - popoverSize.height;
+      dy =
+          resolved == FondePopoverDirection.bottom
+              ? _attachRect.bottom
+              : _attachRect.top - popoverSize.height;
     } else {
       // Vertical centering, clamped to screen
       dy = _attachRect.top + _attachRect.height / 2 - popoverSize.height / 2;
       dy = dy.clamp(arrow, screenSize.height - popoverSize.height - arrow);
-      dx = resolved == FondePopoverDirection.right
-          ? _attachRect.right
-          : _attachRect.left - popoverSize.width;
+      dx =
+          resolved == FondePopoverDirection.right
+              ? _attachRect.right
+              : _attachRect.left - popoverSize.width;
     }
     return Offset(dx, dy);
   }
@@ -461,10 +456,11 @@ class _PopoverLayoutState extends State<_PopoverLayout> {
     final offset = _popoverOffset(resolved, popoverSize, screenSize);
 
     // Arrow center position relative to popover top-left
-    final arrowCenter = resolved == FondePopoverDirection.top ||
-            resolved == FondePopoverDirection.bottom
-        ? _attachRect.left + _attachRect.width / 2 - offset.dx
-        : _attachRect.top + _attachRect.height / 2 - offset.dy;
+    final arrowCenter =
+        resolved == FondePopoverDirection.top ||
+                resolved == FondePopoverDirection.bottom
+            ? _attachRect.left + _attachRect.width / 2 - offset.dx
+            : _attachRect.top + _attachRect.height / 2 - offset.dy;
 
     final popover = _PopoverBalloon(
       direction: resolved,
@@ -544,7 +540,10 @@ class _PopoverBalloon extends StatelessWidget {
   Widget _childWithPadding() {
     switch (direction) {
       case FondePopoverDirection.bottom:
-        return Padding(padding: EdgeInsets.only(top: arrowHeight), child: child);
+        return Padding(
+          padding: EdgeInsets.only(top: arrowHeight),
+          child: child,
+        );
       case FondePopoverDirection.top:
         return Padding(
           padding: EdgeInsets.only(bottom: arrowHeight),
@@ -583,97 +582,175 @@ class _BalloonPainter extends CustomPainter {
   final Color backgroundColor;
   final List<BoxShadow> shadow;
 
+  Rect _bodyRect(Size size) {
+    final ah = arrowHeight;
+    switch (direction) {
+      case FondePopoverDirection.bottom:
+        return Rect.fromLTWH(0, ah, size.width, size.height - ah);
+      case FondePopoverDirection.top:
+        return Rect.fromLTWH(0, 0, size.width, size.height - ah);
+      case FondePopoverDirection.right:
+        return Rect.fromLTWH(ah, 0, size.width - ah, size.height);
+      case FondePopoverDirection.left:
+        return Rect.fromLTWH(0, 0, size.width - ah, size.height);
+    }
+  }
+
+  // Builds the full balloon path: squircle body + rounded arrow in one path.
+  //
+  // Strategy:
+  //   1. Build the squircle body path via buildSquirclePath.
+  //   2. Identify the two base points on the body edge where the arrow meets it.
+  //   3. Cut the body path at those points and insert the arrow sub-path:
+  //        base-left  →  cubicTo (tangent)  →  tip arc  →  cubicTo (tangent)  →  base-right
+  //
+  // For simplicity the body squircle path is unioned with the arrow path drawn
+  // with rounded corners via Path operations.  The arrow itself is built as:
+  //   - Two straight sides with a short cubic easing into the body edge (root rounding)
+  //   - A small arc at the tip
   Path _buildPath(Size size) {
-    final r = radius;
     final ah = arrowHeight;
     final aw = arrowWidth;
-    // Arrow tip center clamped so the arrow stays within the body
-    final ac = arrowCenter.clamp(r + aw / 2, (
-      direction == FondePopoverDirection.top ||
-              direction == FondePopoverDirection.bottom
-          ? size.width
-          : size.height) -
-        r -
-        aw / 2);
+    final isHorizontal =
+        direction == FondePopoverDirection.top ||
+        direction == FondePopoverDirection.bottom;
+    final extent = isHorizontal ? size.width : size.height;
+    final ac = arrowCenter.clamp(radius + aw / 2, extent - radius - aw / 2);
 
-    final path = Path();
+    // Tip rounding radius — small enough not to alter the silhouette noticeably.
+    final tipR = (arrowHeight * 0.18).clamp(1.5, 4.0);
+    // Root rounding: how far from the base point the cubic easing starts.
+    final rootEase = (aw * 0.18).clamp(2.0, 6.0);
+
+    // Build the arrow as a standalone filled path, then union with the body.
+    final arrowPath = Path();
 
     switch (direction) {
       case FondePopoverDirection.bottom:
-        // Body rect: top=ah, left=0, right=size.width, bottom=size.height
-        final bL = 0.0, bT = ah, bR = size.width, bB = size.height;
-        path.moveTo(ac - aw / 2, bT); // arrow left base
-        path.lineTo(ac, 0); // arrow tip
-        path.lineTo(ac + aw / 2, bT); // arrow right base
-        path.lineTo(bR - r, bT);
-        path.conicTo(bR, bT, bR, bT + r, 1);
-        path.lineTo(bR, bB - r);
-        path.conicTo(bR, bB, bR - r, bB, 1);
-        path.lineTo(bL + r, bB);
-        path.conicTo(bL, bB, bL, bB - r, 1);
-        path.lineTo(bL, bT + r);
-        path.conicTo(bL, bT, bL + r, bT, 1);
-        path.close();
+        // Base is at y=ah; tip points upward to y=0.
+        final baseY = ah;
+        final lx = ac - aw / 2; // left base x
+        final rx = ac + aw / 2; // right base x
+
+        // Start at left base, ease upward with cubic, draw tip arc, ease back down.
+        arrowPath.moveTo(lx, baseY);
+        // Left side: cubic easing from base → near tip
+        arrowPath.cubicTo(
+          lx,
+          baseY - rootEase,
+          ac - tipR,
+          tipR,
+          ac - tipR,
+          tipR,
+        );
+        // Tip arc (concave upward, so sweep clockwise)
+        arrowPath.arcToPoint(
+          Offset(ac + tipR, tipR),
+          radius: Radius.circular(tipR),
+          clockwise: true,
+        );
+        // Right side: cubic easing from near tip → base
+        arrowPath.cubicTo(ac + tipR, tipR, rx, baseY - rootEase, rx, baseY);
+        arrowPath.close();
 
       case FondePopoverDirection.top:
-        final bL = 0.0, bT = 0.0, bR = size.width, bB = size.height - ah;
-        path.moveTo(ac - aw / 2, bB); // arrow left base
-        path.lineTo(ac, size.height); // arrow tip
-        path.lineTo(ac + aw / 2, bB); // arrow right base
-        path.lineTo(bR - r, bB);
-        path.conicTo(bR, bB, bR, bB - r, 1);
-        path.lineTo(bR, bT + r);
-        path.conicTo(bR, bT, bR - r, bT, 1);
-        path.lineTo(bL + r, bT);
-        path.conicTo(bL, bT, bL, bT + r, 1);
-        path.lineTo(bL, bB - r);
-        path.conicTo(bL, bB, bL + r, bB, 1);
-        path.close();
+        // Base is at y=(size.height - ah); tip points downward to y=size.height.
+        final baseY = size.height - ah;
+        final tipY = size.height;
+        final lx = ac - aw / 2;
+        final rx = ac + aw / 2;
+
+        arrowPath.moveTo(lx, baseY);
+        arrowPath.cubicTo(
+          lx,
+          baseY + rootEase,
+          ac - tipR,
+          tipY - tipR,
+          ac - tipR,
+          tipY - tipR,
+        );
+        arrowPath.arcToPoint(
+          Offset(ac + tipR, tipY - tipR),
+          radius: Radius.circular(tipR),
+          clockwise: false,
+        );
+        arrowPath.cubicTo(
+          ac + tipR,
+          tipY - tipR,
+          rx,
+          baseY + rootEase,
+          rx,
+          baseY,
+        );
+        arrowPath.close();
 
       case FondePopoverDirection.right:
-        final bL = ah, bT = 0.0, bR = size.width, bB = size.height;
-        path.moveTo(bL, ac - aw / 2);
-        path.lineTo(0, ac); // arrow tip
-        path.lineTo(bL, ac + aw / 2);
-        path.lineTo(bL, bB - r);
-        path.conicTo(bL, bB, bL + r, bB, 1);
-        path.lineTo(bR - r, bB);
-        path.conicTo(bR, bB, bR, bB - r, 1);
-        path.lineTo(bR, bT + r);
-        path.conicTo(bR, bT, bR - r, bT, 1);
-        path.lineTo(bL + r, bT);
-        path.conicTo(bL, bT, bL, bT + r, 1);
-        path.close();
+        // Base is at x=ah; tip points leftward to x=0.
+        final baseX = ah;
+        final ty = ac - aw / 2;
+        final by = ac + aw / 2;
+
+        arrowPath.moveTo(baseX, ty);
+        arrowPath.cubicTo(
+          baseX - rootEase,
+          ty,
+          tipR,
+          ac - tipR,
+          tipR,
+          ac - tipR,
+        );
+        arrowPath.arcToPoint(
+          Offset(tipR, ac + tipR),
+          radius: Radius.circular(tipR),
+          clockwise: false,
+        );
+        arrowPath.cubicTo(tipR, ac + tipR, baseX - rootEase, by, baseX, by);
+        arrowPath.close();
 
       case FondePopoverDirection.left:
-        final bL = 0.0, bT = 0.0, bR = size.width - ah, bB = size.height;
-        path.moveTo(bR, ac - aw / 2);
-        path.lineTo(size.width, ac); // arrow tip
-        path.lineTo(bR, ac + aw / 2);
-        path.lineTo(bR, bB - r);
-        path.conicTo(bR, bB, bR - r, bB, 1);
-        path.lineTo(bL + r, bB);
-        path.conicTo(bL, bB, bL, bB - r, 1);
-        path.lineTo(bL, bT + r);
-        path.conicTo(bL, bT, bL + r, bT, 1);
-        path.lineTo(bR - r, bT);
-        path.conicTo(bR, bT, bR, bT + r, 1);
-        path.close();
+        // Base is at x=(size.width - ah); tip points rightward to x=size.width.
+        final baseX = size.width - ah;
+        final tipX = size.width;
+        final ty = ac - aw / 2;
+        final by = ac + aw / 2;
+
+        arrowPath.moveTo(baseX, ty);
+        arrowPath.cubicTo(
+          baseX + rootEase,
+          ty,
+          tipX - tipR,
+          ac - tipR,
+          tipX - tipR,
+          ac - tipR,
+        );
+        arrowPath.arcToPoint(
+          Offset(tipX - tipR, ac + tipR),
+          radius: Radius.circular(tipR),
+          clockwise: true,
+        );
+        arrowPath.cubicTo(
+          tipX - tipR,
+          ac + tipR,
+          baseX + rootEase,
+          by,
+          baseX,
+          by,
+        );
+        arrowPath.close();
     }
-    return path;
+
+    final bodyPath = buildSquirclePath(_bodyRect(size), radius, 0.6);
+    return Path.combine(PathOperation.union, bodyPath, arrowPath);
   }
 
   @override
   void paint(Canvas canvas, Size size) {
     final path = _buildPath(size);
 
-    // Shadows
     for (final s in shadow) {
-      final paint = s.toPaint();
-      canvas.drawPath(path.shift(s.offset), paint);
+      canvas.drawPath(path.shift(s.offset), s.toPaint());
     }
 
-    // Background fill
     canvas.drawPath(path, Paint()..color = backgroundColor);
   }
 
@@ -681,5 +758,6 @@ class _BalloonPainter extends CustomPainter {
   bool shouldRepaint(_BalloonPainter old) =>
       old.direction != direction ||
       old.arrowCenter != arrowCenter ||
+      old.radius != radius ||
       old.backgroundColor != backgroundColor;
 }
