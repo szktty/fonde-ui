@@ -11,6 +11,9 @@
 
 ## develop
 
+- [CHANGE] Remove `popover` dependency — `FondePopover` now uses self-contained positioning via `RenderBox.localToGlobal` + `Overlay`; arrow balloon rendered with `CustomPainter`
+- [CHANGE] `FondePopover`: replace `PopoverDirection` with `FondePopoverDirection` enum; remove `showText`, `showList`, `showToast`, `showWithSpotlight` methods and `FondePopoverConfig`
+- [CHANGE] `FondeToast`: replace `PopoverDirection` with `FondePopoverDirection`
 - [UPDATE] `FondeUILocalizations`: remove `GlobalCupertinoLocalizations.delegate` from `localizationsDelegates` — no Cupertino widgets are used
 
 ## 0.12.0

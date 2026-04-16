@@ -1,21 +1,42 @@
 import 'dart:async';
+import 'dart:ui' as ui;
+
 import 'package:flutter/material.dart';
-import 'package:popover/popover.dart';
+import 'package:flutter/rendering.dart';
+
 import '../../internal.dart';
 
-import '../widgets/fonde_icon.dart';
-import 'fonde_rectangle_border.dart';
+// ---------------------------------------------------------------------------
+// Direction
+// ---------------------------------------------------------------------------
 
-/// Class to manage popover state
+/// Display direction for [FondePopover].
+enum FondePopoverDirection { top, bottom, left, right }
+
+// ---------------------------------------------------------------------------
+// Animation
+// ---------------------------------------------------------------------------
+
+/// Animation type for [FondePopover].
+enum FondePopoverAnimation {
+  scaleAndFade,
+  slideAndFade,
+  elastic,
+  fade,
+  none,
+}
+
+// ---------------------------------------------------------------------------
+// State tracker
+// ---------------------------------------------------------------------------
+
 class _PopoverState {
   bool _isShowing = false;
   Timer? _autoCloseTimer;
 
   bool get isShowing => _isShowing;
 
-  void markAsShowing() {
-    _isShowing = true;
-  }
+  void markAsShowing() => _isShowing = true;
 
   void markAsClosed() {
     _isShowing = false;
@@ -35,41 +56,15 @@ class _PopoverState {
   }
 }
 
-/// Animation type for FondePopover
-enum FondePopoverAnimation {
-  /// Scale + Fade (default recommended)
-  scaleAndFade,
+// ---------------------------------------------------------------------------
+// Public API
+// ---------------------------------------------------------------------------
 
-  /// Slide + Fade
-  slideAndFade,
+class FondePopover {
+  const FondePopover._();
 
-  /// Elastic
-  elastic,
-
-  /// Simple Fade
-  fade,
-
-  /// No animation
-  none,
-}
-
-/// Common Popover for App app
-///
-/// Wraps popover package to provide unified popover style across the app.
-/// Theme colors are obtained via FondeColorScheme provider,
-/// not directly accessing Flutter standard ColorScheme or Theme.of.
-class FondePopover extends StatelessWidget {
-  const FondePopover({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    // This widget is not used directly, only static methods are provided
-    return const SizedBox.shrink();
-  }
-
-  /// Get animation duration
-  static Duration _getAnimationDuration(FondePopoverAnimation animation) {
-    switch (animation) {
+  static Duration _animationDuration(FondePopoverAnimation a) {
+    switch (a) {
       case FondePopoverAnimation.scaleAndFade:
         return const Duration(milliseconds: 250);
       case FondePopoverAnimation.slideAndFade:
@@ -83,108 +78,93 @@ class FondePopover extends StatelessWidget {
     }
   }
 
-  /// Build custom transition
-  static Widget _buildCustomTransition(
+  static Widget _buildTransition(
     Animation<double> animation,
     Widget child,
-    FondePopoverAnimation animationType,
-    PopoverDirection direction,
+    FondePopoverAnimation type,
+    FondePopoverDirection direction,
   ) {
-    switch (animationType) {
+    switch (type) {
       case FondePopoverAnimation.scaleAndFade:
-        final scaleAnimation = Tween<double>(begin: 0.8, end: 1.0).animate(
-          CurvedAnimation(parent: animation, curve: Curves.easeOutCubic),
-        );
-        final fadeAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
-          CurvedAnimation(
-            parent: animation,
-            curve: const Interval(0.0, 0.8, curve: Curves.easeOut),
+        return ScaleTransition(
+          scale: Tween<double>(
+            begin: 0.8,
+            end: 1.0,
+          ).animate(CurvedAnimation(parent: animation, curve: Curves.easeOutCubic)),
+          child: FadeTransition(
+            opacity: Tween<double>(begin: 0.0, end: 1.0).animate(
+              CurvedAnimation(
+                parent: animation,
+                curve: const Interval(0.0, 0.8, curve: Curves.easeOut),
+              ),
+            ),
+            child: child,
           ),
         );
-        return ScaleTransition(
-          scale: scaleAnimation,
-          child: FadeTransition(opacity: fadeAnimation, child: child),
-        );
-
       case FondePopoverAnimation.slideAndFade:
-        final slideOffset = _getSlideOffset(direction);
-        final slideAnimation = Tween<Offset>(
-          begin: slideOffset,
-          end: Offset.zero,
-        ).animate(
-          CurvedAnimation(parent: animation, curve: Curves.easeOutCubic),
-        );
-        final fadeAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
-          CurvedAnimation(
-            parent: animation,
-            curve: const Interval(0.0, 0.7, curve: Curves.easeOut),
-          ),
-        );
+        Offset slideOffset;
+        switch (direction) {
+          case FondePopoverDirection.top:
+            slideOffset = const Offset(0.0, 0.3);
+          case FondePopoverDirection.bottom:
+            slideOffset = const Offset(0.0, -0.3);
+          case FondePopoverDirection.left:
+            slideOffset = const Offset(0.3, 0.0);
+          case FondePopoverDirection.right:
+            slideOffset = const Offset(-0.3, 0.0);
+        }
         return SlideTransition(
-          position: slideAnimation,
-          child: FadeTransition(opacity: fadeAnimation, child: child),
-        );
-
-      case FondePopoverAnimation.elastic:
-        final scaleAnimation = Tween<double>(
-          begin: 0.7,
-          end: 1.0,
-        ).animate(CurvedAnimation(parent: animation, curve: Curves.elasticOut));
-        final fadeAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
-          CurvedAnimation(
-            parent: animation,
-            curve: const Interval(0.0, 0.5, curve: Curves.easeOut),
+          position: Tween<Offset>(
+            begin: slideOffset,
+            end: Offset.zero,
+          ).animate(CurvedAnimation(parent: animation, curve: Curves.easeOutCubic)),
+          child: FadeTransition(
+            opacity: Tween<double>(begin: 0.0, end: 1.0).animate(
+              CurvedAnimation(
+                parent: animation,
+                curve: const Interval(0.0, 0.7, curve: Curves.easeOut),
+              ),
+            ),
+            child: child,
           ),
         );
+      case FondePopoverAnimation.elastic:
         return ScaleTransition(
-          scale: scaleAnimation,
-          child: FadeTransition(opacity: fadeAnimation, child: child),
+          scale: Tween<double>(
+            begin: 0.7,
+            end: 1.0,
+          ).animate(CurvedAnimation(parent: animation, curve: Curves.elasticOut)),
+          child: FadeTransition(
+            opacity: Tween<double>(begin: 0.0, end: 1.0).animate(
+              CurvedAnimation(
+                parent: animation,
+                curve: const Interval(0.0, 0.5, curve: Curves.easeOut),
+              ),
+            ),
+            child: child,
+          ),
         );
-
       case FondePopoverAnimation.fade:
-        final fadeAnimation = Tween<double>(
-          begin: 0.0,
-          end: 1.0,
-        ).animate(CurvedAnimation(parent: animation, curve: Curves.easeOut));
-        return FadeTransition(opacity: fadeAnimation, child: child);
-
+        return FadeTransition(
+          opacity: Tween<double>(
+            begin: 0.0,
+            end: 1.0,
+          ).animate(CurvedAnimation(parent: animation, curve: Curves.easeOut)),
+          child: child,
+        );
       case FondePopoverAnimation.none:
         return child;
     }
   }
 
-  /// Get slide offset
-  static Offset _getSlideOffset(PopoverDirection direction) {
-    switch (direction) {
-      case PopoverDirection.top:
-        return const Offset(0.0, 0.3);
-      case PopoverDirection.bottom:
-        return const Offset(0.0, -0.3);
-      case PopoverDirection.left:
-        return const Offset(0.3, 0.0);
-      case PopoverDirection.right:
-        return const Offset(-0.3, 0.0);
-    }
-  }
-
-  /// Show popover with spotlight effect
+  /// Show a popover anchored to [context]'s widget.
   ///
-  /// [context] - Build context
-  /// [targetKey] - GlobalKey of element to spotlight
-  /// [bodyBuilder] - Builder to construct popover content
-  /// [direction] - Popover display direction (default: bottom)
-  /// [animation] - Animation type (default: fade)
-  /// [spotlightOverlayColor] - Darkening color outside spotlight (default: semi-transparent black)
-  /// [spotlightRadius] - Corner radius of spotlight area (default: 8.0)
-  /// [spotlightPadding] - Padding of spotlight area (default: 8.0)
-  /// [rippleCount] - Number of ripple effects (default: 2, 0 to disable)
-  /// [rippleDelay] - Delay between ripple effects (default: 800ms)
-  /// Other parameters are same as show method
-  static void showWithSpotlight({
+  /// [direction] is the preferred direction; it may be flipped if there is
+  /// insufficient space on that side.
+  static void show({
     required BuildContext context,
-    required GlobalKey targetKey,
     required WidgetBuilder bodyBuilder,
-    PopoverDirection direction = PopoverDirection.bottom,
+    FondePopoverDirection direction = FondePopoverDirection.bottom,
     double width = 200,
     double height = 400,
     double arrowHeight = 12,
@@ -194,85 +174,25 @@ class FondePopover extends StatelessWidget {
     Color? shadowColor,
     double elevation = 8,
     VoidCallback? onPop,
+    Color? barrierColor,
     bool barrierDismissible = true,
     FondePopoverAnimation animation = FondePopoverAnimation.fade,
-    Duration transitionDuration = const Duration(milliseconds: 200),
-    Color spotlightOverlayColor = const Color(0x80000000),
-    double spotlightRadius = 8.0,
-    double spotlightPadding = 8.0,
-    int rippleCount = 2,
-    Duration rippleDelay = const Duration(milliseconds: 800),
+    Duration? duration,
+    Duration? delay,
   }) {
-    final overlay = Overlay.of(context);
-    final renderBox =
-        targetKey.currentContext?.findRenderObject() as RenderBox?;
+    final state = _PopoverState();
 
-    if (renderBox == null) {
-      // Fallback: show normal popover
-      show(
-        context: context,
-        bodyBuilder: bodyBuilder,
-        direction: direction,
-        width: width,
-        height: height,
-        arrowHeight: arrowHeight,
-        arrowWidth: arrowWidth,
-        radius: radius,
-        backgroundColor: backgroundColor,
-        shadowColor: shadowColor,
-        elevation: elevation,
-        onPop: onPop,
-        barrierDismissible: barrierDismissible,
-        animation: animation,
-        transitionDuration: transitionDuration,
-      );
-      return;
-    }
+    void showInternal() {
+      final effectiveRadius = radius ?? 12.0;
+      final effectiveBackground = backgroundColor ?? Colors.white;
+      final effectiveShadow = shadowColor ?? Colors.black.withAlpha(77);
+      final effectiveBarrier = barrierColor ?? Colors.black.withAlpha(77);
+      final animDuration = _animationDuration(animation);
 
-    final position = renderBox.localToGlobal(Offset.zero);
-    final size = renderBox.size;
-    final targetRect = Rect.fromLTWH(
-      position.dx - spotlightPadding,
-      position.dy - spotlightPadding,
-      size.width + (spotlightPadding * 2),
-      size.height + (spotlightPadding * 2),
-    );
+      state.markAsShowing();
 
-    OverlayEntry? spotlightEntry;
-    bool isSpotlightRemoved = false;
-
-    void removeSpotlight() {
-      if (!isSpotlightRemoved && spotlightEntry != null) {
-        spotlightEntry.remove();
-        isSpotlightRemoved = true;
-      }
-    }
-
-    // Create spotlight overlay
-    spotlightEntry = OverlayEntry(
-      builder:
-          (context) => _SpotlightOverlay(
-            targetRect: targetRect,
-            overlayColor: spotlightOverlayColor,
-            spotlightRadius: spotlightRadius,
-            rippleCount: rippleCount,
-            rippleDelay: rippleDelay,
-            onDismiss: () {
-              removeSpotlight();
-              // Close popover only if context is valid
-              if (context.mounted) {
-                Navigator.of(context).pop();
-              }
-            },
-          ),
-    );
-
-    overlay.insert(spotlightEntry);
-
-    // Show popover after spotlight animation completes
-    Future.delayed(const Duration(milliseconds: 350), () {
-      if (context.mounted) {
-        show(
+      Navigator.of(context, rootNavigator: true).push(
+        _PopoverRoute(
           context: context,
           bodyBuilder: bodyBuilder,
           direction: direction,
@@ -280,571 +200,486 @@ class FondePopover extends StatelessWidget {
           height: height,
           arrowHeight: arrowHeight,
           arrowWidth: arrowWidth,
-          radius: radius,
-          backgroundColor: backgroundColor,
-          shadowColor: shadowColor,
-          elevation: elevation,
+          radius: effectiveRadius,
+          backgroundColor: effectiveBackground,
+          shadow: [
+            BoxShadow(
+              color: effectiveShadow,
+              blurRadius: elevation,
+              offset: const Offset(0, 2),
+            ),
+          ],
+          barrierColor: effectiveBarrier,
+          barrierDismissible: barrierDismissible,
+          transitionDuration: animDuration,
+          transitionBuilder: (anim, child) =>
+              _buildTransition(anim, child, animation, direction),
           onPop: () {
-            removeSpotlight();
+            state.markAsClosed();
             onPop?.call();
           },
-          barrierColor:
-              Colors.transparent, // Make barrier transparent to show spotlight
-          barrierDismissible:
-              false, // Disable barrier close (handled by spotlight)
-          animation: animation,
-          transitionDuration: transitionDuration,
-        );
+        ),
+      );
+
+      if (duration != null) {
+        state.setAutoCloseTimer(Timer(duration, () {
+          if (context.mounted && state.isShowing) {
+            try {
+              Navigator.of(context, rootNavigator: false).pop();
+              state.markAsClosed();
+            } catch (_) {
+              state.markAsClosed();
+            }
+          }
+        }));
       }
-    });
+    }
+
+    if (delay != null) {
+      Timer(delay, () {
+        if (context.mounted) showInternal();
+      });
+    } else {
+      showInternal();
+    }
   }
+}
 
-  /// Show popover
-  ///
-  /// [context] - Build context
-  /// [bodyBuilder] - Builder to construct popover content
-  /// [direction] - Popover display direction (default: bottom)
-  /// [width] - Popover width (default: 200)
-  /// [height] - Popover height (default: 400)
-  /// [arrowHeight] - Arrow height (default: 12)
-  /// [arrowWidth] - Arrow width (default: 20)
-  /// [radius] - Corner radius (default: 12)
-  /// [backgroundColor] - Background color (auto-fetched from theme if not specified)
-  /// [shadowColor] - Shadow color (auto-fetched from theme if not specified)
-  /// [elevation] - Shadow height (default: 8)
-  /// [onPop] - Callback when popover is closed
-  /// [barrierColor] - Barrier color (auto-fetched from theme if not specified)
-  /// [barrierDismissible] - Whether to close by tapping barrier (default: true)
-  /// [animation] - Animation type (default: fade)
-  /// [transitionDuration] - Animation duration (default: 200ms, ignored if animation is not none)
-  /// [duration] - Time until auto-dismiss (shows until manually closed if not specified)
-  /// [delay] - Delay time until display (used for hover tooltips)
-  static void show({
-    required BuildContext context,
-    required WidgetBuilder bodyBuilder,
-    PopoverDirection direction = PopoverDirection.bottom,
-    double width = 200,
-    double height = 400,
-    double arrowHeight = 12,
-    double arrowWidth = 20,
-    double? radius,
-    Color? backgroundColor,
-    Color? shadowColor,
-    double elevation = 8,
-    VoidCallback? onPop,
-    Color? barrierColor,
-    bool barrierDismissible = true,
-    FondePopoverAnimation animation = FondePopoverAnimation.fade,
-    Duration transitionDuration = const Duration(milliseconds: 200),
-    Duration? duration,
-    Duration? delay,
-  }) {
-    // Manage popover state
-    final popoverState = _PopoverState();
+// ---------------------------------------------------------------------------
+// Route
+// ---------------------------------------------------------------------------
 
-    void showPopoverInternal() {
-      // Set default values (recommended to specify theme colors on caller side)
-      final effectiveRadius = radius ?? 12.0;
-      final effectiveBackgroundColor = backgroundColor ?? Colors.white;
-      final effectiveShadowColor = shadowColor ?? Colors.black.withAlpha(77);
-      final effectiveBarrierColor = barrierColor ?? Colors.black.withAlpha(77);
+typedef _TransitionBuilder = Widget Function(
+  Animation<double> animation,
+  Widget child,
+);
 
-      // Mark popover as showing
-      popoverState.markAsShowing();
+class _PopoverRoute extends PopupRoute<void> {
+  _PopoverRoute({
+    required this.context,
+    required this.bodyBuilder,
+    required this.direction,
+    required this.width,
+    required this.height,
+    required this.arrowHeight,
+    required this.arrowWidth,
+    required this.radius,
+    required this.backgroundColor,
+    required this.shadow,
+    required this.barrierDismissible,
+    required this.transitionDuration,
+    required this.transitionBuilder,
+    required Color barrierColor,
+    this.onPop,
+  }) : _barrierColor = barrierColor;
 
-      showPopover(
-        context: context,
-        bodyBuilder: bodyBuilder,
+  final BuildContext context;
+  final WidgetBuilder bodyBuilder;
+  final FondePopoverDirection direction;
+  final double width;
+  final double height;
+  final double arrowHeight;
+  final double arrowWidth;
+  final double radius;
+  final Color backgroundColor;
+  final List<BoxShadow> shadow;
+  final VoidCallback? onPop;
+  final _TransitionBuilder transitionBuilder;
+  final Color _barrierColor;
+
+  @override
+  final bool barrierDismissible;
+
+  @override
+  final Duration transitionDuration;
+
+  @override
+  Color get barrierColor => _barrierColor;
+
+  @override
+  String? get barrierLabel => null;
+
+  @override
+  Widget buildPage(
+    BuildContext ctx,
+    Animation<double> animation,
+    Animation<double> secondaryAnimation,
+  ) {
+    return PopScope(
+      onPopInvokedWithResult: (didPop, _) => onPop?.call(),
+      child: _PopoverLayout(
+        attachContext: context,
         direction: direction,
         width: width,
         height: height,
         arrowHeight: arrowHeight,
         arrowWidth: arrowWidth,
-        radius: effectiveRadius,
-        backgroundColor: effectiveBackgroundColor,
-        shadow: [
-          BoxShadow(
-            color: effectiveShadowColor,
-            blurRadius: elevation,
-            offset: const Offset(0, 2),
-          ),
-        ],
-        onPop: () {
-          // Handle popover close
-          popoverState.markAsClosed();
-          onPop?.call();
-        },
-        barrierColor: effectiveBarrierColor,
-        barrierDismissible: barrierDismissible,
-        transitionDuration:
-            animation == FondePopoverAnimation.none
-                ? Duration
-                    .zero // No animation
-                : _getAnimationDuration(animation),
-        popoverTransitionBuilder:
-            animation == FondePopoverAnimation.none
-                ? (animationController, child) =>
-                    child // No animation
-                : (animationController, child) => _buildCustomTransition(
-                  animationController,
-                  child,
-                  animation,
-                  direction,
-                ),
-      );
-
-      // Set auto-close timer
-      if (duration != null) {
-        final timer = Timer(duration, () {
-          if (context.mounted && popoverState.isShowing) {
-            // Close only if popover is showing
-            try {
-              Navigator.of(context, rootNavigator: false).pop();
-              popoverState.markAsClosed();
-            } catch (e) {
-              // Clear state if error occurs
-              popoverState.markAsClosed();
-              assert(() {
-                debugPrint('FondePopover: Failed to auto-close popover: $e');
-                return true;
-              }());
-            }
-          }
-        });
-        popoverState.setAutoCloseTimer(timer);
-      }
-    }
-
-    // Handle delayed display
-    if (delay != null) {
-      Timer(delay, () {
-        if (context.mounted) {
-          showPopoverInternal();
-        }
-      });
-    } else {
-      showPopoverInternal();
-    }
-  }
-
-  /// Show simple text popover
-  ///
-  /// [context] - Build context
-  /// [text] - Text to display
-  /// [direction] - Popover display direction (default: top)
-  /// [width] - Popover width (default: 200)
-  /// [height] - Popover height (default: 60)
-  /// [animation] - Animation type (default: fade)
-  /// Other parameters are same as show method
-  static void showText({
-    required BuildContext context,
-    required String text,
-    PopoverDirection direction = PopoverDirection.top,
-    double width = 200,
-    double? height,
-    TextStyle? textStyle,
-    EdgeInsetsGeometry? padding,
-    double arrowHeight = 8,
-    double arrowWidth = 16,
-    double? radius,
-    Color? backgroundColor,
-    Color? shadowColor,
-    double elevation = 4,
-    VoidCallback? onPop,
-    Color? barrierColor,
-    bool barrierDismissible = true,
-    FondePopoverAnimation animation = FondePopoverAnimation.fade,
-    Duration transitionDuration = const Duration(milliseconds: 150),
-  }) {
-    // Set default values
-    final effectivePadding = padding ?? const EdgeInsets.all(12);
-    final effectiveTextStyle =
-        textStyle ?? const TextStyle(color: Colors.black87, fontSize: 14);
-
-    show(
-      context: context,
-      bodyBuilder:
-          (context) => Container(
-            padding: effectivePadding,
-            child: Text(text, style: effectiveTextStyle),
-          ),
-      direction: direction,
-      width: width,
-      height: height ?? 60,
-      arrowHeight: arrowHeight,
-      arrowWidth: arrowWidth,
-      radius: radius,
-      backgroundColor: backgroundColor,
-      shadowColor: shadowColor,
-      elevation: elevation,
-      onPop: onPop,
-      barrierColor: barrierColor,
-      barrierDismissible: barrierDismissible,
-      animation: animation,
-      transitionDuration: transitionDuration,
+        radius: radius,
+        backgroundColor: backgroundColor,
+        shadow: shadow,
+        animation: animation,
+        transitionBuilder: transitionBuilder,
+        child: Builder(builder: bodyBuilder),
+      ),
     );
   }
-
-  /// Show simple notification (Toast)
-  ///
-  /// [context] - Build context
-  /// [message] - Message to display
-  /// [icon] - Icon (optional)
-  /// [backgroundColor] - Background color (optional)
-  /// [textColor] - Text color (optional)
-  /// [duration] - Display duration (default: 3 seconds)
-  /// [direction] - Display direction (default: top)
-  /// [animation] - Animation type (default: fade)
-  static void showToast({
-    required BuildContext context,
-    required String message,
-    IconData? icon,
-    Color? backgroundColor,
-    Color? textColor,
-    Duration duration = const Duration(seconds: 3),
-    PopoverDirection direction = PopoverDirection.top,
-    FondePopoverAnimation animation = FondePopoverAnimation.fade,
-  }) {
-    show(
-      context: context,
-      duration: duration,
-      direction: direction,
-      animation: animation,
-      backgroundColor: backgroundColor ?? Colors.grey.shade800,
-      elevation: 4,
-      arrowHeight: 0, // Toast style without arrow
-      arrowWidth: 0,
-      barrierColor: Colors.transparent, // Make barrier transparent
-      barrierDismissible: true,
-      bodyBuilder:
-          (context) => Container(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                if (icon != null) ...[
-                  FondeIcon(
-                    icon,
-                    customSize: 20,
-                    customColor: textColor ?? Colors.white,
-                    disableZoom: true,
-                  ),
-                  const SizedBox(width: 8),
-                ],
-                Flexible(
-                  child: Text(
-                    message,
-                    style: TextStyle(
-                      color: textColor ?? Colors.white,
-                      fontSize: 14,
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-    );
-  }
-
-  /// Show list item popover
-  ///
-  /// [context] - Build context
-  /// [items] - List of items to display
-  /// [onItemTap] - Callback when item is tapped
-  /// [direction] - Popover display direction (default: bottom)
-  /// [width] - Popover width (default: 200)
-  /// [animation] - Animation type (default: fade)
-  /// Other parameters are same as show method
-  static void showList({
-    required BuildContext context,
-    required List<String> items,
-    required void Function(int index, String item) onItemTap,
-    PopoverDirection direction = PopoverDirection.bottom,
-    double width = 200,
-    double? height,
-    double arrowHeight = 12,
-    double arrowWidth = 20,
-    double? radius,
-    Color? backgroundColor,
-    Color? shadowColor,
-    double elevation = 8,
-    VoidCallback? onPop,
-    Color? barrierColor,
-    bool barrierDismissible = true,
-    FondePopoverAnimation animation = FondePopoverAnimation.fade,
-    Duration transitionDuration = const Duration(milliseconds: 200),
-  }) {
-    // Auto-calculate height if not specified
-    final effectiveHeight =
-        height ?? (items.length * 48.0 + 16).clamp(60.0, 400.0);
-
-    show(
-      context: context,
-      bodyBuilder:
-          (context) => Container(
-            padding: const EdgeInsets.symmetric(vertical: 8),
-            child: ListView.builder(
-              itemCount: items.length,
-              itemBuilder: (context, index) {
-                final item = items[index];
-                return GestureDetector(
-                  onTap: () {
-                    Navigator.of(context).pop();
-                    onItemTap(index, item);
-                  },
-                  child: MouseRegion(
-                    cursor: SystemMouseCursors.click,
-                    child: Container(
-                      height: 48,
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 16,
-                        vertical: 12,
-                      ),
-                      child: Align(
-                        alignment: Alignment.centerLeft,
-                        child: Text(
-                          item,
-                          style: const TextStyle(
-                            color: Colors.black87,
-                            fontSize: 14,
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
-                );
-              },
-            ),
-          ),
-      direction: direction,
-      width: width,
-      height: effectiveHeight,
-      arrowHeight: arrowHeight,
-      arrowWidth: arrowWidth,
-      radius: radius,
-      backgroundColor: backgroundColor,
-      shadowColor: shadowColor,
-      elevation: elevation,
-      onPop: onPop,
-      barrierColor: barrierColor,
-      barrierDismissible: barrierDismissible,
-      animation: animation,
-      transitionDuration: transitionDuration,
-    );
-  }
-}
-
-/// Overlay widget with spotlight effect
-class _SpotlightOverlay extends StatefulWidget {
-  const _SpotlightOverlay({
-    required this.targetRect,
-    required this.overlayColor,
-    required this.spotlightRadius,
-    required this.rippleCount,
-    required this.rippleDelay,
-    required this.onDismiss,
-  });
-
-  final Rect targetRect;
-  final Color overlayColor;
-  final double spotlightRadius;
-  final int rippleCount;
-  final Duration rippleDelay;
-  final VoidCallback onDismiss;
 
   @override
-  State<_SpotlightOverlay> createState() => _SpotlightOverlayState();
+  Widget buildTransitions(
+    BuildContext context,
+    Animation<double> animation,
+    Animation<double> secondaryAnimation,
+    Widget child,
+  ) => child;
 }
 
-class _SpotlightOverlayState extends State<_SpotlightOverlay>
-    with TickerProviderStateMixin {
-  late AnimationController _overlayController;
-  late Animation<double> _overlayAnimation;
+// ---------------------------------------------------------------------------
+// Layout
+// ---------------------------------------------------------------------------
 
-  late AnimationController _rippleController;
-  late Animation<double> _rippleAnimation;
+class _PopoverLayout extends StatefulWidget {
+  const _PopoverLayout({
+    required this.attachContext,
+    required this.direction,
+    required this.width,
+    required this.height,
+    required this.arrowHeight,
+    required this.arrowWidth,
+    required this.radius,
+    required this.backgroundColor,
+    required this.shadow,
+    required this.animation,
+    required this.transitionBuilder,
+    required this.child,
+  });
 
-  int _currentRippleCount = 0;
+  final BuildContext attachContext;
+  final FondePopoverDirection direction;
+  final double width;
+  final double height;
+  final double arrowHeight;
+  final double arrowWidth;
+  final double radius;
+  final Color backgroundColor;
+  final List<BoxShadow> shadow;
+  final Animation<double> animation;
+  final _TransitionBuilder transitionBuilder;
+  final Widget child;
+
+  @override
+  State<_PopoverLayout> createState() => _PopoverLayoutState();
+}
+
+class _PopoverLayoutState extends State<_PopoverLayout> {
+  Rect _attachRect = Rect.zero;
 
   @override
   void initState() {
     super.initState();
+    _updateAttachRect();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) setState(_updateAttachRect);
+    });
+  }
 
-    // Overlay fade-in animation
-    _overlayController = AnimationController(
-      duration: const Duration(milliseconds: 300),
-      vsync: this,
-    );
-    _overlayAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
-      CurvedAnimation(parent: _overlayController, curve: Curves.easeOut),
-    );
+  void _updateAttachRect() {
+    final renderBox =
+        widget.attachContext.findRenderObject() as RenderBox?;
+    if (renderBox == null || !renderBox.attached) return;
+    final offset = renderBox.localToGlobal(Offset.zero);
+    _attachRect = offset & renderBox.size;
+  }
 
-    // Ripple effect animation
-    _rippleController = AnimationController(
-      duration: const Duration(milliseconds: 600),
-      vsync: this,
-    );
-    _rippleAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
-      CurvedAnimation(parent: _rippleController, curve: Curves.easeOut),
-    );
-
-    // Start animation
-    _overlayController.forward();
-
-    // Start ripple effect (if count is specified)
-    if (widget.rippleCount > 0) {
-      _startRippleSequence();
+  FondePopoverDirection _resolveDirection(Size popoverSize) {
+    final screen = ui.PlatformDispatcher.instance.views.first.physicalSize /
+        ui.PlatformDispatcher.instance.views.first.devicePixelRatio;
+    switch (widget.direction) {
+      case FondePopoverDirection.top:
+        return _attachRect.top >= popoverSize.height + widget.arrowHeight
+            ? FondePopoverDirection.top
+            : FondePopoverDirection.bottom;
+      case FondePopoverDirection.bottom:
+        return screen.height >=
+                _attachRect.bottom + popoverSize.height + widget.arrowHeight
+            ? FondePopoverDirection.bottom
+            : FondePopoverDirection.top;
+      case FondePopoverDirection.left:
+        return _attachRect.left >= popoverSize.width + widget.arrowHeight
+            ? FondePopoverDirection.left
+            : FondePopoverDirection.right;
+      case FondePopoverDirection.right:
+        return screen.width >=
+                _attachRect.right + popoverSize.width + widget.arrowHeight
+            ? FondePopoverDirection.right
+            : FondePopoverDirection.left;
     }
   }
 
-  void _startRippleSequence() async {
-    // Initial delay
-    await Future.delayed(const Duration(milliseconds: 500));
+  Offset _popoverOffset(
+    FondePopoverDirection resolved,
+    Size popoverSize,
+    Size screenSize,
+  ) {
+    final arrow = widget.arrowHeight;
+    double dx, dy;
 
-    while (_currentRippleCount < widget.rippleCount && mounted) {
-      await _rippleController.forward();
-      _rippleController.reset();
-      _currentRippleCount++;
-
-      if (_currentRippleCount < widget.rippleCount) {
-        await Future.delayed(widget.rippleDelay);
-      }
+    if (resolved == FondePopoverDirection.top ||
+        resolved == FondePopoverDirection.bottom) {
+      // Horizontal centering, clamped to screen
+      dx = _attachRect.left + _attachRect.width / 2 - popoverSize.width / 2;
+      dx = dx.clamp(arrow, screenSize.width - popoverSize.width - arrow);
+      dy = resolved == FondePopoverDirection.bottom
+          ? _attachRect.bottom
+          : _attachRect.top - popoverSize.height;
+    } else {
+      // Vertical centering, clamped to screen
+      dy = _attachRect.top + _attachRect.height / 2 - popoverSize.height / 2;
+      dy = dy.clamp(arrow, screenSize.height - popoverSize.height - arrow);
+      dx = resolved == FondePopoverDirection.right
+          ? _attachRect.right
+          : _attachRect.left - popoverSize.width;
     }
-  }
-
-  @override
-  void dispose() {
-    _overlayController.dispose();
-    _rippleController.dispose();
-    super.dispose();
+    return Offset(dx, dy);
   }
 
   @override
   Widget build(BuildContext context) {
-    return AnimatedBuilder(
-      animation: Listenable.merge([_overlayAnimation, _rippleAnimation]),
-      builder: (context, child) {
-        return GestureDetector(
-          onTap: widget.onDismiss, // Close by tapping outside spotlight
-          child: Stack(
-            children: [
-              // Spotlight overlay
-              CustomPaint(
-                painter: _SpotlightPainter(
-                  targetRect: widget.targetRect,
-                  overlayColor: widget.overlayColor.withValues(
-                    alpha: widget.overlayColor.a * _overlayAnimation.value,
-                  ),
-                  spotlightRadius: widget.spotlightRadius,
-                ),
-                size: MediaQuery.of(context).size,
-              ),
+    final screenSize = MediaQuery.sizeOf(context);
+    final bodySize = Size(widget.width, widget.height);
+    final popoverSize = Size(
+      widget.direction == FondePopoverDirection.left ||
+              widget.direction == FondePopoverDirection.right
+          ? bodySize.width + widget.arrowHeight
+          : bodySize.width,
+      widget.direction == FondePopoverDirection.top ||
+              widget.direction == FondePopoverDirection.bottom
+          ? bodySize.height + widget.arrowHeight
+          : bodySize.height,
+    );
 
-              // Ripple effect
-              if (widget.rippleCount > 0 && _rippleAnimation.value > 0)
-                Positioned.fromRect(
-                  rect: widget.targetRect,
-                  child: FondeRectangleBorder(
-                    cornerRadius: widget.spotlightRadius,
-                    side: BorderSide(
-                      color: Colors.white.withValues(
-                        alpha: 0.5 * _rippleAnimation.value,
-                      ),
-                      width: 2.0,
-                    ),
-                    child: SizedBox(
-                      width: widget.targetRect.width,
-                      height: widget.targetRect.height,
-                    ),
-                  ),
-                ),
-            ],
-          ),
-        );
-      },
+    final resolved = _resolveDirection(popoverSize);
+    final offset = _popoverOffset(resolved, popoverSize, screenSize);
+
+    // Arrow center position relative to popover top-left
+    final arrowCenter = resolved == FondePopoverDirection.top ||
+            resolved == FondePopoverDirection.bottom
+        ? _attachRect.left + _attachRect.width / 2 - offset.dx
+        : _attachRect.top + _attachRect.height / 2 - offset.dy;
+
+    final popover = _PopoverBalloon(
+      direction: resolved,
+      arrowHeight: widget.arrowHeight,
+      arrowWidth: widget.arrowWidth,
+      arrowCenter: arrowCenter,
+      radius: widget.radius,
+      backgroundColor: widget.backgroundColor,
+      shadow: widget.shadow,
+      size: popoverSize,
+      child: SizedBox(
+        width: bodySize.width,
+        height: bodySize.height,
+        child: widget.child,
+      ),
+    );
+
+    return Stack(
+      children: [
+        Positioned(
+          left: offset.dx,
+          top: offset.dy,
+          child: widget.transitionBuilder(widget.animation, popover),
+        ),
+      ],
     );
   }
 }
 
-/// Custom painter to draw spotlight effect
-class _SpotlightPainter extends CustomPainter {
-  const _SpotlightPainter({
-    required this.targetRect,
-    required this.overlayColor,
-    required this.spotlightRadius,
+// ---------------------------------------------------------------------------
+// Balloon (arrow + rounded rect)
+// ---------------------------------------------------------------------------
+
+class _PopoverBalloon extends StatelessWidget {
+  const _PopoverBalloon({
+    required this.direction,
+    required this.arrowHeight,
+    required this.arrowWidth,
+    required this.arrowCenter,
+    required this.radius,
+    required this.backgroundColor,
+    required this.shadow,
+    required this.size,
+    required this.child,
   });
 
-  final Rect targetRect;
-  final Color overlayColor;
-  final double spotlightRadius;
+  final FondePopoverDirection direction;
+  final double arrowHeight;
+  final double arrowWidth;
+  final double arrowCenter;
+  final double radius;
+  final Color backgroundColor;
+  final List<BoxShadow> shadow;
+  final Size size;
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      width: size.width,
+      height: size.height,
+      child: CustomPaint(
+        painter: _BalloonPainter(
+          direction: direction,
+          arrowHeight: arrowHeight,
+          arrowWidth: arrowWidth,
+          arrowCenter: arrowCenter,
+          radius: radius,
+          backgroundColor: backgroundColor,
+          shadow: shadow,
+        ),
+        child: _childWithPadding(),
+      ),
+    );
+  }
+
+  Widget _childWithPadding() {
+    switch (direction) {
+      case FondePopoverDirection.bottom:
+        return Padding(padding: EdgeInsets.only(top: arrowHeight), child: child);
+      case FondePopoverDirection.top:
+        return Padding(
+          padding: EdgeInsets.only(bottom: arrowHeight),
+          child: child,
+        );
+      case FondePopoverDirection.right:
+        return Padding(
+          padding: EdgeInsets.only(left: arrowHeight),
+          child: child,
+        );
+      case FondePopoverDirection.left:
+        return Padding(
+          padding: EdgeInsets.only(right: arrowHeight),
+          child: child,
+        );
+    }
+  }
+}
+
+class _BalloonPainter extends CustomPainter {
+  _BalloonPainter({
+    required this.direction,
+    required this.arrowHeight,
+    required this.arrowWidth,
+    required this.arrowCenter,
+    required this.radius,
+    required this.backgroundColor,
+    required this.shadow,
+  });
+
+  final FondePopoverDirection direction;
+  final double arrowHeight;
+  final double arrowWidth;
+  final double arrowCenter;
+  final double radius;
+  final Color backgroundColor;
+  final List<BoxShadow> shadow;
+
+  Path _buildPath(Size size) {
+    final r = radius;
+    final ah = arrowHeight;
+    final aw = arrowWidth;
+    // Arrow tip center clamped so the arrow stays within the body
+    final ac = arrowCenter.clamp(r + aw / 2, (
+      direction == FondePopoverDirection.top ||
+              direction == FondePopoverDirection.bottom
+          ? size.width
+          : size.height) -
+        r -
+        aw / 2);
+
+    final path = Path();
+
+    switch (direction) {
+      case FondePopoverDirection.bottom:
+        // Body rect: top=ah, left=0, right=size.width, bottom=size.height
+        final bL = 0.0, bT = ah, bR = size.width, bB = size.height;
+        path.moveTo(ac - aw / 2, bT); // arrow left base
+        path.lineTo(ac, 0); // arrow tip
+        path.lineTo(ac + aw / 2, bT); // arrow right base
+        path.lineTo(bR - r, bT);
+        path.conicTo(bR, bT, bR, bT + r, 1);
+        path.lineTo(bR, bB - r);
+        path.conicTo(bR, bB, bR - r, bB, 1);
+        path.lineTo(bL + r, bB);
+        path.conicTo(bL, bB, bL, bB - r, 1);
+        path.lineTo(bL, bT + r);
+        path.conicTo(bL, bT, bL + r, bT, 1);
+        path.close();
+
+      case FondePopoverDirection.top:
+        final bL = 0.0, bT = 0.0, bR = size.width, bB = size.height - ah;
+        path.moveTo(ac - aw / 2, bB); // arrow left base
+        path.lineTo(ac, size.height); // arrow tip
+        path.lineTo(ac + aw / 2, bB); // arrow right base
+        path.lineTo(bR - r, bB);
+        path.conicTo(bR, bB, bR, bB - r, 1);
+        path.lineTo(bR, bT + r);
+        path.conicTo(bR, bT, bR - r, bT, 1);
+        path.lineTo(bL + r, bT);
+        path.conicTo(bL, bT, bL, bT + r, 1);
+        path.lineTo(bL, bB - r);
+        path.conicTo(bL, bB, bL + r, bB, 1);
+        path.close();
+
+      case FondePopoverDirection.right:
+        final bL = ah, bT = 0.0, bR = size.width, bB = size.height;
+        path.moveTo(bL, ac - aw / 2);
+        path.lineTo(0, ac); // arrow tip
+        path.lineTo(bL, ac + aw / 2);
+        path.lineTo(bL, bB - r);
+        path.conicTo(bL, bB, bL + r, bB, 1);
+        path.lineTo(bR - r, bB);
+        path.conicTo(bR, bB, bR, bB - r, 1);
+        path.lineTo(bR, bT + r);
+        path.conicTo(bR, bT, bR - r, bT, 1);
+        path.lineTo(bL + r, bT);
+        path.conicTo(bL, bT, bL, bT + r, 1);
+        path.close();
+
+      case FondePopoverDirection.left:
+        final bL = 0.0, bT = 0.0, bR = size.width - ah, bB = size.height;
+        path.moveTo(bR, ac - aw / 2);
+        path.lineTo(size.width, ac); // arrow tip
+        path.lineTo(bR, ac + aw / 2);
+        path.lineTo(bR, bB - r);
+        path.conicTo(bR, bB, bR - r, bB, 1);
+        path.lineTo(bL + r, bB);
+        path.conicTo(bL, bB, bL, bB - r, 1);
+        path.lineTo(bL, bT + r);
+        path.conicTo(bL, bT, bL + r, bT, 1);
+        path.lineTo(bR - r, bT);
+        path.conicTo(bR, bT, bR, bT + r, 1);
+        path.close();
+    }
+    return path;
+  }
 
   @override
   void paint(Canvas canvas, Size size) {
-    final paint = Paint()..color = overlayColor;
+    final path = _buildPath(size);
 
-    // Darken full screen
-    final fullScreenRect = Rect.fromLTWH(0, 0, size.width, size.height);
+    // Shadows
+    for (final s in shadow) {
+      final paint = s.toPaint();
+      canvas.drawPath(path.shift(s.offset), paint);
+    }
 
-    // Cut out spotlight area
-    final spotlightRect = RRect.fromRectAndRadius(
-      targetRect,
-      Radius.circular(spotlightRadius),
-    );
-
-    final path =
-        Path()
-          ..addRect(fullScreenRect)
-          ..addRRect(spotlightRect)
-          ..fillType = PathFillType.evenOdd;
-
-    canvas.drawPath(path, paint);
+    // Background fill
+    canvas.drawPath(path, Paint()..color = backgroundColor);
   }
 
   @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) {
-    if (oldDelegate is! _SpotlightPainter) return true;
-    return oldDelegate.overlayColor != overlayColor ||
-        oldDelegate.targetRect != targetRect ||
-        oldDelegate.spotlightRadius != spotlightRadius;
-  }
-}
-
-/// Capsule providing default configuration for FondePopover
-///
-/// Provides unified popover configuration across the app.
-/// Extension point for future theme-based configuration.
-class FondePopoverConfig {
-  const FondePopoverConfig({
-    this.defaultWidth = 200,
-    this.defaultHeight = 400,
-    this.defaultArrowHeight = 12,
-    this.defaultArrowWidth = 20,
-    this.defaultRadius = 12,
-    this.defaultElevation = 8,
-    this.defaultTransitionDuration = const Duration(milliseconds: 200),
-  });
-
-  final double defaultWidth;
-  final double defaultHeight;
-  final double defaultArrowHeight;
-  final double defaultArrowWidth;
-  final double defaultRadius;
-  final double defaultElevation;
-  final Duration defaultTransitionDuration;
-}
-
-/// Returns a [FondePopoverConfig] with values scaled by the current zoom scale.
-FondePopoverConfig appPopoverConfigFromContext(BuildContext context) {
-  final zoomScale = context.fondeZoomScale;
-
-  // Apply zoom scaling to default values
-  return FondePopoverConfig(
-    defaultWidth: 200 * zoomScale,
-    defaultHeight: 400 * zoomScale,
-    defaultArrowHeight: 12 * zoomScale,
-    defaultArrowWidth: 20 * zoomScale,
-    defaultRadius: 12 * zoomScale,
-    defaultElevation: 8 * zoomScale,
-    defaultTransitionDuration: const Duration(milliseconds: 200),
-  );
+  bool shouldRepaint(_BalloonPainter old) =>
+      old.direction != direction ||
+      old.arrowCenter != arrowCenter ||
+      old.backgroundColor != backgroundColor;
 }

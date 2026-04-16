@@ -95,8 +95,7 @@ export 'src/widgets/date_picker/fonde_date_picker.dart';
 
 // ─── Dialogs & Overlays ───────────────────────────────────────────────────────
 export 'src/widgets/widgets/fonde_dialog.dart';
-export 'src/widgets/widgets/fonde_popover.dart'
-    hide appPopoverConfigFromContext;
+export 'src/widgets/widgets/fonde_popover.dart';
 export 'src/widgets/widgets/fonde_toast.dart';
 export 'src/widgets/widgets/fonde_snack_bar.dart';
 export 'src/widgets/dialogs/confirmation_dialog.dart';
