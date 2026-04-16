@@ -11,6 +11,8 @@
 
 ## develop
 
+- [UPDATE] `FondeUILocalizations`: remove `GlobalCupertinoLocalizations.delegate` from `localizationsDelegates` — no Cupertino widgets are used
+
 ## 0.12.0
 
 **Release date**: 2026-04-15
