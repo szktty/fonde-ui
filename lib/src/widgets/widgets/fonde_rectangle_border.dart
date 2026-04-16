@@ -25,11 +25,9 @@ const _kappa = 0.5522847498;
 ///
 /// [cornerRadius] — corner radius in logical pixels.
 /// [cornerSmoothing] — 0 = plain rounded rect, ~0.6 = Figma default, 1 = full squircle.
-Path _buildSquirclePath(
-  Rect rect,
-  double cornerRadius,
-  double cornerSmoothing,
-) {
+///
+/// Squircle path builder. Internal use only — not exported from `fonde_ui.dart`.
+Path buildSquirclePath(Rect rect, double cornerRadius, double cornerSmoothing) {
   final w = rect.width;
   final h = rect.height;
 
@@ -158,7 +156,7 @@ class SquircleBorder extends OutlinedBorder {
   @override
   Path getInnerPath(Rect rect, {TextDirection? textDirection}) {
     final inset = side.width;
-    return _buildSquirclePath(
+    return buildSquirclePath(
       rect.deflate(inset),
       (_cornerRadius - inset).clamp(0.0, double.infinity),
       _cornerSmoothing,
@@ -167,7 +165,7 @@ class SquircleBorder extends OutlinedBorder {
 
   @override
   Path getOuterPath(Rect rect, {TextDirection? textDirection}) {
-    return _buildSquirclePath(rect, _cornerRadius, _cornerSmoothing);
+    return buildSquirclePath(rect, _cornerRadius, _cornerSmoothing);
   }
 
   @override
@@ -176,7 +174,7 @@ class SquircleBorder extends OutlinedBorder {
     final paint = side.toPaint();
     final inset = side.width / 2;
     canvas.drawPath(
-      _buildSquirclePath(
+      buildSquirclePath(
         rect.deflate(inset),
         (_cornerRadius - inset).clamp(0.0, double.infinity),
         _cornerSmoothing,
