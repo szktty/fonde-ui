@@ -9,7 +9,9 @@
 - FIX
   - Bug fixes
 
-## develop
+## 0.13.0
+
+**Release date**: 2026-04-18
 
 - [CHANGE] Remove `popover` dependency — `FondePopover` now uses self-contained positioning via `RenderBox.localToGlobal`; arrow balloon rendered with `CustomPainter` using squircle corners and rounded arrow tip/base
 - [CHANGE] `FondePopover`: replace `PopoverDirection` with `FondePopoverDirection` enum; remove `showText`, `showList`, `showToast`, `showWithSpotlight` methods and `FondePopoverConfig`
