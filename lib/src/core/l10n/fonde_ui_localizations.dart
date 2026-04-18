@@ -3,10 +3,7 @@ import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_localizations/flutter_localizations.dart'
-    show
-        GlobalMaterialLocalizations,
-        GlobalWidgetsLocalizations,
-        LocalizationsDelegate;
+    show GlobalMaterialLocalizations, GlobalWidgetsLocalizations;
 
 import 'fonde_ui_localizations_en.dart';
 import 'fonde_ui_localizations_ja.dart';
