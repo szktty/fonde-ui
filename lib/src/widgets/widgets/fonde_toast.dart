@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:popover/popover.dart';
 import '../../internal.dart';
 
 import '../typography/fonde_text.dart';
@@ -45,7 +44,7 @@ class FondeToast {
     FondeToastType type = FondeToastType.info,
     IconData? icon,
     Duration duration = const Duration(seconds: 2),
-    PopoverDirection direction = PopoverDirection.top,
+    FondePopoverDirection direction = FondePopoverDirection.top,
     FondePopoverAnimation animation = FondePopoverAnimation.none,
   }) {
     // Get target position and display popover
@@ -89,7 +88,7 @@ class FondeToast {
     FondeToastType type = FondeToastType.info,
     IconData? icon,
     Duration duration = const Duration(seconds: 2),
-    PopoverDirection direction = PopoverDirection.top,
+    FondePopoverDirection direction = FondePopoverDirection.top,
     FondePopoverAnimation animation = FondePopoverAnimation.none,
   }) {
     // Dynamically calculate toast size

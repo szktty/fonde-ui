@@ -7,13 +7,9 @@ Developed for [RinneGraph](https://github.com/szktty/rinne-graph). Currently pro
 ## Package info
 
 - name: fonde_ui
-- version: 0.12.0
+- version: 0.13.0
 - Dart SDK: ^3.7.0
 - Flutter: >=3.41.2
-
-## Key dependencies
-
-- popover: ^0.4.0 (FondePopover)
 
 ## Imports
 
@@ -1111,11 +1107,45 @@ Pre-built confirmation dialog with confirm/cancel buttons.
 
 ### FondePopover
 
-Contextual popover anchored to a widget.
+Contextual popover anchored to a widget. Self-contained implementation with squircle body and rounded arrow.
+
+```dart
+FondePopover.show(
+  context: context,
+  bodyBuilder: (context) => ...,
+  direction: FondePopoverDirection.bottom, // top / bottom / left / right; auto-flips at screen edge
+  width: 200,
+  height: 400,
+  arrowHeight: 12,
+  arrowWidth: 20,
+  radius: 12,           // corner radius
+  backgroundColor: ...,
+  shadowColor: ...,
+  elevation: 8,
+  barrierColor: ...,
+  barrierDismissible: true,
+  animation: FondePopoverAnimation.fade, // scaleAndFade / slideAndFade / elastic / fade / none
+  duration: ...,        // auto-dismiss after this duration
+  delay: ...,           // delay before showing
+  onPop: () {},
+)
+```
 
 ### FondeToast
 
-Transient notification widget.
+Transient notification anchored near a target widget.
+
+```dart
+FondeToast.show(
+  context: context,
+  targetKey: globalKey,
+  message: 'Saved',
+  type: FondeToastType.success, // info / success / warning / error
+  duration: Duration(seconds: 2),
+  direction: FondePopoverDirection.top,
+  animation: FondePopoverAnimation.none,
+)
+```
 
 ### FondeSnackBar
 
