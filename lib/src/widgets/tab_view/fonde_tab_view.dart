@@ -26,6 +26,10 @@ class FondeTabView extends StatefulWidget {
   /// ID of the initially selected tab.
   final String? initialSelectedTabId;
 
+  /// ID of the currently selected tab (controlled mode).
+  /// When non-null, the tab view is controlled externally and ignores internal state.
+  final String? selectedTabId;
+
   /// Callback when a tab is selected.
   final void Function(String tabId)? onTabSelected;
 
@@ -77,6 +81,7 @@ class FondeTabView extends StatefulWidget {
     required this.tabs,
     required this.contents,
     this.initialSelectedTabId,
+    this.selectedTabId,
     this.onTabSelected,
     this.onTabClosed,
     this.tabBarPosition = FondeTabBarPosition.top,
@@ -115,6 +120,7 @@ class _AppTabViewState extends State<FondeTabView> {
   void initState() {
     super.initState();
     _selectedTabId =
+        widget.selectedTabId ??
         widget.initialSelectedTabId ??
         (widget.tabs.isNotEmpty ? widget.tabs.first.id : '');
   }
@@ -122,6 +128,14 @@ class _AppTabViewState extends State<FondeTabView> {
   @override
   void didUpdateWidget(FondeTabView oldWidget) {
     super.didUpdateWidget(oldWidget);
+    // Controlled mode: follow external selectedTabId changes.
+    if (widget.selectedTabId != null &&
+        widget.selectedTabId != _selectedTabId) {
+      setState(() {
+        _selectedTabId = widget.selectedTabId!;
+      });
+      return;
+    }
     // If the tab list is changed and the current selection ID is gone, select the first tab.
     if (widget.tabs.isNotEmpty &&
         !widget.tabs.any((tab) => tab.id == _selectedTabId)) {
@@ -136,7 +150,10 @@ class _AppTabViewState extends State<FondeTabView> {
   }
 
   void _handleTabSelected(String tabId) {
-    if (_selectedTabId != tabId) {
+    if (widget.selectedTabId != null) {
+      // Controlled mode: notify parent only, do not update internal state.
+      widget.onTabSelected?.call(tabId);
+    } else if (_selectedTabId != tabId) {
       setState(() {
         _selectedTabId = tabId;
       });

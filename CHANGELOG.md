@@ -11,6 +11,8 @@
 
 ## develop
 
+- [ADD] `FondeTabView`: add `selectedTabId` parameter for controlled mode — when non-null, the tab view reflects the externally supplied value; tab clicks call `onTabSelected` only without updating internal state
+
 ## 0.13.0
 
 **Release date**: 2026-04-18
